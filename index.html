@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Defect Tracker - Tactical</title>
+    <title>Defect Tracer V2</title>
 
     <link rel="icon" type="image/png" href="icon.png">
     <link rel="manifest" href="manifest.json">
@@ -396,7 +396,7 @@
                     <span id="active-area-display"></span>
                 </h2>
                 <button id="stsDropdownBtn" class="sts-header-btn" onclick="toggleStsMenu(event)">
-                    <span style="color:var(--text-muted); font-weight:normal; margin-right:4px;">STS:</span> 
+                    <span style="color:var(--text-muted); font-weight:normal; margin-right:4px;">Sub RANGE:</span> 
                     <span id="active-route-display">AWAITING...</span> 
                     <span style="font-size:10px; margin-left:6px; color:var(--primary);">▼</span>
                 </button>
@@ -409,7 +409,7 @@
         </div>
         
         <div id="collapsible-menu" class="expanded">
-            <button id="exportBtn" class="btn-success" onclick="exportData()">📊 EXPORT FINAL REPORT</button>
+            <button id="exportBtn" class="btn-success" onclick="exportData()">📊 EXPORT REPORT (Excel & PDF)</button>
             
             <div class="save-load-grid">
                 <button class="btn-warning" onclick="saveProject()">💾 SAVE DATA</button>
@@ -418,14 +418,14 @@
             </div>
 
             <div class="control-panel">
-                <label for="general-area">1. SELECT AREA</label>
+                <label for="general-area">1. SELECT LINE (EX, MI, EV)</label>
                 <div class="input-group">
                     <select id="general-area" onchange="updateRouteDropdown()">
                         <option value="">AWAITING INPUT...</option>
                     </select>
                 </div>
 
-                <label for="page-direction">2. SELECT DIRECTION</label>
+                <label for="page-direction">2. SELECT DIRECTION (IB or OB)</label>
                 <div class="input-group">
                     <select id="page-direction" onchange="updateRouteDropdown()">
                         <option value="Inbound Track">INBOUND (IB)</option>
@@ -433,7 +433,7 @@
                     </select>
                 </div>
                 
-                <label for="global-section">3. SELECT SUB-TO-SUB BLOCK</label>
+                <label for="global-section">3. SELECT SUB-TO-SUB </label>
                 <div class="input-group">
                     <select id="global-section">
                         <option value="">AWAITING INPUT...</option>
@@ -441,7 +441,7 @@
                 </div>
                 
                 <div class="action-buttons">
-                    <button class="btn-primary" onclick="generateSegments(false)">INITIATE SECTIONS</button>
+                    <button class="btn-primary" onclick="generateSegments(false)">LOAD AREA</button>
                     <button class="btn-outline" onclick="flipOrder()">🔃 FLIP DIR</button>
                 </div>
             </div>
@@ -456,24 +456,24 @@
                     <h3>SYSTEM INITIALIZED</h3>
                 </div>
                 <div style="font-size: 13px; line-height: 1.6; color: var(--text-muted); text-transform: none;">
-                    <p style="color: var(--text-color); font-weight: bold; text-transform: uppercase;">STEP 1: ESTABLISH ROUTE</p>
+                    <p style="color: var(--text-color); font-weight: bold; text-transform: uppercase;">STEP 1: ESTABLISH ROUTE (In Order)</p>
                     <ul style="margin-top: 5px; padding-left: 20px;">
                         <li>Open the top right menu.</li>
-                        <li>Select <b>1. AREA</b>, <b>2. DIRECTION</b>, and <b>3. SUB-TO-SUB BLOCK</b>.</li>
-                        <li>Tap <b>INITIATE SECTIONS</b> to generate your track blocks.</li>
+                        <li>Select <b>1. LINE</b>, <b>2. DIRECTION</b> (IB or OB), and <b>3. SUB-TO-SUB AREA</b>.</li>
+                        <li>Tap <b>INITIATE SECTIONS</b> to generate your inspection route.</li>
                     </ul>
 
                     <p style="color: var(--text-color); font-weight: bold; text-transform: uppercase; margin-top: 15px;">STEP 2: LOG DEFECTS</p>
                     <ul style="margin-top: 5px; padding-left: 20px;">
                         <li>Scroll to current Track Section (TS).</li>
                         <li>Select <b>COMPONENT</b> and <b>DEFECT</b> from dropdowns.</li>
-                        <li>Tap <b>📷 PHOTO</b> to attach visual evidence.</li>
+                        <li>Tap <b>📷 PHOTO</b> (if needed) to attach visual evidence or start reference of progressing defect.</li>
                     </ul>
 
-                    <p style="color: var(--warning); font-weight: bold; text-transform: uppercase; margin-top: 15px;">STEP 3: SAVE PROTOCOL ⚠️</p>
+                    <p style="color: var(--warning); font-weight: bold; text-transform: uppercase; margin-top: 15px;">STEP 3: SAVE DATA (not export) ⚠️</p>
                     <ul style="margin-top: 5px; padding-left: 20px;">
-                        <li>System does not auto-save. Open menu and tap <b>💾 SAVE DATA</b> frequently.</li>
-                        <li>If system restarts, tap <b>📂 LOAD DATA</b> to resume.</li>
+                        <li>System does not auto-save. Open menu and tap <b>💾 SAVE DATA</b> frequently incase phone crash or browser accidental refresh.</li>
+                        <li>If system restarts, tap <b>📂 LOAD DATA</b> and load saved file to resume.</li>
                     </ul>
                 </div>
             </div>
