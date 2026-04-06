@@ -1,5 +1,5 @@
 const globalDatabase = {
-    "EXPO LINE": {
+    "Expo Line": {
         "Inbound Track": {
             "KGT-KGZ-IB": { 
                 name: "KGT-KGZ-IB", 
