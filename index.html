@@ -32,13 +32,13 @@
     <style>
         /* TACTICAL / HUD THEME VARIABLES */
         :root {
-            --primary: #8bc34a; /* Tactical Green */
+            --primary: #8bc34a; 
             --primary-dark: #33691e;
-            --danger: #d32f2f; /* Alert Red */
+            --danger: #d32f2f; 
             --success: #4caf50;
-            --warning: #ffb300; /* Amber */
-            --bg-color: #0d0d0d; /* Pitch Black */
-            --card-bg: #1a1a1a; /* Dark Charcoal */
+            --warning: #ffb300; 
+            --bg-color: #0d0d0d; 
+            --card-bg: #1a1a1a; 
             --input-bg: #111111;
             --text-color: #e0e0e0;
             --text-muted: #888888;
@@ -73,14 +73,14 @@
         .header-top-bar {
             display: flex;
             justify-content: space-between;
-            align-items: flex-start; /* Keeps button at the top even if text wraps */
-            flex-wrap: nowrap; /* Prevents button from dropping to next line */
+            align-items: flex-start; 
+            flex-wrap: nowrap; 
             gap: 12px;
         }
         
         .header-title-container {
             flex: 1;
-            min-width: 0; /* Crucial for allowing text to wrap naturally inside flexbox */
+            min-width: 0; 
         }
 
         h2 { 
@@ -123,26 +123,29 @@
             background-color: var(--card-bg);
             color: #ffffff; 
             border: 1px solid var(--border-color);
-            width: 42px; /* Perfect square */
-            height: 42px; /* Perfect square */
+            width: 42px; 
+            height: 42px; 
             cursor: pointer;
             display: flex;       
             align-items: center; 
             justify-content: center;
-            flex-shrink: 0; /* Prevents button from getting squished */
+            flex-shrink: 0; 
             box-shadow: 0 2px 4px rgba(0,0,0,0.5);
             padding: 0;
+            transition: background-color 0.2s ease;
         }
         
         .menu-toggle-btn:active { background-color: #333; }
         .menu-toggle-icon { font-size: 22px; font-family: sans-serif; line-height: 1; }
 
+        /* Hardware Accelerated Smooth Menu Transition */
         #collapsible-menu {
             overflow: hidden;
-            transition: max-height 0.3s ease-out, opacity 0.3s ease-out, margin-top 0.3s ease-out;
+            max-height: 0;
+            opacity: 0;
+            transition: max-height 0.4s cubic-bezier(0, 1, 0.5, 1), opacity 0.3s ease-out, margin-top 0.3s ease;
         }
         #collapsible-menu.expanded { max-height: 800px; opacity: 1; margin-top: 15px; }
-        #collapsible-menu.collapsed { max-height: 0; opacity: 0; margin-top: 0; }
 
         .control-panel {
             background: var(--card-bg);
@@ -209,6 +212,7 @@
             gap: 5px;
             scrollbar-width: none; 
             -ms-overflow-style: none;
+            padding-bottom: 90px; /* Leaves room for the Quick Add FAB */
         }
         .mini-map-container::-webkit-scrollbar { display: none; }
 
@@ -230,7 +234,7 @@
         .map-item.active-map { background: var(--primary-dark); color: #fff; border-color: var(--primary) !important; box-shadow: var(--hud-glow);}
         .map-item.active-map.has-data { background-color: #b26500; color: #fff; border-color: var(--warning) !important;}
 
-        #segments-container { flex: 1; display: flex; flex-direction: column; gap: 15px; min-width: 0; }
+        #segments-container { flex: 1; display: flex; flex-direction: column; gap: 15px; min-width: 0; padding-bottom: 90px; }
 
         @keyframes cascadingFadeIn {
             from { opacity: 0; transform: translateY(-15px); }
@@ -253,18 +257,16 @@
         .direction-badge { font-size: 12px; font-weight: bold; color: var(--text-color); background: var(--input-bg); padding: 4px 8px; border: 1px solid var(--border-color);}
 
         .segment-notes {
-            width: 100%; /* Auto size to full container width */
-            display: block; /* Guarantees full edge-to-edge block */
+            width: 100%; 
+            display: block; 
             margin-bottom: 15px;
-            box-sizing: border-box; /* Includes padding so it perfectly hits the right edge */
+            box-sizing: border-box; 
             resize: vertical;
             min-height: 60px;
         }
 
         .defect-list { display: flex; flex-direction: column; gap: 12px; }
         .defect-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; background: var(--input-bg); padding: 10px; border: 1px solid var(--border-color); }
-
-        select { flex: 1 1 40%; min-width: 120px; }
 
         .photo-wrapper { display: flex; align-items: center; gap: 10px; flex: 1 1 100%; justify-content: space-between; background: #000; padding: 5px; border: 1px solid var(--border-color); }
         .file-input { display: none; }
@@ -284,12 +286,84 @@
             justify-content: center; 
             padding: 0; 
             flex-shrink: 0;
+            transition: background-color 0.2s ease;
         }
         .delete-btn:active { background-color: var(--danger); color: #fff; }
 
-        .add-defect-btn { background-color: transparent; color: var(--text-muted); border: 1px dashed var(--text-muted); margin-top: 10px; width: 100%; }
+        .add-defect-btn { background-color: transparent; color: var(--text-muted); border: 1px dashed var(--text-muted); margin-top: 10px; width: 100%; transition: color 0.2s, border-color 0.2s;}
         .add-defect-btn:active { border-color: var(--primary); color: var(--primary); }
         
+        /* QUICK ADD FAB & MENU */
+        .quick-add-btn {
+            position: fixed;
+            bottom: 20px;
+            left: 15px; /* Aligned with map */
+            width: 50px;
+            height: 50px;
+            border-radius: 50% !important;
+            background-color: var(--primary-dark);
+            color: #fff;
+            border: 2px solid var(--primary);
+            font-size: 28px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.6), var(--hud-glow);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), background-color 0.2s;
+            padding: 0;
+            line-height: 1;
+        }
+        .quick-add-btn:active { transform: scale(0.85); background-color: var(--primary); }
+        .quick-add-btn.hidden { transform: scale(0); pointer-events: none; opacity: 0; }
+
+        .quick-add-menu {
+            position: fixed;
+            bottom: 85px;
+            left: 15px;
+            width: 260px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.8);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            transform-origin: bottom left;
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease;
+        }
+        .quick-add-menu.collapsed { transform: scale(0); opacity: 0; pointer-events: none; }
+        .quick-add-menu.expanded { transform: scale(1); opacity: 1; pointer-events: auto; }
+        
+        .quick-add-header {
+            background: #111;
+            padding: 10px 12px;
+            font-weight: bold;
+            font-size: 13px;
+            border-bottom: 1px solid var(--primary);
+            color: var(--primary);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .quick-add-header button { padding: 4px 8px; font-size: 14px; background: transparent; border: 1px solid var(--border-color); }
+        .quick-add-header button:active { background: var(--border-color); }
+        
+        .quick-add-list { max-height: 300px; overflow-y: auto; }
+        .quick-add-item {
+            padding: 12px;
+            border-bottom: 1px solid var(--border-color);
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: bold;
+            color: var(--text-color);
+            transition: background-color 0.2s;
+            display: flex;
+            justify-content: space-between;
+        }
+        .quick-add-item:active { background: var(--input-bg); }
+        .quick-add-item.disabled { color: var(--text-muted); cursor: not-allowed; background: transparent; }
+
         @media (max-width: 600px) { select { flex: 1 1 100%; } }
     </style>
 </head>
@@ -342,11 +416,20 @@
                 </div>
                 
                 <div class="action-buttons">
-                    <button class="btn-primary" onclick="generateSegments()">INITIATE SECTIONS</button>
+                    <button class="btn-primary" onclick="initiateNewSegments()">INITIATE SECTIONS</button>
                     <button class="btn-outline" onclick="flipOrder()">🔃 FLIP DIR</button>
                 </div>
             </div>
         </div>
+    </div>
+
+    <button id="quickAddBtn" class="quick-add-btn hidden" onclick="toggleQuickAdd()">⊕</button>
+    <div id="quickAddMenu" class="quick-add-menu collapsed">
+        <div class="quick-add-header">
+            ADD SECTION
+            <button onclick="toggleQuickAdd()">✖</button>
+        </div>
+        <div id="quickAddList" class="quick-add-list"></div>
     </div>
 
     <div class="app-layout">
@@ -369,6 +452,7 @@
                         <li>Scroll to current Track Section (TS).</li>
                         <li>Select <b>COMPONENT</b> and <b>DEFECT</b> from dropdowns.</li>
                         <li>Tap <b>📷 PHOTO</b> to attach visual evidence.</li>
+                        <li>Use the <b>⊕ QUICK ADD</b> button at bottom left to instantly load the next track block.</li>
                     </ul>
 
                     <p style="color: var(--warning); font-weight: bold; text-transform: uppercase; margin-top: 15px;">STEP 3: SAVE PROTOCOL ⚠️</p>
@@ -383,6 +467,11 @@
 
     <script>
         let currentFileName = null;
+        
+        // Global System State tracking
+        let activeArea = null;
+        let activeDirection = null;
+        let loadedSegmentsSet = new Set(); // Tracks loaded sub-to-sub blocks to prevent duplicates
 
         window.addEventListener('beforeunload', function (e) {
             const cards = document.querySelectorAll('.segment-card');
@@ -398,12 +487,54 @@
             if (forceClose || menu.classList.contains('expanded')) {
                 menu.classList.remove('expanded');
                 menu.classList.add('collapsed');
-                // Uses a text-forced gear unicode to prevent default colored emojis on mobile
-                btn.innerHTML = '<span class="menu-toggle-icon">&#9881;&#xFE0E;</span>';
+                btn.innerHTML = '<span class="menu-toggle-icon">&#9881;&#xFE0E;</span>'; // Gear Icon
             } else {
                 menu.classList.remove('collapsed');
                 menu.classList.add('expanded');
                 btn.innerHTML = '<span class="menu-toggle-icon">✖</span>';
+            }
+        }
+
+        // QUICK ADD FAB LOGIC
+        function toggleQuickAdd() {
+            const menu = document.getElementById('quickAddMenu');
+            if (menu.classList.contains('expanded')) {
+                menu.classList.remove('expanded');
+                menu.classList.add('collapsed');
+            } else {
+                populateQuickAddList();
+                menu.classList.remove('collapsed');
+                menu.classList.add('expanded');
+            }
+        }
+
+        function populateQuickAddList() {
+            const list = document.getElementById('quickAddList');
+            list.innerHTML = '';
+            
+            if (!activeArea || !activeDirection || !globalDatabase[activeArea] || !globalDatabase[activeArea][activeDirection]) {
+                list.innerHTML = '<div style="padding:15px; color:var(--danger); font-size:12px;">SYSTEM ERROR: NO ACTIVE ROUTE.</div>';
+                return;
+            }
+
+            const availableRoutes = globalDatabase[activeArea][activeDirection];
+
+            for (let routeKey in availableRoutes) {
+                const route = availableRoutes[routeKey];
+                const item = document.createElement('div');
+                item.className = 'quick-add-item';
+                
+                if (loadedSegmentsSet.has(routeKey)) {
+                    item.classList.add('disabled');
+                    item.innerHTML = `<span>${route.name}</span> <span style="color:var(--success);">✓</span>`;
+                } else {
+                    item.innerHTML = `<span>${route.name}</span> <span style="color:var(--primary); font-size: 16px;">+</span>`;
+                    item.onclick = () => {
+                        appendRoute(activeArea, activeDirection, routeKey);
+                        toggleQuickAdd();
+                    };
+                }
+                list.appendChild(item);
             }
         }
 
@@ -501,7 +632,8 @@
             });
         }, { rootMargin: '-100px 0px -50% 0px' });
 
-        function generateSegments() {
+        // MAIN MENU - WIPES SLATE CLEAN
+        function initiateNewSegments() {
             const area = document.getElementById('general-area').value;
             const direction = document.getElementById('page-direction').value;
             const routeSelect = document.getElementById('global-section');
@@ -509,15 +641,40 @@
             
             if (!area || !selectedRouteKey) { alert('ERROR: Select Area and Sub-to-Sub Block.'); return; }
 
-            const selectedRouteData = globalDatabase[area][direction][selectedRouteKey];
+            // Clear the slate when initiated from main menu
+            document.getElementById('segments-container').innerHTML = '';
+            document.getElementById('miniMap').innerHTML = '';
+            loadedSegmentsSet.clear();
+
+            appendRoute(area, direction, selectedRouteKey);
+            
+            document.getElementById('global-section').value = '';
+            toggleMenu(true);
+        }
+
+        // SHARED FUNCTION: APPENDS CARDS (USED BY MAIN MENU AND QUICK ADD)
+        function appendRoute(area, direction, routeKey) {
+            if (loadedSegmentsSet.has(routeKey)) {
+                alert(`SYSTEM ERROR: Route [${routeKey}] is already loaded in the workspace.`);
+                return;
+            }
+
+            const selectedRouteData = globalDatabase[area][direction][routeKey];
             const container = document.getElementById('segments-container');
             const mapContainer = document.getElementById('miniMap');
             
             const instructions = document.getElementById('instruction-panel');
             if (instructions) instructions.remove();
 
-            const newCards = []; 
+            // Set global tracking
+            activeArea = area;
+            activeDirection = direction;
+            loadedSegmentsSet.add(routeKey);
 
+            // Enable and show the Quick Add FAB
+            document.getElementById('quickAddBtn').classList.remove('hidden');
+
+            const newCards = []; 
             selectedRouteData.segments.forEach(range => {
                 const blockColor = range.color || 'var(--primary)'; 
                 if (range.start <= range.end) { 
@@ -528,8 +685,8 @@
             });
             
             newCards.forEach((item, index) => {
-                const card = createSegmentCard(item.num, selectedRouteData.name, direction, item.color, area);
-                card.style.animationDelay = `${index * 0.05}s`;
+                const card = createSegmentCard(item.num, selectedRouteData.name, direction, item.color, area, routeKey);
+                card.style.animationDelay = `${index * 0.03}s`; // Sped up animation slightly for HUD feel
                 container.appendChild(card);
                 scrollObserver.observe(card);
 
@@ -541,9 +698,6 @@
                 mapBtn.onclick = () => { card.scrollIntoView({ behavior: 'smooth' }); };
                 mapContainer.appendChild(mapBtn);
             });
-            
-            document.getElementById('global-section').value = '';
-            toggleMenu(true);
         }
 
         function flipOrder() {
@@ -564,7 +718,7 @@
             mapItems.forEach(item => mapContainer.appendChild(item));
         }
 
-        function createSegmentCard(segmentNum, routeText, direction, color = 'var(--primary)', areaName = '') {
+        function createSegmentCard(segmentNum, routeText, direction, color = 'var(--primary)', areaName = '', routeKey = '') {
             const card = document.createElement('div');
             card.className = 'segment-card';
             card.setAttribute('data-segment', segmentNum);
@@ -572,6 +726,7 @@
             card.setAttribute('data-direction', direction); 
             card.setAttribute('data-color', color);
             card.setAttribute('data-area-name', areaName); 
+            card.setAttribute('data-route-key', routeKey); // Tracked for Saving/Loading
             card.style.borderLeft = `4px solid ${color}`;
 
             const colors = getLineColors(areaName);
@@ -734,6 +889,7 @@
                     direction: card.getAttribute('data-direction'),
                     color: card.getAttribute('data-color'),
                     areaName: card.getAttribute('data-area-name'), 
+                    routeKey: card.getAttribute('data-route-key'), 
                     notes: card.querySelector('.segment-notes').value,
                     defects: []
                 };
@@ -784,10 +940,18 @@
                     const mapContainer = document.getElementById('miniMap');
                     container.innerHTML = '';
                     mapContainer.innerHTML = '';
+                    loadedSegmentsSet.clear(); // Reset tracking system
 
                     projectData.forEach((segData, index) => {
                         const safeAreaName = segData.areaName || '';
-                        const card = createSegmentCard(segData.segmentNum, segData.routeName, segData.direction, segData.color, safeAreaName);
+                        const safeRouteKey = segData.routeKey || '';
+                        
+                        // Re-establish tracking parameters from loaded file
+                        if (safeAreaName) activeArea = safeAreaName;
+                        if (segData.direction) activeDirection = segData.direction;
+                        if (safeRouteKey) loadedSegmentsSet.add(safeRouteKey);
+
+                        const card = createSegmentCard(segData.segmentNum, segData.routeName, segData.direction, segData.color, safeAreaName, safeRouteKey);
                         card.style.animationDelay = `${index * 0.05}s`;
                         
                         card.querySelector('.segment-notes').value = segData.notes;
@@ -811,6 +975,7 @@
                         checkSegmentData(card);
                     });
 
+                    document.getElementById('quickAddBtn').classList.remove('hidden');
                     alert('SYSTEM: Data loaded successfully.');
                     toggleMenu(true);
 
