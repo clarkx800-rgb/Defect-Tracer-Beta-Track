@@ -55,7 +55,7 @@
             padding: 0; 
             box-sizing: border-box;
             text-transform: uppercase; 
-            -webkit-font-smoothing: antialiased;
+            -webkit-font-smoothing: antialiased; 
         }
 
         * { border-radius: 2px !important; }
@@ -139,7 +139,7 @@
         
         .menu-toggle-btn:active { background-color: #333; }
         
-        /* FIXED: pointer-events: none prevents the icon from hijacking the click */
+        /* pointer-events: none fixes the bug where clicking the icon dead-center does nothing */
         .menu-toggle-icon { font-size: 22px; font-family: sans-serif; line-height: 1; pointer-events: none; }
 
         #collapsible-menu {
@@ -254,7 +254,7 @@
             padding: 15px;
             position: relative;
             animation: cascadingFadeIn 0.3s ease-out both;
-            scroll-margin-top: 140px; 
+            scroll-margin-top: 150px; 
             will-change: opacity, transform;
         }
 
@@ -349,7 +349,7 @@
 </head>
 <body>
 
-    <div class="sticky-header">
+    <div class="sticky-header" id="stickyHeader">
         <div class="header-top-bar">
             <div class="header-title-container">
                 <h2>
@@ -630,11 +630,20 @@
                     const activeMapItem = document.querySelector(`.map-item[data-map-segment="${segNum}"]`);
                     if (activeMapItem) {
                         activeMapItem.classList.add('active-map');
-                        activeMapItem.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
                     }
                 }
             });
-        }, { rootMargin: '-130px 0px -40% 0px' }); 
+        }, { rootMargin: '-120px 0px -60% 0px' }); 
+
+        // CUSTOM SCROLL FUNCTION TO PREVENT HEADER OVERLAP BUG
+        function scrollToCard(card) {
+            const headerHeight = document.getElementById('stickyHeader').offsetHeight;
+            const elementPosition = card.getBoundingClientRect().top + window.scrollY;
+            window.scrollTo({
+                top: elementPosition - headerHeight - 15,
+                behavior: "smooth"
+            });
+        }
 
         function generateSegments(isQuickAdd = false) {
             let area, direction, routeSelect, selectedRouteKey;
@@ -691,7 +700,7 @@
                 mapBtn.setAttribute('data-route-key', selectedRouteKey); 
                 mapBtn.textContent = `TS-${item.num}`;
                 mapBtn.style.borderLeft = `4px solid ${item.color}`;
-                mapBtn.onclick = () => { card.scrollIntoView({ behavior: 'smooth' }); };
+                mapBtn.onclick = () => { scrollToCard(card); };
                 mapContainer.appendChild(mapBtn);
             });
             
@@ -718,9 +727,41 @@
                 return;
             }
             
-            const lastRouteKey = routeLoadHistory.pop();
+            const lastRouteKey = routeLoadHistory[routeLoadHistory.length - 1];
+            const cardsToRemove = document.querySelectorAll(`.segment-card[data-route-key="${lastRouteKey}"]`);
             
-            document.querySelectorAll(`.segment-card[data-route-key="${lastRouteKey}"]`).forEach(el => el.remove());
+            // PREVENT DATA LOSS: Check if any card about to be deleted has data
+            let hasData = false;
+            let conflictTS = "";
+            let conflictRoute = "";
+
+            cardsToRemove.forEach(card => {
+                if (hasData) return; // Skip if we already found data
+                
+                let cardHasData = false;
+                if (card.querySelector('.segment-notes').value.trim() !== '') cardHasData = true;
+                
+                card.querySelectorAll('.defect-row').forEach(row => {
+                    if (row.querySelector('.component-select').value || row.querySelector('.defect-select').value || row.dataset.base64Image) {
+                        cardHasData = true;
+                    }
+                });
+
+                if (cardHasData) {
+                    hasData = true;
+                    conflictTS = card.getAttribute('data-segment');
+                    conflictRoute = card.getAttribute('data-route-name');
+                }
+            });
+
+            if (hasData) {
+                const proceed = confirm(`TS-${conflictTS} has data. Undoing this will erase the "${conflictRoute}" and details. Are you sure you want to undo?`);
+                if (!proceed) return; // Abort undo if user clicks Cancel
+            }
+            
+            // Proceed with UI deletion
+            routeLoadHistory.pop();
+            cardsToRemove.forEach(el => el.remove());
             document.querySelectorAll(`.map-item[data-route-key="${lastRouteKey}"]`).forEach(el => el.remove());
             
             loadedRoutes.delete(lastRouteKey);
@@ -1023,7 +1064,7 @@
                         mapBtn.setAttribute('data-route-key', activeKey);
                         mapBtn.textContent = `TS-${segData.segmentNum}`;
                         mapBtn.style.borderLeft = `4px solid ${segData.color || '#ccc'}`;
-                        mapBtn.onclick = () => { card.scrollIntoView({ behavior: 'smooth' }); };
+                        mapBtn.onclick = () => { scrollToCard(card); };
                         mapContainer.appendChild(mapBtn);
                         
                         checkSegmentData(card);
