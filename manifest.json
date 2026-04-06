@@ -1,7 +1,7 @@
 {
   "name": "Defect Tracker Pro",
   "short_name": "Tracer-Beta",
-  "description": "Offline Track Defect Logger",
+  "description": "Beta Track Defect Logger",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#f4f7f6",
