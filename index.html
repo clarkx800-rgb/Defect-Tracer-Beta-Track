@@ -259,7 +259,7 @@
             scrollbar-width: none; 
             -ms-overflow-style: none;
             padding-bottom: 90px; 
-            scroll-behavior: smooth; /* Enables smooth scrolling internally */
+            scroll-behavior: smooth; /* Ensures auto-scroll animates nicely */
         }
         .mini-map-container::-webkit-scrollbar { display: none; }
 
@@ -507,8 +507,8 @@
         let routeLoadHistory = []; 
         let currentActiveArea = "";
         let currentActiveDirection = "";
-
-        // VARIABLE TO TRACK CLICK-DRIVEN SCROLLS VS USER SCROLLS
+        
+        // PREVENTS MINI-MAP AUTO-SCROLL WHEN A USER CLICKS A SHORTCUT
         let isAutoScrolling = false;
 
         // GLOBAL CLICK LISTENER TO AUTO-HIDE MENUS
@@ -601,8 +601,7 @@
         }
 
         function jumpToRoute(routeKey) {
-            // Tell the scroll observer we are auto-scrolling
-            isAutoScrolling = true;
+            isAutoScrolling = true; // Tell the system we are handling the map scroll manually
             
             // Find and scroll Main Pane
             const firstCard = document.querySelector(`.segment-card[data-route-key="${routeKey}"]`);
@@ -618,13 +617,14 @@
                 const itemRect = firstMapItem.getBoundingClientRect();
                 
                 // Calculates exact pixel distance to align map item in center of sidebar
-                mapContainer.scrollTop += (itemRect.top - containerRect.top) - (containerRect.height / 2) + (itemRect.height / 2);
+                mapContainer.scrollTo({
+                    top: mapContainer.scrollTop + (itemRect.top - containerRect.top) - (containerRect.height / 2) + (itemRect.height / 2),
+                    behavior: 'smooth'
+                });
             }
             
             document.getElementById('stsShortcutMenu').style.display = 'none';
-            
-            // Release the scroll lock after animation finishes
-            setTimeout(() => { isAutoScrolling = false; }, 800);
+            setTimeout(() => { isAutoScrolling = false; }, 800); // Release the manual override after animation finishes
         }
 
         function getLineColors(lineName) {
@@ -759,17 +759,19 @@
                     
                     if (activeMapItem) {
                         activeMapItem.classList.add('active-map');
-                        
-                        // NEW LOGIC: Only auto-scroll the mini-map if the user is natively scrolling the main pane.
-                        // If they clicked a shortcut, we already handled the map scroll perfectly in `jumpToRoute`.
+
+                        // NEW LOGIC: Smooth auto-scrolling of the mini-map when user swipes down the main pane.
                         if (!isAutoScrolling) {
                             const mapContainer = document.getElementById('miniMap');
                             const containerRect = mapContainer.getBoundingClientRect();
                             const itemRect = activeMapItem.getBoundingClientRect();
                             
-                            // Check if the item is out of view in the mini-map container
-                            if (itemRect.top < containerRect.top || itemRect.bottom > containerRect.bottom) {
-                                mapContainer.scrollTop += (itemRect.top - containerRect.top) - (containerRect.height / 2) + (itemRect.height / 2);
+                            // If the active item gets close to the top or bottom boundaries of the visible sidebar, recenter it
+                            if (itemRect.top < containerRect.top + 20 || itemRect.bottom > containerRect.bottom - 20) {
+                                mapContainer.scrollTo({
+                                    top: mapContainer.scrollTop + (itemRect.top - containerRect.top) - (containerRect.height / 2) + (itemRect.height / 2),
+                                    behavior: 'smooth'
+                                });
                             }
                         }
                     }
@@ -842,7 +844,7 @@
                 mapBtn.textContent = `TS-${item.num}`;
                 mapBtn.style.borderLeft = `4px solid ${item.color}`;
                 mapBtn.onclick = () => {
-                    isAutoScrolling = true;
+                    isAutoScrolling = true; // Tell the observer we are handling the scroll manually
                     scrollToCard(card);
                     setTimeout(() => { isAutoScrolling = false; }, 800);
                 };
