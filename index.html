@@ -55,7 +55,7 @@
             padding: 0; 
             box-sizing: border-box;
             text-transform: uppercase; 
-            -webkit-font-smoothing: antialiased; /* Smoother text rendering */
+            -webkit-font-smoothing: antialiased;
         }
 
         * { border-radius: 2px !important; }
@@ -143,7 +143,7 @@
         #collapsible-menu {
             overflow: hidden;
             transition: max-height 0.3s ease-out, opacity 0.3s ease-out, margin-top 0.3s ease-out;
-            will-change: max-height, opacity; /* Hardware acceleration for jitter-free animation */
+            will-change: max-height, opacity; 
         }
         #collapsible-menu.expanded { max-height: 800px; opacity: 1; margin-top: 15px; }
         #collapsible-menu.collapsed { max-height: 0; opacity: 0; margin-top: 0; }
@@ -170,7 +170,7 @@
             color: var(--text-color) !important;
             text-transform: uppercase;
             font-family: inherit;
-            appearance: none; /* Cleaner look on mobile */
+            appearance: none; 
         }
         select:focus, .segment-notes:focus {
             outline: none;
@@ -214,7 +214,7 @@
             gap: 5px;
             scrollbar-width: none; 
             -ms-overflow-style: none;
-            padding-bottom: 90px; /* Room for Quick Add Button */
+            padding-bottom: 90px; 
         }
         .mini-map-container::-webkit-scrollbar { display: none; }
 
@@ -250,7 +250,8 @@
             padding: 15px;
             position: relative;
             animation: cascadingFadeIn 0.3s ease-out both;
-            scroll-margin-top: 100px; 
+            /* Increased to guarantee perfect clearance below the sticky header */
+            scroll-margin-top: 120px; 
             will-change: opacity, transform;
         }
 
@@ -299,7 +300,7 @@
         .add-defect-btn { background-color: transparent; color: var(--text-muted); border: 1px dashed var(--text-muted); margin-top: 10px; width: 100%; transition: all 0.2s;}
         .add-defect-btn:active { border-color: var(--primary); color: var(--primary); }
 
-        /* QUICK ADD FAB (Floating Action Button) */
+        /* QUICK ADD FAB */
         .quick-add-fab {
             position: fixed;
             bottom: 20px;
@@ -309,7 +310,7 @@
             background-color: var(--card-bg);
             color: var(--primary);
             border: 2px solid var(--primary);
-            border-radius: 50% !important; /* Forces circular shape */
+            border-radius: 50% !important; 
             font-size: 32px;
             display: flex;
             align-items: center;
@@ -317,7 +318,7 @@
             box-shadow: 0 4px 10px rgba(0,0,0,0.8), var(--hud-glow);
             cursor: pointer;
             z-index: 1000;
-            display: none; /* Hidden until Area is loaded */
+            display: none; 
             transition: transform 0.1s ease, background-color 0.2s ease;
         }
         .quick-add-fab:active { transform: scale(0.9); background-color: var(--primary-dark); color: #fff; }
@@ -448,8 +449,6 @@
 
     <script>
         let currentFileName = null;
-        
-        // SYSTEM STATE MEMORY (Crucial for Smart Filtering)
         let loadedRoutes = new Set();
         let currentActiveArea = "";
         let currentActiveDirection = "";
@@ -502,7 +501,6 @@
             }
         });
 
-        // SMART FILTER FOR MAIN MENU
         function updateRouteDropdown() {
             const area = document.getElementById('general-area').value;
             const direction = document.getElementById('page-direction').value;
@@ -514,7 +512,6 @@
                 const routes = globalDatabase[area][direction];
                 let hasOptions = false;
                 for (let routeKey in routes) {
-                    // Check Memory: Only show if it is NOT loaded
                     if (!loadedRoutes.has(routeKey)) {
                         let opt = document.createElement('option');
                         opt.value = routeKey;
@@ -529,7 +526,6 @@
             }
         }
 
-        // SMART FILTER FOR QUICK ADD MENU
         function updateQuickAddDropdown() {
             const dropdown = document.getElementById('quick-add-select');
             dropdown.innerHTML = '<option value="">AWAITING INPUT...</option>';
@@ -584,6 +580,7 @@
         document.getElementById('segments-container').addEventListener('input', (e) => checkSegmentData(e.target.closest('.segment-card')));
         document.getElementById('segments-container').addEventListener('change', (e) => checkSegmentData(e.target.closest('.segment-card')));
 
+        // OFFSET TRIPWIRE FIX: rootMargin adjusted to guarantee the top card steals the highlight perfectly.
         const scrollObserver = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
@@ -612,7 +609,7 @@
                     }
                 }
             });
-        }, { rootMargin: '-100px 0px -50% 0px' });
+        }, { rootMargin: '-80px 0px -60% 0px' });
 
         function generateSegments(isQuickAdd = false) {
             let area, direction, routeSelect, selectedRouteKey;
@@ -668,23 +665,21 @@
                 mapBtn.setAttribute('data-map-segment', item.num);
                 mapBtn.textContent = `TS-${item.num}`;
                 mapBtn.style.borderLeft = `4px solid ${item.color}`;
-                mapBtn.onclick = () => { card.scrollIntoView({ behavior: 'smooth' }); };
+                // EXPLICIT TOP ALIGNMENT FIX FOR CLICK SCROLLING
+                mapBtn.onclick = () => { card.scrollIntoView({ behavior: 'smooth', block: 'start' }); };
                 mapContainer.appendChild(mapBtn);
             });
             
-            // UPDATE SYSTEM MEMORY
             loadedRoutes.add(selectedRouteKey);
             currentActiveArea = area;
             currentActiveDirection = direction;
 
-            // ACTIVATE QUICK ADD FAB
             document.getElementById('quickAddBtn').style.display = 'flex';
 
-            // CLEANUP UI
             routeSelect.value = '';
             if (isQuickAdd) {
                 toggleQuickAddModal(false);
-                updateRouteDropdown(); // Refresh main menu too
+                updateRouteDropdown(); 
             } else {
                 updateRouteDropdown();
                 toggleMenu(true);
@@ -713,7 +708,7 @@
             const card = document.createElement('div');
             card.className = 'segment-card';
             card.setAttribute('data-segment', segmentNum);
-            card.setAttribute('data-route-key', routeKey); // Hidden memory tag
+            card.setAttribute('data-route-key', routeKey); 
             card.setAttribute('data-route-name', routeText); 
             card.setAttribute('data-direction', direction); 
             card.setAttribute('data-color', color);
@@ -932,11 +927,10 @@
                     container.innerHTML = '';
                     mapContainer.innerHTML = '';
                     
-                    loadedRoutes.clear(); // Reset memory
+                    loadedRoutes.clear(); 
 
                     projectData.forEach((segData, index) => {
                         const safeAreaName = segData.areaName || '';
-                        // Fallback logic for older saves that didn't have routeKey
                         const activeKey = segData.routeKey || segData.routeName; 
                         
                         const card = createSegmentCard(segData.segmentNum, activeKey, segData.routeName, segData.direction, segData.color, safeAreaName);
@@ -957,18 +951,16 @@
                         mapBtn.setAttribute('data-map-segment', segData.segmentNum);
                         mapBtn.textContent = `TS-${segData.segmentNum}`;
                         mapBtn.style.borderLeft = `4px solid ${segData.color || '#ccc'}`;
-                        mapBtn.onclick = () => { card.scrollIntoView({ behavior: 'smooth' }); };
+                        mapBtn.onclick = () => { card.scrollIntoView({ behavior: 'smooth', block: 'start' }); };
                         mapContainer.appendChild(mapBtn);
                         
                         checkSegmentData(card);
 
-                        // Rebuild System Memory
                         if (activeKey) loadedRoutes.add(activeKey);
                         currentActiveArea = safeAreaName;
                         currentActiveDirection = segData.direction;
                     });
 
-                    // Activate FAB if we loaded valid data
                     if (loadedRoutes.size > 0) {
                         document.getElementById('quickAddBtn').style.display = 'flex';
                         updateRouteDropdown(); 
