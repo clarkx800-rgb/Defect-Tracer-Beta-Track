@@ -83,6 +83,7 @@
         .header-title-container {
             flex: 1;
             min-width: 0; 
+            position: relative; /* Anchor for the shortcut menu */
         }
 
         h2 { 
@@ -106,30 +107,61 @@
         }
         #active-area-display:empty { display: none; }
 
-        #active-route-display {
-            font-size: 13px;
-            color: var(--text-color);
-            background: var(--input-bg);
-            padding: 3px 8px;
-            font-weight: bold;
+        /* TACTICAL STS SHORTCUT BUTTON */
+        .sts-header-btn {
+            background-color: var(--input-bg);
             border: 1px solid var(--primary);
+            color: var(--text-color);
+            padding: 4px 10px;
+            font-family: inherit;
+            font-size: 13px;
+            font-weight: bold;
             letter-spacing: 1px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            margin-top: 4px;
+            text-transform: uppercase;
+            transition: background-color 0.2s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.5);
             word-wrap: break-word;
             white-space: normal;
-            display: inline-block;
-            margin-top: 4px;
+            text-align: left;
+        }
+        .sts-header-btn:active { background-color: var(--border-color); }
+        .sts-header-btn span#active-route-display { color: var(--text-color); }
+
+        /* STS SHORTCUT DROPDOWN MENU */
+        .sts-shortcut-menu {
+            position: absolute;
+            top: 100%; 
+            left: 0;
+            background: var(--bg-color);
+            border: 1px solid var(--primary);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.9), var(--hud-glow);
+            z-index: 1002;
+            padding: 5px;
+            display: none;
+            flex-direction: column;
+            gap: 5px;
+            max-height: 350px;
+            overflow-y: auto;
+            width: 100%;
+            margin-top: 10px;
+        }
+        .sts-menu-item {
+            padding: 12px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
             cursor: pointer;
-            transition: all 0.2s ease;
+            font-size: 13px;
+            font-weight: bold;
+            text-align: left;
+            letter-spacing: 1px;
+            transition: background 0.2s;
         }
-        #active-route-display:active { background-color: #333; }
-        #active-route-display::after {
-            content: ' ▼';
-            font-size: 10px;
-            opacity: 0.8;
-            margin-left: 4px;
-            vertical-align: middle;
-        }
-        #active-route-display:empty { display: none; }
+        .sts-menu-item:active { background: var(--primary-dark); border-color: var(--primary); }
 
         .menu-toggle-btn {
             background-color: var(--card-bg);
@@ -334,9 +366,12 @@
         }
         .quick-add-fab:active { transform: scale(0.9); background-color: var(--primary-dark); color: #fff; }
 
-        /* MODAL HUD STYLES */
-        .tactical-modal {
+        /* QUICK ADD MODAL HUD */
+        .quick-add-modal {
             position: fixed;
+            bottom: 85px;
+            left: 20px;
+            width: 260px;
             background-color: var(--bg-color);
             border: 1px solid var(--primary);
             box-shadow: 0 10px 25px rgba(0,0,0,0.9), var(--hud-glow);
@@ -347,19 +382,7 @@
             gap: 10px;
             will-change: opacity, transform;
         }
-        
-        .quick-add-modal { bottom: 85px; left: 20px; width: 260px; }
-        
-        /* NEW JUMP MENU STYLES */
-        .loaded-routes-modal {
-            top: 65px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 90%;
-            max-width: 400px;
-            max-height: 60vh;
-        }
-        .tactical-modal h4 { margin: 0 0 5px 0; color: var(--text-color); font-size: 13px; letter-spacing: 1px; border-bottom: 1px solid var(--border-color); padding-bottom: 8px;}
+        .quick-add-modal h4 { margin: 0 0 5px 0; color: var(--text-color); font-size: 13px; letter-spacing: 1px; border-bottom: 1px solid var(--border-color); padding-bottom: 8px;}
         
         @media (max-width: 600px) { select { flex: 1 1 100%; } }
     </style>
@@ -371,10 +394,15 @@
             <div class="header-title-container">
                 <h2>
                     <span id="active-area-display"></span>
-                    <span style="vertical-align: middle;">STS:</span>  
-                    <span id="active-route-display" onclick="toggleLoadedRoutesMenu()"></span>
                 </h2>
+                <button id="stsDropdownBtn" class="sts-header-btn" onclick="toggleStsMenu(event)">
+                    <span style="color:var(--text-muted); font-weight:normal; margin-right:4px;">STS:</span> 
+                    <span id="active-route-display">AWAITING...</span> 
+                    <span style="font-size:10px; margin-left:6px; color:var(--primary);">▼</span>
+                </button>
+                <div id="stsShortcutMenu" class="sts-shortcut-menu"></div>
             </div>
+            
             <button class="menu-toggle-btn" onclick="toggleMenu()" id="menuBtn">
                 <span class="menu-toggle-icon">✖</span>
             </button>
@@ -420,13 +448,6 @@
         </div>
     </div>
 
-    <div class="tactical-modal loaded-routes-modal" id="loadedRoutesModal">
-        <h4>JUMP TO SECTION</h4>
-        <div id="loaded-routes-list" style="display:flex; flex-direction: column; gap: 8px; overflow-y: auto;">
-            </div>
-        <button class="btn-outline" style="margin-top: 5px; padding: 10px;" onclick="toggleLoadedRoutesMenu(false)">CLOSE</button>
-    </div>
-
     <div class="app-layout">
         <div class="mini-map-container" id="miniMap"></div>
         <div id="segments-container">
@@ -463,7 +484,7 @@
         <span style="transform: translateY(-2px); pointer-events: none;">+</span>
     </button>
     
-    <div class="tactical-modal quick-add-modal" id="quickAddModal">
+    <div class="quick-add-modal" id="quickAddModal">
         <h4>ADD TO: <span id="quick-add-title" style="color: var(--primary);"></span></h4>
         <select id="quick-add-select" style="width: 100%; margin-bottom: 5px;">
             <option value="">AWAITING INPUT...</option>
@@ -486,25 +507,27 @@
         let currentActiveArea = "";
         let currentActiveDirection = "";
 
-        // GLOBAL CLICK LISTENER TO AUTO-HIDE ALL MENUS
+        // GLOBAL CLICK LISTENER TO AUTO-HIDE MENUS
         document.addEventListener('click', (e) => {
             const menu = document.getElementById('collapsible-menu');
             const fabModal = document.getElementById('quickAddModal');
-            const routeModal = document.getElementById('loadedRoutesModal');
+            const stsMenu = document.getElementById('stsShortcutMenu');
             
             const menuBtn = document.getElementById('menuBtn');
             const fabBtn = document.getElementById('quickAddBtn');
-            const routeBtn = document.getElementById('active-route-display');
+            const stsBtn = document.getElementById('stsDropdownBtn');
 
+            // Hide main menu
             if (!menu.contains(e.target) && !menuBtn.contains(e.target) && menu.classList.contains('expanded')) {
                 toggleMenu(true);
             }
+            // Hide quick add modal
             if (!fabModal.contains(e.target) && !fabBtn.contains(e.target) && fabModal.style.display === 'flex') {
                 toggleQuickAddModal(false);
             }
-            // Safely close Jump Menu if clicked outside
-            if (routeModal && routeBtn && !routeModal.contains(e.target) && !routeBtn.contains(e.target) && routeModal.style.display === 'flex') {
-                toggleLoadedRoutesMenu(false);
+            // Hide STS Shortcut Menu
+            if (stsMenu && stsBtn && !stsMenu.contains(e.target) && !stsBtn.contains(e.target) && stsMenu.style.display === 'flex') {
+                stsMenu.style.display = 'none';
             }
         });
 
@@ -527,70 +550,71 @@
                 menu.classList.remove('collapsed');
                 menu.classList.add('expanded');
                 btn.innerHTML = '<span class="menu-toggle-icon">✖</span>';
-                toggleQuickAddModal(false);
-                toggleLoadedRoutesMenu(false);
             }
         }
 
-        // NEW LOGIC: GENERATES THE SHORTCUT BUTTONS FOR THE JUMP MENU
-        function updateLoadedRoutesMenu() {
-            const list = document.getElementById('loaded-routes-list');
-            list.innerHTML = '';
-            const uniqueRoutes = new Set();
+        // TACTICAL STS SHORTCUT MENU CONTROLS
+        function toggleStsMenu(e) {
+            if (e) e.stopPropagation();
+            const menu = document.getElementById('stsShortcutMenu');
+            if (menu.style.display === 'flex') {
+                menu.style.display = 'none';
+            } else {
+                populateStsMenu();
+                menu.style.display = 'flex';
+                toggleMenu(true); // Auto close other menus
+                toggleQuickAddModal(false); 
+            }
+        }
 
-            document.querySelectorAll('.segment-card').forEach(card => {
-                const rKey = card.getAttribute('data-route-key');
-                const rName = card.getAttribute('data-route-name');
-                const rSeg = card.getAttribute('data-segment');
-                
-                if(rKey && !uniqueRoutes.has(rKey)) {
-                    uniqueRoutes.add(rKey);
-                    
-                    const btn = document.createElement('button');
-                    btn.className = 'btn-outline';
-                    btn.style.padding = '10px 12px';
-                    btn.style.textAlign = 'left';
-                    btn.style.fontSize = '13px';
-                    btn.style.display = 'flex';
-                    btn.style.justifyContent = 'space-between';
-                    btn.style.alignItems = 'center';
-                    
-                    btn.innerHTML = `<span>${rName}</span> <span style="color: var(--text-muted); font-size: 11px;">[TS-${rSeg}]</span>`;
-                    
-                    btn.onclick = () => {
-                        scrollToCard(card);
-                        // Force the mini-map to scroll to the first element of this newly selected route
-                        const mapItem = document.querySelector(`.map-item[data-map-segment="${rSeg}"]`);
-                        if(mapItem) {
-                            mapItem.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                        }
-                        toggleLoadedRoutesMenu(false);
-                    };
-                    list.appendChild(btn);
+        function populateStsMenu() {
+            const menu = document.getElementById('stsShortcutMenu');
+            menu.innerHTML = '';
+            
+            const cards = document.querySelectorAll('.segment-card');
+            if (cards.length === 0) {
+                menu.innerHTML = '<div style="padding:10px; color:var(--text-muted); font-size:12px;">NO SECTIONS LOADED</div>';
+                return;
+            }
+
+            // Extract unique routes matching exact current DOM order
+            const orderedRoutes = [];
+            cards.forEach(card => {
+                const key = card.getAttribute('data-route-key');
+                const name = card.getAttribute('data-route-name');
+                if (!orderedRoutes.find(r => r.key === key)) {
+                    orderedRoutes.push({ key, name });
                 }
             });
-            
-            if(uniqueRoutes.size === 0) {
-                list.innerHTML = '<span style="color: var(--text-muted); font-size: 12px; text-align: center; padding: 10px;">NO SECTIONS LOADED</span>';
-            }
+
+            orderedRoutes.forEach((route, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'sts-menu-item';
+                btn.innerHTML = `<span style="color:var(--primary); margin-right:8px;">${index + 1}.</span> ${route.name}`;
+                btn.onclick = () => jumpToRoute(route.key);
+                menu.appendChild(btn);
+            });
         }
 
-        function toggleLoadedRoutesMenu(show) {
-            const modal = document.getElementById('loadedRoutesModal');
-            if (!modal) return;
-            
-            if (show === undefined) {
-                show = modal.style.display === 'none' || modal.style.display === '';
+        function jumpToRoute(routeKey) {
+            // Find and scroll Main Pane
+            const firstCard = document.querySelector(`.segment-card[data-route-key="${routeKey}"]`);
+            if (firstCard) {
+                scrollToCard(firstCard);
+            }
+
+            // Find and perfectly scroll Mini-Map
+            const firstMapItem = document.querySelector(`.map-item[data-route-key="${routeKey}"]`);
+            if (firstMapItem) {
+                const mapContainer = document.getElementById('miniMap');
+                const containerRect = mapContainer.getBoundingClientRect();
+                const itemRect = firstMapItem.getBoundingClientRect();
+                
+                // Calculates exact pixel distance to align map item in center of sidebar
+                mapContainer.scrollTop += (itemRect.top - containerRect.top) - (containerRect.height / 2) + (itemRect.height / 2);
             }
             
-            if (show) {
-                updateLoadedRoutesMenu();
-                modal.style.display = 'flex';
-                toggleMenu(true); 
-                toggleQuickAddModal(false); 
-            } else {
-                modal.style.display = 'none';
-            }
+            document.getElementById('stsShortcutMenu').style.display = 'none';
         }
 
         function getLineColors(lineName) {
@@ -674,7 +698,7 @@
                 updateQuickAddDropdown();
                 modal.style.display = 'flex';
                 toggleMenu(true); 
-                toggleLoadedRoutesMenu(false);
+                document.getElementById('stsShortcutMenu').style.display = 'none'; // Close shortcut menu
             } else {
                 modal.style.display = 'none';
             }
@@ -710,7 +734,7 @@
                     const routeDisplay = document.getElementById('active-route-display');
                     const areaDisplay = document.getElementById('active-area-display');
 
-                    routeDisplay.textContent = routeName ? routeName : '';
+                    routeDisplay.textContent = routeName ? routeName : 'AWAITING...';
                     areaDisplay.textContent = areaName ? areaName : '';
 
                     if (areaName) {
@@ -862,7 +886,7 @@
                 currentActiveArea = "";
                 currentActiveDirection = "";
                 document.getElementById('active-area-display').textContent = '';
-                document.getElementById('active-route-display').textContent = '';
+                document.getElementById('active-route-display').textContent = 'AWAITING...';
                 
                 const container = document.getElementById('segments-container');
                 if(!document.getElementById('instruction-panel')) {
