@@ -3,15 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Defect Tracker - Pro</title>
+    <title>Defect Tracker - Tactical</title>
 
     <link rel="icon" type="image/png" href="icon.png">
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#28a745">
+    <meta name="theme-color" content="#1a1a1a">
     
     <link rel="apple-touch-icon" href="icon.png">
     <meta name="mobile-web-app-capable" content="yes">
-    <meta name="mobile-web-app-status-bar-style" content="black">
+    <meta name="mobile-web-app-status-bar-style" content="black-translucent">
 
     <script src="database.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
@@ -30,35 +30,45 @@
     </script>
     
     <style>
+        /* TACTICAL / HUD THEME VARIABLES */
         :root {
-            --primary: #0056b3;
-            --danger: #dc3545;
-            --success: #28a745;
-            --warning: #ffc107;
-            --bg-color: #f4f7f6;
-            --card-bg: #ffffff;
-            --text-color: #333;
-            --border-color: #ccc;
+            --primary: #8bc34a; /* Tactical Green */
+            --primary-dark: #33691e;
+            --danger: #d32f2f; /* Alert Red */
+            --success: #4caf50;
+            --warning: #ffb300; /* Amber */
+            --bg-color: #0d0d0d; /* Pitch Black */
+            --card-bg: #1a1a1a; /* Dark Charcoal */
+            --input-bg: #111111;
+            --text-color: #e0e0e0;
+            --text-muted: #888888;
+            --border-color: #333333;
+            --hud-glow: 0 0 8px rgba(139, 195, 74, 0.4);
             --map-width: 70px; 
         }
 
         body {
-            font-family: system-ui, -apple-system, sans-serif;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             background-color: var(--bg-color);
             color: var(--text-color);
             margin: 0;
             padding: 0; 
             box-sizing: border-box;
+            text-transform: uppercase; /* Gives the military HUD feel */
         }
+
+        /* Angular, sharp edges instead of soft rounded ones */
+        * { border-radius: 2px !important; }
 
         .sticky-header {
             position: sticky;
             top: 0;
             z-index: 1000;
-            background-color: var(--bg-color);
+            background-color: #111111;
             padding: 10px 15px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.08); 
-            margin-bottom: 10px;
+            border-bottom: 2px solid var(--primary);
+            box-shadow: var(--hud-glow); 
+            margin-bottom: 15px;
         }
 
         .header-top-bar {
@@ -71,51 +81,50 @@
 
         h2 { 
             margin: 0; 
-            font-size: 20px;
+            font-size: 18px;
             display: flex;
             align-items: center;
             gap: 10px;
             flex-wrap: wrap;
+            letter-spacing: 1px;
+            color: var(--primary);
         }
 
         #active-area-display {
-            font-size: 14px;
-            padding: 4px 12px;
-            border-radius: 6px;
+            font-size: 13px;
+            padding: 4px 10px;
             font-weight: bold;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             text-transform: uppercase;
-            border: 2px solid transparent;
+            border: 1px solid transparent;
         }
         #active-area-display:empty { display: none; }
 
         #active-route-display {
             font-size: 13px;
-            color: var(--primary);
-            background: #e1ecf7;
-            padding: 3px 10px;
-            border-radius: 12px;
+            color: var(--text-color);
+            background: var(--input-bg);
+            padding: 4px 10px;
             font-weight: bold;
-            border: 1px solid #b9d4f0;
+            border: 1px solid var(--primary);
+            letter-spacing: 1px;
         }
         #active-route-display:empty { display: none; }
 
         .menu-toggle-btn {
             background-color: transparent;
-            color: #000000; 
-            border: 2px solid #000000;
+            color: var(--text-color); 
+            border: 1px solid var(--border-color);
             padding: 6px 12px;
-            border-radius: 6px;
             font-size: 14px;
             font-weight: bold;
             cursor: pointer;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
             display: flex;       
             align-items: center; 
             gap: 6px;
         }
         
-        .menu-toggle-icon { font-size: 22px; }
+        .menu-toggle-btn:active { background-color: var(--border-color); }
+        .menu-toggle-icon { font-size: 18px; }
 
         #collapsible-menu {
             overflow: hidden;
@@ -127,46 +136,54 @@
         .control-panel {
             background: var(--card-bg);
             padding: 12px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border: 1px solid var(--border-color);
             margin-bottom: 10px;
             display: flex;
             flex-direction: column;
             gap: 8px;
         }
 
-        .control-panel label { font-size: 14px; margin-top: 5px; }
+        .control-panel label { font-size: 13px; letter-spacing: 1px; color: var(--text-muted); margin-top: 5px; }
         .input-group { display: flex; gap: 8px; }
-        .input-group select {
+        
+        select, .segment-notes {
             flex: 1;
-            padding: 10px;
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            font-size: 16px; 
-            background-color: white;
+            padding: 12px;
+            border: 1px solid var(--border-color) !important;
+            font-size: 15px; 
+            background-color: var(--input-bg) !important;
+            color: var(--text-color) !important;
+            text-transform: uppercase;
+            font-family: inherit;
         }
+        select:focus, .segment-notes:focus {
+            outline: none;
+            border-color: var(--primary) !important;
+            box-shadow: 0 0 5px rgba(139, 195, 74, 0.2);
+        }
+        select:disabled { background-color: #000 !important; color: #555 !important; cursor: not-allowed; }
 
         .action-buttons { display: flex; gap: 8px; margin-top: 5px; }
         .save-load-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 5px; }
 
         button {
-            padding: 10px;
-            border: none;
-            border-radius: 6px;
-            font-size: 15px;
+            padding: 12px;
+            border: 1px solid transparent;
+            font-size: 14px;
             font-weight: bold;
+            letter-spacing: 1px;
             color: white;
             cursor: pointer;
             touch-action: manipulation;
+            font-family: inherit;
         }
 
-        .btn-primary { background-color: var(--primary); flex: 2; }
-        .btn-success { background-color: var(--success); width: 100%; margin-bottom: 5px;}
-        .btn-warning { background-color: var(--warning); color: #333; }
-        .btn-info { background-color: #17a2b8; }
-        .btn-danger { background-color: var(--danger); }
-        .btn-outline { background-color: transparent; color: var(--primary); border: 2px solid var(--primary); flex: 1; }
-        button:disabled { background-color: #cccccc; cursor: not-allowed; }
+        .btn-primary { background-color: var(--primary-dark); color: #fff; border-color: var(--primary); flex: 2; }
+        .btn-success { background-color: #1b5e20; color: #fff; border-color: #4caf50; width: 100%; margin-bottom: 5px;}
+        .btn-warning { background-color: #ff8f00; color: #000; border-color: #ffca28; }
+        .btn-info { background-color: #01579b; color: #fff; border-color: #29b6f6; }
+        .btn-outline { background-color: transparent; color: var(--primary); border: 1px solid var(--primary); flex: 1; }
+        button:disabled { background-color: #333; color: #666; border-color: #444; cursor: not-allowed; }
 
         .app-layout { display: flex; align-items: flex-start; gap: 10px; padding: 0 15px 30px 10px; }
 
@@ -186,24 +203,21 @@
 
         .map-item {
             background: var(--card-bg);
-            border-top: 2px solid var(--border-color);
-            border-right: 2px solid var(--border-color);
-            border-bottom: 2px solid var(--border-color);
-            border-radius: 6px;
+            border: 1px solid var(--border-color);
             padding: 10px 0;
             text-align: center;
             font-weight: bold;
             font-size: 13px;
+            color: var(--text-muted);
             cursor: pointer;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             transition: all 0.2s ease;
             user-select: none;
         }
         
         .map-item:active { transform: scale(0.9); }
-        .map-item.has-data { background-color: #ffecd2; color: #e65100; }
-        .map-item.active-map { background: var(--primary); color: white; transform: scale(1.05); border-color: var(--primary) !important;}
-        .map-item.active-map.has-data { background-color: #ff9800; color: white; border-color: #e65100 !important;}
+        .map-item.has-data { background-color: #3e2700; color: var(--warning); border-color: var(--warning); }
+        .map-item.active-map { background: var(--primary-dark); color: #fff; border-color: var(--primary) !important; box-shadow: var(--hud-glow);}
+        .map-item.active-map.has-data { background-color: #b26500; color: #fff; border-color: var(--warning) !important;}
 
         #segments-container { flex: 1; display: flex; flex-direction: column; gap: 15px; min-width: 0; }
 
@@ -214,46 +228,56 @@
 
         .segment-card {
             background: var(--card-bg);
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border: 1px solid var(--border-color);
             padding: 15px;
             position: relative;
-            animation: cascadingFadeIn 0.4s ease-out both;
+            animation: cascadingFadeIn 0.3s ease-out both;
             scroll-margin-top: 100px; 
         }
 
-        .segment-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--bg-color); padding-bottom: 10px; margin-bottom: 10px; }
-        .segment-header h3 { margin: 0; color: var(--primary); font-size: 18px;}
+        .segment-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; margin-bottom: 10px; }
+        .segment-header h3 { margin: 0; color: var(--primary); font-size: 16px; letter-spacing: 2px;}
         .segment-header-badges { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
         
-        .direction-badge { font-size: 13px; font-weight: bold; color: #0056b3; background: #e1ecf7; padding: 4px 8px; border-radius: 6px; border: 1px solid #b9d4f0;}
+        .direction-badge { font-size: 12px; font-weight: bold; color: var(--text-color); background: var(--input-bg); padding: 4px 8px; border: 1px solid var(--border-color);}
 
         .segment-notes {
             width: 100%;
-            padding: 10px;
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            font-size: 15px;
             margin-bottom: 15px;
             box-sizing: border-box;
-            font-family: inherit;
             resize: vertical;
             min-height: 60px;
-            background-color: var(--bg-color);
         }
 
         .defect-list { display: flex; flex-direction: column; gap: 12px; }
-        .defect-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; background: var(--bg-color); padding: 10px; border-radius: 6px; border: 1px solid var(--border-color); }
+        .defect-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; background: var(--input-bg); padding: 10px; border: 1px solid var(--border-color); }
 
-        select { flex: 1 1 40%; padding: 10px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 16px; background-color: white; min-width: 120px; }
-        select:disabled { background-color: #e9ecef; color: #6c757d; cursor: not-allowed; }
+        select { flex: 1 1 40%; min-width: 120px; }
 
-        .photo-wrapper { display: flex; align-items: center; gap: 10px; flex: 1 1 100%; }
+        /* REWORKED PHOTO WRAPPER & TACTICAL REMOVE BUTTON */
+        .photo-wrapper { display: flex; align-items: center; gap: 10px; flex: 1 1 100%; justify-content: space-between; background: #000; padding: 5px; border: 1px solid var(--border-color); }
         .file-input { display: none; }
-        .camera-btn { background-color: var(--primary); color: white; border-radius: 6px; padding: 8px 12px; font-size: 15px; font-weight: bold; cursor: pointer; text-align: center; flex: 1; box-sizing: border-box; }
-        .photo-name { font-size: 13px; color: var(--success); font-weight: bold; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 120px; }
-        .delete-btn { background-color: var(--danger); color: white; border-radius: 6px; padding: 8px 12px; font-size: 15px; flex: 1 1 100%; }
-        .add-defect-btn { background-color: transparent; color: var(--primary); border: 2px solid var(--primary); margin-top: 10px; width: 100%; }
+        .camera-btn { background-color: #333; color: white; padding: 8px 12px; font-size: 13px; font-weight: bold; cursor: pointer; text-align: center; border: 1px solid #555; flex: 0 1 auto; }
+        .camera-btn:active { background-color: #555; }
+        .photo-name { font-size: 12px; color: var(--success); font-weight: bold; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; text-align: center; }
+        
+        .delete-btn { 
+            background-color: transparent; 
+            color: var(--danger); 
+            border: 1px solid var(--danger); 
+            width: 36px; 
+            height: 36px; 
+            font-size: 18px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            padding: 0; 
+            flex-shrink: 0;
+        }
+        .delete-btn:active { background-color: var(--danger); color: #fff; }
+
+        .add-defect-btn { background-color: transparent; color: var(--text-muted); border: 1px dashed var(--text-muted); margin-top: 10px; width: 100%; }
+        .add-defect-btn:active { border-color: var(--primary); color: var(--primary); }
         
         @media (max-width: 600px) { select { flex: 1 1 100%; } }
     </style>
@@ -264,49 +288,49 @@
         <div class="header-top-bar">
             <h2>
                 <span id="active-area-display"></span>
-                SUB TO SUB AREA:  
+                STS:  
                 <span id="active-route-display"></span>
             </h2>
             <button class="menu-toggle-btn" onclick="toggleMenu()" id="menuBtn">
-                <span class="menu-toggle-icon">❌</span> Close Menu
+                <span class="menu-toggle-icon">✖</span> CLOSE
             </button>
         </div>
         
         <div id="collapsible-menu" class="expanded">
-            <button id="exportBtn" class="btn-success" onclick="exportData()">📊 Export Final Report (Excel & PDF)</button>
+            <button id="exportBtn" class="btn-success" onclick="exportData()">📊 EXPORT FINAL REPORT</button>
             
             <div class="save-load-grid">
-                <button class="btn-warning" onclick="saveProject()">💾 Save Work</button>
-                <button class="btn-info" onclick="document.getElementById('importFile').click()">📂 Load Work</button>
+                <button class="btn-warning" onclick="saveProject()">💾 SAVE DATA</button>
+                <button class="btn-info" onclick="document.getElementById('importFile').click()">📂 LOAD DATA</button>
                 <input type="file" id="importFile" accept=".json, application/json, text/plain, */*" style="display: none;" onchange="loadProject(event)">
             </div>
 
             <div class="control-panel">
-                <label for="general-area"><b>1. Select General Area</b></label>
+                <label for="general-area">1. SELECT AREA</label>
                 <div class="input-group">
-                    <select id="general-area" style="background-color: #eef2f5; font-weight: bold;" onchange="updateRouteDropdown()">
-                        <option value="">tap here...</option>
+                    <select id="general-area" onchange="updateRouteDropdown()">
+                        <option value="">AWAITING INPUT...</option>
                     </select>
                 </div>
 
-                <label for="page-direction"><b>2. Select Track Direction</b></label>
+                <label for="page-direction">2. SELECT DIRECTION</label>
                 <div class="input-group">
-                    <select id="page-direction" style="background-color: #eef2f5; font-weight: bold;" onchange="updateRouteDropdown()">
-                        <option value="Inbound Track">Inbound (IB)</option>
-                        <option value="Outbound Track">Outbound (OB)</option>
+                    <select id="page-direction" onchange="updateRouteDropdown()">
+                        <option value="Inbound Track">INBOUND (IB)</option>
+                        <option value="Outbound Track">OUTBOUND (OB)</option>
                     </select>
                 </div>
                 
-                <label for="global-section"><b>3. Select Sub-to-Sub Block</b></label>
+                <label for="global-section">3. SELECT SUB-TO-SUB BLOCK</label>
                 <div class="input-group">
                     <select id="global-section">
-                        <option value="">tap here...</option>
+                        <option value="">AWAITING INPUT...</option>
                     </select>
                 </div>
                 
                 <div class="action-buttons">
-                    <button class="btn-primary" onclick="generateSegments()">Load Sections</button>
-                    <button class="btn-outline" onclick="flipOrder()">🔃 Flip Direction</button>
+                    <button class="btn-primary" onclick="generateSegments()">INITIATE SECTIONS</button>
+                    <button class="btn-outline" onclick="flipOrder()">🔃 FLIP DIR</button>
                 </div>
             </div>
         </div>
@@ -315,34 +339,29 @@
     <div class="app-layout">
         <div class="mini-map-container" id="miniMap"></div>
         <div id="segments-container">
-            <div id="instruction-panel" class="segment-card" style="border-left: 6px solid var(--success);">
+            <div id="instruction-panel" class="segment-card" style="border-left: 6px solid var(--primary);">
                 <div class="segment-header">
-                    <h3>📋 Welcome to Defect Tracker V2</h3>
+                    <h3>SYSTEM INITIALIZED</h3>
                 </div>
-                <div style="font-size: 15px; line-height: 1.5;">
-                    <p><b>Step 1: Start a New Route</b></p>
+                <div style="font-size: 13px; line-height: 1.6; color: var(--text-muted); text-transform: none;">
+                    <p style="color: var(--text-color); font-weight: bold; text-transform: uppercase;">STEP 1: ESTABLISH ROUTE</p>
                     <ul style="margin-top: 5px; padding-left: 20px;">
-                        <li>Tap the <b>Menu</b> button at the top right.</li>
-                        <li>Select <b>1. Area</b>, <b>2. Direction</b>, and <b>3. Sub-to-Sub Block</b>.</li>
-                        <li>Tap <b>Load Sections</b> to generate your track blocks.</li>
+                        <li>Open the top right menu.</li>
+                        <li>Select <b>1. AREA</b>, <b>2. DIRECTION</b>, and <b>3. SUB-TO-SUB BLOCK</b>.</li>
+                        <li>Tap <b>INITIATE SECTIONS</b> to generate your track blocks.</li>
                     </ul>
 
-                    <p><b>Step 2: Log Defects & Take Photos</b></p>
+                    <p style="color: var(--text-color); font-weight: bold; text-transform: uppercase; margin-top: 15px;">STEP 2: LOG DEFECTS</p>
                     <ul style="margin-top: 5px; padding-left: 20px;">
-                        <li>Scroll to your current Track Section (TS).</li>
-                        <li>Select the <b>Component</b> and the <b>Defect</b>.</li>
-                        <li>Tap <b>📷 Photo</b> to open your camera and attach a picture.</li>
+                        <li>Scroll to current Track Section (TS).</li>
+                        <li>Select <b>COMPONENT</b> and <b>DEFECT</b> from dropdowns.</li>
+                        <li>Tap <b>📷 PHOTO</b> to attach visual evidence.</li>
                     </ul>
 
-                    <p><b>Step 3: Save Your Progress! ⚠️</b></p>
+                    <p style="color: var(--warning); font-weight: bold; text-transform: uppercase; margin-top: 15px;">STEP 3: SAVE PROTOCOL ⚠️</p>
                     <ul style="margin-top: 5px; padding-left: 20px;">
-                        <li>Open the Menu and tap <b>💾 Save Work</b> frequently. This saves a backup to your phone.</li>
-                        <li>If you close the app, tap <b>📂 Load Work</b> and select your file to pick up right where you left off.</li>
-                    </ul>
-
-                    <p><b>Step 4: Export Final Report</b></p>
-                    <ul style="margin-top: 5px; padding-left: 20px;">
-                        <li>When your shift is done, tap <b>📊 Export Final Report</b> to download your Excel spreadsheet and PDFs.</li>
+                        <li>System does not auto-save. Open menu and tap <b>💾 SAVE DATA</b> frequently.</li>
+                        <li>If system restarts, tap <b>📂 LOAD DATA</b> to resume.</li>
                     </ul>
                 </div>
             </div>
@@ -356,7 +375,7 @@
             const cards = document.querySelectorAll('.segment-card');
             if (cards.length > 0) {
                 e.preventDefault();
-                e.returnValue = 'You have unsaved track sections. Are you sure you want to leave?';
+                e.returnValue = 'Data loss imminent. Are you sure you want to abort?';
             }
         });
 
@@ -366,33 +385,29 @@
             if (forceClose || menu.classList.contains('expanded')) {
                 menu.classList.remove('expanded');
                 menu.classList.add('collapsed');
-                btn.innerHTML = '<span class="menu-toggle-icon">&#x2699;</span> Menu';
+                btn.innerHTML = '<span class="menu-toggle-icon">≡</span> MENU';
             } else {
                 menu.classList.remove('collapsed');
                 menu.classList.add('expanded');
-                btn.innerHTML = '<span class="menu-toggle-icon">❌</span> Close Menu';
+                btn.innerHTML = '<span class="menu-toggle-icon">✖</span> CLOSE';
             }
         }
 
-        // SMART COLOR CODING FOR LINES
+        // TACTICAL GLOW COLOR CODING FOR LINES
         function getLineColors(lineName) {
-            if (!lineName) return { bg: '#e1ecf7', text: '#0056b3', border: '#b9d4f0' };
+            if (!lineName) return { bg: 'transparent', text: 'var(--text-color)', border: 'var(--border-color)' };
             const name = lineName.toUpperCase();
             
-            // Yellow for Area 1 or Expo Line
             if (name.includes("AREA 1") || name.includes("EXPO")) {
-                return { bg: '#ffc107', text: '#000000', border: '#d39e00' };
+                return { bg: '#3e3000', text: '#ffc107', border: '#ffc107' };
             }
-            // Blue for Area 2 or Millenium Line
             else if (name.includes("AREA 2") || name.includes("MILLENIUM") || name.includes("MILLENNIUM")) {
-                return { bg: '#007bff', text: '#ffffff', border: '#004a99' };
+                return { bg: '#00254d', text: '#3399ff', border: '#3399ff' };
             }
-            // Green for Area 3 or Evergreen Line
             else if (name.includes("AREA 3") || name.includes("EVERGREEN")) {
-                return { bg: '#28a745', text: '#ffffff', border: '#1e7e34' };
+                return { bg: '#0f3316', text: '#4caf50', border: '#4caf50' };
             }
-            // Default Grey for anything else
-            return { bg: '#6c757d', text: '#ffffff', border: '#545b62' };
+            return { bg: '#222', text: '#aaa', border: '#555' };
         }
 
         document.addEventListener("DOMContentLoaded", () => {
@@ -410,7 +425,7 @@
             const direction = document.getElementById('page-direction').value;
             const dropdown = document.getElementById('global-section');
             
-            dropdown.innerHTML = '<option value="">tap here...</option>';
+            dropdown.innerHTML = '<option value="">AWAITING INPUT...</option>';
             
             if (area && direction && globalDatabase[area] && globalDatabase[area][direction]) {
                 const routes = globalDatabase[area][direction];
@@ -479,7 +494,7 @@
             const routeSelect = document.getElementById('global-section');
             const selectedRouteKey = routeSelect.value;
             
-            if (!area || !selectedRouteKey) { alert('Please select an Area and Sub-to-Sub Block.'); return; }
+            if (!area || !selectedRouteKey) { alert('ERROR: Select Area and Sub-to-Sub Block.'); return; }
 
             const selectedRouteData = globalDatabase[area][direction][selectedRouteKey];
             const container = document.getElementById('segments-container');
@@ -491,7 +506,7 @@
             const newCards = []; 
 
             selectedRouteData.segments.forEach(range => {
-                const blockColor = range.color || '#0056b3'; 
+                const blockColor = range.color || 'var(--primary)'; 
                 if (range.start <= range.end) { 
                     for (let i = range.start; i <= range.end; i++) newCards.push({ num: i, color: blockColor }); 
                 } else { 
@@ -509,7 +524,7 @@
                 mapBtn.className = 'map-item';
                 mapBtn.setAttribute('data-map-segment', item.num);
                 mapBtn.textContent = `TS-${item.num}`;
-                mapBtn.style.borderLeft = `6px solid ${item.color}`;
+                mapBtn.style.borderLeft = `4px solid ${item.color}`;
                 mapBtn.onclick = () => { card.scrollIntoView({ behavior: 'smooth' }); };
                 mapContainer.appendChild(mapBtn);
             });
@@ -531,12 +546,12 @@
                 container.appendChild(card); 
                 card.style.animation = 'none';
                 void card.offsetWidth; 
-                card.style.animation = `cascadingFadeIn 0.4s ease-out ${index * 0.05}s both`;
+                card.style.animation = `cascadingFadeIn 0.3s ease-out ${index * 0.05}s both`;
             });
             mapItems.forEach(item => mapContainer.appendChild(item));
         }
 
-        function createSegmentCard(segmentNum, routeText, direction, color = '#0056b3', areaName = '') {
+        function createSegmentCard(segmentNum, routeText, direction, color = 'var(--primary)', areaName = '') {
             const card = document.createElement('div');
             card.className = 'segment-card';
             card.setAttribute('data-segment', segmentNum);
@@ -544,7 +559,7 @@
             card.setAttribute('data-direction', direction); 
             card.setAttribute('data-color', color);
             card.setAttribute('data-area-name', areaName); 
-            card.style.borderLeft = `6px solid ${color}`;
+            card.style.borderLeft = `4px solid ${color}`;
 
             const colors = getLineColors(areaName);
             const areaBadge = areaName ? `<span class="direction-badge" style="background-color: ${colors.bg}; color: ${colors.text}; border-color: ${colors.border};">${areaName}</span>` : '';
@@ -557,9 +572,9 @@
                         <span class="direction-badge">${routeText}</span>
                     </div>
                 </div>
-                <textarea class="segment-notes" placeholder="Add TS details or comments here..."></textarea>
+                <textarea class="segment-notes" placeholder="INPUT SECTION LOG..."></textarea>
                 <div class="defect-list"></div>
-                <button class="add-defect-btn" onclick="addDefectRow(this.previousElementSibling)">+ Add another defect</button>
+                <button class="add-defect-btn" onclick="addDefectRow(this.previousElementSibling)">+ ADD DEFECT ROW</button>
             `;
             addDefectRow(card.querySelector('.defect-list'));
             return card;
@@ -574,7 +589,7 @@
             components.forEach(c => {
                 let opt = document.createElement('option');
                 opt.value = c === 'Select Component' ? '' : c;
-                opt.textContent = c;
+                opt.textContent = c.toUpperCase();
                 compSelect.appendChild(opt);
             });
 
@@ -583,7 +598,7 @@
             defSelect.disabled = true; 
             let defaultOpt = document.createElement('option');
             defaultOpt.value = '';
-            defaultOpt.textContent = 'Select Component First';
+            defaultOpt.textContent = 'AWAITING COMPONENT';
             defSelect.appendChild(defaultOpt);
 
             function updateDefects(selectedComp, selectedDefect = '') {
@@ -592,12 +607,12 @@
                     defSelect.disabled = false;
                     let defDefault = document.createElement('option');
                     defDefault.value = '';
-                    defDefault.textContent = 'Select Defect';
+                    defDefault.textContent = 'SELECT DEFECT';
                     defSelect.appendChild(defDefault);
                     defectMap[selectedComp].forEach(d => {
                         let opt = document.createElement('option');
                         opt.value = d;
-                        opt.textContent = d;
+                        opt.textContent = d.toUpperCase();
                         defSelect.appendChild(opt);
                     });
                     if (selectedDefect) defSelect.value = selectedDefect;
@@ -605,13 +620,14 @@
                     defSelect.disabled = true;
                     let resetOpt = document.createElement('option');
                     resetOpt.value = '';
-                    resetOpt.textContent = 'Select Component First';
+                    resetOpt.textContent = 'AWAITING COMPONENT';
                     defSelect.appendChild(resetOpt);
                 }
             }
 
             compSelect.addEventListener('change', function() { updateDefects(this.value); });
 
+            // TACTICAL PHOTO WRAPPER & INLINE DELETE BUTTON
             const photoWrapper = document.createElement('div');
             photoWrapper.className = 'photo-wrapper';
             const fileInputId = 'photo-' + Math.random().toString(36).substr(2, 9);
@@ -625,15 +641,20 @@
             const cameraLabel = document.createElement('label');
             cameraLabel.htmlFor = fileInputId;
             cameraLabel.className = 'camera-btn';
-            cameraLabel.innerHTML = '📷 Photo';
+            cameraLabel.innerHTML = '📷 PHOTO';
 
             const photoName = document.createElement('div');
             photoName.className = 'photo-name';
 
+            const delBtn = document.createElement('button');
+            delBtn.className = 'delete-btn';
+            delBtn.innerHTML = '✖'; // Small system close icon
+            delBtn.onclick = function() { const card = row.closest('.segment-card'); row.remove(); checkSegmentData(card); };
+
             fileInput.addEventListener('change', function(e) {
                 if (this.files && this.files.length > 0) {
                     const file = this.files[0];
-                    cameraLabel.innerHTML = '⏳ Processing...';
+                    cameraLabel.innerHTML = '⏳ LOAD...';
                     const reader = new FileReader();
                     reader.onload = function(event) {
                         const img = new Image();
@@ -649,9 +670,11 @@
                             row.dataset.base64Image = canvas.toDataURL('image/jpeg', 0.8); 
                             row.dataset.imgWidth = width;
                             row.dataset.imgHeight = height;
+                            
                             cameraLabel.style.backgroundColor = 'var(--success)';
-                            cameraLabel.innerHTML = '✅ Saved';
-                            photoName.textContent = "Attached";
+                            cameraLabel.style.borderColor = 'var(--success)';
+                            cameraLabel.innerHTML = '✅ OK';
+                            photoName.textContent = "IMG ATTACHED";
                             checkSegmentData(row.closest('.segment-card'));
                         };
                         img.src = event.target.result;
@@ -660,18 +683,14 @@
                 }
             });
 
-            const delBtn = document.createElement('button');
-            delBtn.className = 'delete-btn';
-            delBtn.textContent = 'Remove Defect';
-            delBtn.onclick = function() { const card = row.closest('.segment-card'); row.remove(); checkSegmentData(card); };
-
             photoWrapper.appendChild(cameraLabel);
             photoWrapper.appendChild(fileInput);
             photoWrapper.appendChild(photoName);
+            photoWrapper.appendChild(delBtn); // Placed right beside the photo tools
+            
             row.appendChild(compSelect);
             row.appendChild(defSelect);
             row.appendChild(photoWrapper);
-            row.appendChild(delBtn);
             container.appendChild(row);
 
             if (prefill) {
@@ -684,15 +703,16 @@
                     row.dataset.imgWidth = prefill.imgW;
                     row.dataset.imgHeight = prefill.imgH;
                     cameraLabel.style.backgroundColor = 'var(--success)';
-                    cameraLabel.innerHTML = '✅ Saved';
-                    photoName.textContent = "Attached";
+                    cameraLabel.style.borderColor = 'var(--success)';
+                    cameraLabel.innerHTML = '✅ OK';
+                    photoName.textContent = "IMG ATTACHED";
                 }
             }
         }
 
         function saveProject() {
             const cards = document.querySelectorAll('.segment-card');
-            if (cards.length === 0) { alert('No track sections to save.'); return; }
+            if (cards.length === 0) { alert('SYSTEM: No data available to save.'); return; }
 
             const projectData = [];
             cards.forEach(card => {
@@ -724,7 +744,7 @@
             let exportName = currentFileName;
             if (!exportName) {
                 const date = new Date().toISOString().split('T')[0];
-                exportName = `Project_Backup_${date}.json`;
+                exportName = `TRACK_DATA_${date}.json`;
             }
 
             link.setAttribute("href", dataStr);
@@ -772,18 +792,18 @@
                         mapBtn.className = 'map-item';
                         mapBtn.setAttribute('data-map-segment', segData.segmentNum);
                         mapBtn.textContent = `TS-${segData.segmentNum}`;
-                        mapBtn.style.borderLeft = `6px solid ${segData.color || '#ccc'}`;
+                        mapBtn.style.borderLeft = `4px solid ${segData.color || '#ccc'}`;
                         mapBtn.onclick = () => { card.scrollIntoView({ behavior: 'smooth' }); };
                         mapContainer.appendChild(mapBtn);
                         
                         checkSegmentData(card);
                     });
 
-                    alert('Project loaded successfully!');
+                    alert('SYSTEM: Data loaded successfully.');
                     toggleMenu(true);
 
                 } catch (err) {
-                    alert('Error loading file. Please make sure it is a valid backup JSON.');
+                    alert('SYSTEM ERROR: Corrupt or invalid JSON file.');
                     console.error(err);
                 }
                 document.getElementById('importFile').value = '';
@@ -795,16 +815,16 @@
 
         async function exportData() {
             if (typeof ExcelJS === 'undefined' || typeof window.jspdf === 'undefined') {
-                alert("Libraries are still loading or require an internet connection for the first run.");
+                alert("SYSTEM ERROR: Libraries offline. Requires network connection for initial boot.");
                 return;
             }
 
             const cards = document.querySelectorAll('.segment-card');
-            if (cards.length === 0) { alert('No data to export.'); return; }
+            if (cards.length === 0) { alert('SYSTEM: No data to export.'); return; }
 
             const exportBtn = document.getElementById('exportBtn');
             exportBtn.disabled = true;
-            exportBtn.innerHTML = '⏳ Processing Exports...';
+            exportBtn.innerHTML = '⏳ COMPILING DATA...';
 
             try {
                 const workbook = new ExcelJS.Workbook();
@@ -861,26 +881,26 @@
                     const link = document.createElement("a");
                     const date = new Date().toISOString().split('T')[0];
                     link.href = URL.createObjectURL(blob);
-                    link.download = `TS_Report_${date}.xlsx`;
+                    link.download = `DEFECT_REPORT_${date}.xlsx`;
                     document.body.appendChild(link);
                     link.click();
                     document.body.removeChild(link);
                 } else {
-                    alert("No filled track sections found to export to Excel.");
+                    alert("SYSTEM: No filled track sections found to export to Excel.");
                 }
 
                 if (pdfJobs.length > 0) {
-                    exportBtn.innerHTML = `⏳ Building ${pdfJobs.length} PDFs...`;
+                    exportBtn.innerHTML = `⏳ BUILDING ${pdfJobs.length} PDFs...`;
                     await delay(800); 
                     for (let job of pdfJobs) { generatePDF(job); await delay(800); }
                 }
 
             } catch (error) {
                 console.error(error);
-                alert("An error occurred during export.");
+                alert("SYSTEM ERROR: Export failed.");
             } finally {
                 exportBtn.disabled = false;
-                exportBtn.innerHTML = '📊 Export Final Report (Excel & PDF)';
+                exportBtn.innerHTML = '📊 EXPORT FINAL REPORT';
             }
         }
 
@@ -938,10 +958,10 @@
             const todayDate = new Date().toLocaleDateString();
             doc.setFont("helvetica", "italic");
             doc.setFontSize(10);
-            doc.text(`Date Taken: ${todayDate}`, leftMargin, currentY);
+            doc.text(`DATE LOGGED: ${todayDate}`, leftMargin, currentY);
 
             const rightMargin = pageWidth - 10;
-            const notes = data.notes && data.notes.trim() !== "" ? data.notes : "No additional comments.";
+            const notes = data.notes && data.notes.trim() !== "" ? data.notes : "NO ADDITIONAL COMMENTS.";
             
             doc.setFont("helvetica", "normal");
             doc.setFontSize(10);
@@ -949,7 +969,7 @@
             const splitNotes = doc.splitTextToSize(notes, 140); 
             doc.text(splitNotes, rightMargin, footerY + 8, { align: "right" });
 
-            doc.save(`${data.tsId}_${data.comp.replace(/[^a-z0-9]/gi, '_')}_Defect.pdf`);
+            doc.save(`${data.tsId}_${data.comp.replace(/[^a-z0-9]/gi, '_')}_DEFECT.pdf`);
         }
     </script>
 </body>
