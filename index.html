@@ -106,20 +106,26 @@
         }
         #active-area-display:empty { display: none; }
 
+        /* TACTICAL ROUTE JUMP BUTTON */
         #active-route-display {
             font-size: 13px;
             color: var(--text-color);
             background: var(--input-bg);
-            padding: 3px 8px;
+            padding: 4px 8px;
             font-weight: bold;
             border: 1px solid var(--primary);
             letter-spacing: 1px;
             word-wrap: break-word;
             white-space: normal;
-            display: inline-block;
+            display: none; /* Hidden by default, toggled via JS to inline-flex */
+            align-items: center;
+            gap: 6px;
             margin-top: 4px;
+            cursor: pointer;
+            text-align: left;
+            transition: background-color 0.2s, box-shadow 0.2s;
         }
-        #active-route-display:empty { display: none; }
+        #active-route-display:active { background-color: #333; box-shadow: inset 0 0 5px rgba(0,0,0,0.5); }
 
         .menu-toggle-btn {
             background-color: var(--card-bg);
@@ -138,8 +144,6 @@
         }
         
         .menu-toggle-btn:active { background-color: #333; }
-        
-        /* pointer-events: none fixes the bug where clicking the icon dead-center does nothing */
         .menu-toggle-icon { font-size: 22px; font-family: sans-serif; line-height: 1; pointer-events: none; }
 
         #collapsible-menu {
@@ -326,24 +330,35 @@
         }
         .quick-add-fab:active { transform: scale(0.9); background-color: var(--primary-dark); color: #fff; }
 
-        /* QUICK ADD MODAL HUD */
-        .quick-add-modal {
+        /* TACTICAL MODALS */
+        .tactical-modal {
             position: fixed;
-            bottom: 85px;
-            left: 20px;
-            width: 260px;
             background-color: var(--bg-color);
             border: 1px solid var(--primary);
             box-shadow: 0 10px 25px rgba(0,0,0,0.9), var(--hud-glow);
             z-index: 1001;
-            padding: 15px;
             display: none; 
             flex-direction: column;
-            gap: 10px;
             will-change: opacity, transform;
         }
-        .quick-add-modal h4 { margin: 0 0 5px 0; color: var(--text-color); font-size: 13px; letter-spacing: 1px; border-bottom: 1px solid var(--border-color); padding-bottom: 8px;}
+
+        #quickAddModal { bottom: 85px; left: 20px; width: 260px; padding: 15px; gap: 10px; }
+        #quickAddModal h4 { margin: 0 0 5px 0; color: var(--text-color); font-size: 13px; letter-spacing: 1px; border-bottom: 1px solid var(--border-color); padding-bottom: 8px;}
         
+        /* LOADED ROUTES SHORTCUT DROPDOWN */
+        #loadedRoutesModal {
+            top: 65px;
+            left: 15px;
+            right: 15px;
+            max-width: 400px;
+            margin: 0 auto;
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+        .loaded-routes-header { padding: 12px; font-size: 12px; text-align: center; color: var(--primary); background: var(--bg-color); border-bottom: 1px solid var(--border-color); font-weight: bold; position: sticky; top: 0; }
+        .loaded-route-btn { background: var(--card-bg); color: var(--text-color); border: none; border-bottom: 1px solid var(--border-color); padding: 15px; text-align: left; font-size: 14px; font-weight: bold; cursor: pointer; transition: background 0.2s; }
+        .loaded-route-btn:active { background: var(--primary-dark); color: #fff; }
+
         @media (max-width: 600px) { select { flex: 1 1 100%; } }
     </style>
 </head>
@@ -355,7 +370,11 @@
                 <h2>
                     <span id="active-area-display"></span>
                     <span style="vertical-align: middle;">STS:</span>  
-                    <span id="active-route-display"></span>
+                    
+                    <button id="active-route-display" onclick="toggleLoadedRoutesMenu()">
+                        <span id="active-route-text"></span>
+                        <span style="font-size: 10px; color: var(--primary);">▼</span>
+                    </button>
                 </h2>
             </div>
             <button class="menu-toggle-btn" onclick="toggleMenu()" id="menuBtn">
@@ -403,6 +422,9 @@
         </div>
     </div>
 
+    <div class="tactical-modal" id="loadedRoutesModal">
+        </div>
+
     <div class="app-layout">
         <div class="mini-map-container" id="miniMap"></div>
         <div id="segments-container">
@@ -439,7 +461,7 @@
         <span style="transform: translateY(-2px); pointer-events: none;">+</span>
     </button>
     
-    <div class="quick-add-modal" id="quickAddModal">
+    <div class="tactical-modal" id="quickAddModal">
         <h4>ADD TO: <span id="quick-add-title" style="color: var(--primary);"></span></h4>
         <select id="quick-add-select" style="width: 100%; margin-bottom: 5px;">
             <option value="">AWAITING INPUT...</option>
@@ -465,16 +487,25 @@
         // GLOBAL CLICK LISTENER TO AUTO-HIDE MENUS
         document.addEventListener('click', (e) => {
             const menu = document.getElementById('collapsible-menu');
-            const fabModal = document.getElementById('quickAddModal');
             const menuBtn = document.getElementById('menuBtn');
+            
+            const fabModal = document.getElementById('quickAddModal');
             const fabBtn = document.getElementById('quickAddBtn');
+            
+            const jumpModal = document.getElementById('loadedRoutesModal');
+            const jumpBtn = document.getElementById('active-route-display');
 
+            // Hide Main Menu
             if (!menu.contains(e.target) && !menuBtn.contains(e.target) && menu.classList.contains('expanded')) {
                 toggleMenu(true);
             }
-            
+            // Hide FAB Menu
             if (!fabModal.contains(e.target) && !fabBtn.contains(e.target) && fabModal.style.display === 'flex') {
                 toggleQuickAddModal(false);
+            }
+            // Hide Jump Modal
+            if (!jumpModal.contains(e.target) && !jumpBtn.contains(e.target) && jumpModal.style.display === 'flex') {
+                toggleLoadedRoutesMenu(false);
             }
         });
 
@@ -497,6 +528,48 @@
                 menu.classList.remove('collapsed');
                 menu.classList.add('expanded');
                 btn.innerHTML = '<span class="menu-toggle-icon">✖</span>';
+            }
+        }
+
+        // NEW: JUMP MENU LOGIC
+        function toggleLoadedRoutesMenu(show) {
+            const menu = document.getElementById('loadedRoutesModal');
+            const isCurrentlyVisible = menu.style.display === 'flex';
+            const targetShow = show !== undefined ? show : !isCurrentlyVisible;
+
+            if (targetShow) {
+                menu.innerHTML = '<div class="loaded-routes-header">LOADED SUB-SECTIONS (TAP TO JUMP)</div>';
+                
+                // Scan the DOM to maintain exact rendering order (respects Flip Dir)
+                const renderedCards = document.querySelectorAll('.segment-card[data-route-key]');
+                const seenKeys = new Set();
+                
+                renderedCards.forEach(card => {
+                    const rKey = card.getAttribute('data-route-key');
+                    const rName = card.getAttribute('data-route-name');
+                    
+                    if (!seenKeys.has(rKey)) {
+                        seenKeys.add(rKey);
+                        const btn = document.createElement('button');
+                        btn.className = 'loaded-route-btn';
+                        btn.textContent = rName;
+                        btn.onclick = () => {
+                            scrollToCard(card);
+                            toggleLoadedRoutesMenu(false);
+                        };
+                        menu.appendChild(btn);
+                    }
+                });
+
+                if (seenKeys.size === 0) {
+                    menu.innerHTML += '<div style="padding: 20px; text-align: center; color: var(--text-muted); font-size: 13px;">NO DATA BLOCKS LOADED</div>';
+                }
+
+                menu.style.display = 'flex';
+                toggleMenu(true); // Auto-close other menus
+                toggleQuickAddModal(false);
+            } else {
+                menu.style.display = 'none';
             }
         }
 
@@ -581,6 +654,7 @@
                 updateQuickAddDropdown();
                 modal.style.display = 'flex';
                 toggleMenu(true); 
+                toggleLoadedRoutesMenu(false);
             } else {
                 modal.style.display = 'none';
             }
@@ -606,6 +680,7 @@
         document.getElementById('segments-container').addEventListener('input', (e) => checkSegmentData(e.target.closest('.segment-card')));
         document.getElementById('segments-container').addEventListener('change', (e) => checkSegmentData(e.target.closest('.segment-card')));
 
+        // RECALIBRATED OBSERVER: Updates Button Text instead of basic Span
         const scrollObserver = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
@@ -613,10 +688,17 @@
                     const routeName = entry.target.getAttribute('data-route-name');
                     const areaName = entry.target.getAttribute('data-area-name');
 
-                    const routeDisplay = document.getElementById('active-route-display');
+                    const routeText = document.getElementById('active-route-text');
+                    const routeBtn = document.getElementById('active-route-display');
                     const areaDisplay = document.getElementById('active-area-display');
 
-                    routeDisplay.textContent = routeName ? routeName : '';
+                    if (routeName) {
+                        routeText.textContent = routeName;
+                        routeBtn.style.display = 'inline-flex';
+                    } else {
+                        routeBtn.style.display = 'none';
+                    }
+
                     areaDisplay.textContent = areaName ? areaName : '';
 
                     if (areaName) {
@@ -635,7 +717,6 @@
             });
         }, { rootMargin: '-120px 0px -60% 0px' }); 
 
-        // CUSTOM SCROLL FUNCTION TO PREVENT HEADER OVERLAP BUG
         function scrollToCard(card) {
             const headerHeight = document.getElementById('stickyHeader').offsetHeight;
             const elementPosition = card.getBoundingClientRect().top + window.scrollY;
@@ -730,13 +811,12 @@
             const lastRouteKey = routeLoadHistory[routeLoadHistory.length - 1];
             const cardsToRemove = document.querySelectorAll(`.segment-card[data-route-key="${lastRouteKey}"]`);
             
-            // PREVENT DATA LOSS: Check if any card about to be deleted has data
             let hasData = false;
             let conflictTS = "";
             let conflictRoute = "";
 
             cardsToRemove.forEach(card => {
-                if (hasData) return; // Skip if we already found data
+                if (hasData) return; 
                 
                 let cardHasData = false;
                 if (card.querySelector('.segment-notes').value.trim() !== '') cardHasData = true;
@@ -756,10 +836,9 @@
 
             if (hasData) {
                 const proceed = confirm(`TS-${conflictTS} has data. Undoing this will erase the "${conflictRoute}" and details. Are you sure you want to undo?`);
-                if (!proceed) return; // Abort undo if user clicks Cancel
+                if (!proceed) return; 
             }
             
-            // Proceed with UI deletion
             routeLoadHistory.pop();
             cardsToRemove.forEach(el => el.remove());
             document.querySelectorAll(`.map-item[data-route-key="${lastRouteKey}"]`).forEach(el => el.remove());
@@ -771,7 +850,7 @@
                 currentActiveArea = "";
                 currentActiveDirection = "";
                 document.getElementById('active-area-display').textContent = '';
-                document.getElementById('active-route-display').textContent = '';
+                document.getElementById('active-route-display').style.display = 'none';
                 
                 const container = document.getElementById('segments-container');
                 if(!document.getElementById('instruction-panel')) {
