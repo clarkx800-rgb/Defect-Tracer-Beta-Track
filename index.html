@@ -106,26 +106,30 @@
         }
         #active-area-display:empty { display: none; }
 
-        /* TACTICAL ROUTE JUMP BUTTON */
         #active-route-display {
             font-size: 13px;
             color: var(--text-color);
             background: var(--input-bg);
-            padding: 4px 8px;
+            padding: 3px 8px;
             font-weight: bold;
             border: 1px solid var(--primary);
             letter-spacing: 1px;
             word-wrap: break-word;
             white-space: normal;
-            display: none; /* Hidden by default, toggled via JS to inline-flex */
-            align-items: center;
-            gap: 6px;
+            display: inline-block;
             margin-top: 4px;
             cursor: pointer;
-            text-align: left;
-            transition: background-color 0.2s, box-shadow 0.2s;
+            transition: all 0.2s ease;
         }
-        #active-route-display:active { background-color: #333; box-shadow: inset 0 0 5px rgba(0,0,0,0.5); }
+        #active-route-display:active { background-color: #333; }
+        #active-route-display::after {
+            content: ' ▼';
+            font-size: 10px;
+            opacity: 0.8;
+            margin-left: 4px;
+            vertical-align: middle;
+        }
+        #active-route-display:empty { display: none; }
 
         .menu-toggle-btn {
             background-color: var(--card-bg);
@@ -330,35 +334,33 @@
         }
         .quick-add-fab:active { transform: scale(0.9); background-color: var(--primary-dark); color: #fff; }
 
-        /* TACTICAL MODALS */
+        /* MODAL HUD STYLES */
         .tactical-modal {
             position: fixed;
             background-color: var(--bg-color);
             border: 1px solid var(--primary);
             box-shadow: 0 10px 25px rgba(0,0,0,0.9), var(--hud-glow);
             z-index: 1001;
+            padding: 15px;
             display: none; 
             flex-direction: column;
+            gap: 10px;
             will-change: opacity, transform;
         }
-
-        #quickAddModal { bottom: 85px; left: 20px; width: 260px; padding: 15px; gap: 10px; }
-        #quickAddModal h4 { margin: 0 0 5px 0; color: var(--text-color); font-size: 13px; letter-spacing: 1px; border-bottom: 1px solid var(--border-color); padding-bottom: 8px;}
         
-        /* LOADED ROUTES SHORTCUT DROPDOWN */
-        #loadedRoutesModal {
+        .quick-add-modal { bottom: 85px; left: 20px; width: 260px; }
+        
+        /* NEW JUMP MENU STYLES */
+        .loaded-routes-modal {
             top: 65px;
-            left: 15px;
-            right: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
             max-width: 400px;
-            margin: 0 auto;
             max-height: 60vh;
-            overflow-y: auto;
         }
-        .loaded-routes-header { padding: 12px; font-size: 12px; text-align: center; color: var(--primary); background: var(--bg-color); border-bottom: 1px solid var(--border-color); font-weight: bold; position: sticky; top: 0; }
-        .loaded-route-btn { background: var(--card-bg); color: var(--text-color); border: none; border-bottom: 1px solid var(--border-color); padding: 15px; text-align: left; font-size: 14px; font-weight: bold; cursor: pointer; transition: background 0.2s; }
-        .loaded-route-btn:active { background: var(--primary-dark); color: #fff; }
-
+        .tactical-modal h4 { margin: 0 0 5px 0; color: var(--text-color); font-size: 13px; letter-spacing: 1px; border-bottom: 1px solid var(--border-color); padding-bottom: 8px;}
+        
         @media (max-width: 600px) { select { flex: 1 1 100%; } }
     </style>
 </head>
@@ -370,11 +372,7 @@
                 <h2>
                     <span id="active-area-display"></span>
                     <span style="vertical-align: middle;">STS:</span>  
-                    
-                    <button id="active-route-display" onclick="toggleLoadedRoutesMenu()">
-                        <span id="active-route-text"></span>
-                        <span style="font-size: 10px; color: var(--primary);">▼</span>
-                    </button>
+                    <span id="active-route-display" onclick="toggleLoadedRoutesMenu()"></span>
                 </h2>
             </div>
             <button class="menu-toggle-btn" onclick="toggleMenu()" id="menuBtn">
@@ -422,8 +420,12 @@
         </div>
     </div>
 
-    <div class="tactical-modal" id="loadedRoutesModal">
-        </div>
+    <div class="tactical-modal loaded-routes-modal" id="loadedRoutesModal">
+        <h4>JUMP TO SECTION</h4>
+        <div id="loaded-routes-list" style="display:flex; flex-direction: column; gap: 8px; overflow-y: auto;">
+            </div>
+        <button class="btn-outline" style="margin-top: 5px; padding: 10px;" onclick="toggleLoadedRoutesMenu(false)">CLOSE</button>
+    </div>
 
     <div class="app-layout">
         <div class="mini-map-container" id="miniMap"></div>
@@ -461,7 +463,7 @@
         <span style="transform: translateY(-2px); pointer-events: none;">+</span>
     </button>
     
-    <div class="tactical-modal" id="quickAddModal">
+    <div class="tactical-modal quick-add-modal" id="quickAddModal">
         <h4>ADD TO: <span id="quick-add-title" style="color: var(--primary);"></span></h4>
         <select id="quick-add-select" style="width: 100%; margin-bottom: 5px;">
             <option value="">AWAITING INPUT...</option>
@@ -484,27 +486,24 @@
         let currentActiveArea = "";
         let currentActiveDirection = "";
 
-        // GLOBAL CLICK LISTENER TO AUTO-HIDE MENUS
+        // GLOBAL CLICK LISTENER TO AUTO-HIDE ALL MENUS
         document.addEventListener('click', (e) => {
             const menu = document.getElementById('collapsible-menu');
-            const menuBtn = document.getElementById('menuBtn');
-            
             const fabModal = document.getElementById('quickAddModal');
-            const fabBtn = document.getElementById('quickAddBtn');
+            const routeModal = document.getElementById('loadedRoutesModal');
             
-            const jumpModal = document.getElementById('loadedRoutesModal');
-            const jumpBtn = document.getElementById('active-route-display');
+            const menuBtn = document.getElementById('menuBtn');
+            const fabBtn = document.getElementById('quickAddBtn');
+            const routeBtn = document.getElementById('active-route-display');
 
-            // Hide Main Menu
             if (!menu.contains(e.target) && !menuBtn.contains(e.target) && menu.classList.contains('expanded')) {
                 toggleMenu(true);
             }
-            // Hide FAB Menu
             if (!fabModal.contains(e.target) && !fabBtn.contains(e.target) && fabModal.style.display === 'flex') {
                 toggleQuickAddModal(false);
             }
-            // Hide Jump Modal
-            if (!jumpModal.contains(e.target) && !jumpBtn.contains(e.target) && jumpModal.style.display === 'flex') {
+            // Safely close Jump Menu if clicked outside
+            if (routeModal && routeBtn && !routeModal.contains(e.target) && !routeBtn.contains(e.target) && routeModal.style.display === 'flex') {
                 toggleLoadedRoutesMenu(false);
             }
         });
@@ -528,48 +527,69 @@
                 menu.classList.remove('collapsed');
                 menu.classList.add('expanded');
                 btn.innerHTML = '<span class="menu-toggle-icon">✖</span>';
+                toggleQuickAddModal(false);
+                toggleLoadedRoutesMenu(false);
             }
         }
 
-        // NEW: JUMP MENU LOGIC
-        function toggleLoadedRoutesMenu(show) {
-            const menu = document.getElementById('loadedRoutesModal');
-            const isCurrentlyVisible = menu.style.display === 'flex';
-            const targetShow = show !== undefined ? show : !isCurrentlyVisible;
+        // NEW LOGIC: GENERATES THE SHORTCUT BUTTONS FOR THE JUMP MENU
+        function updateLoadedRoutesMenu() {
+            const list = document.getElementById('loaded-routes-list');
+            list.innerHTML = '';
+            const uniqueRoutes = new Set();
 
-            if (targetShow) {
-                menu.innerHTML = '<div class="loaded-routes-header">LOADED SUB-SECTIONS (TAP TO JUMP)</div>';
+            document.querySelectorAll('.segment-card').forEach(card => {
+                const rKey = card.getAttribute('data-route-key');
+                const rName = card.getAttribute('data-route-name');
+                const rSeg = card.getAttribute('data-segment');
                 
-                // Scan the DOM to maintain exact rendering order (respects Flip Dir)
-                const renderedCards = document.querySelectorAll('.segment-card[data-route-key]');
-                const seenKeys = new Set();
-                
-                renderedCards.forEach(card => {
-                    const rKey = card.getAttribute('data-route-key');
-                    const rName = card.getAttribute('data-route-name');
+                if(rKey && !uniqueRoutes.has(rKey)) {
+                    uniqueRoutes.add(rKey);
                     
-                    if (!seenKeys.has(rKey)) {
-                        seenKeys.add(rKey);
-                        const btn = document.createElement('button');
-                        btn.className = 'loaded-route-btn';
-                        btn.textContent = rName;
-                        btn.onclick = () => {
-                            scrollToCard(card);
-                            toggleLoadedRoutesMenu(false);
-                        };
-                        menu.appendChild(btn);
-                    }
-                });
-
-                if (seenKeys.size === 0) {
-                    menu.innerHTML += '<div style="padding: 20px; text-align: center; color: var(--text-muted); font-size: 13px;">NO DATA BLOCKS LOADED</div>';
+                    const btn = document.createElement('button');
+                    btn.className = 'btn-outline';
+                    btn.style.padding = '10px 12px';
+                    btn.style.textAlign = 'left';
+                    btn.style.fontSize = '13px';
+                    btn.style.display = 'flex';
+                    btn.style.justifyContent = 'space-between';
+                    btn.style.alignItems = 'center';
+                    
+                    btn.innerHTML = `<span>${rName}</span> <span style="color: var(--text-muted); font-size: 11px;">[TS-${rSeg}]</span>`;
+                    
+                    btn.onclick = () => {
+                        scrollToCard(card);
+                        // Force the mini-map to scroll to the first element of this newly selected route
+                        const mapItem = document.querySelector(`.map-item[data-map-segment="${rSeg}"]`);
+                        if(mapItem) {
+                            mapItem.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }
+                        toggleLoadedRoutesMenu(false);
+                    };
+                    list.appendChild(btn);
                 }
+            });
+            
+            if(uniqueRoutes.size === 0) {
+                list.innerHTML = '<span style="color: var(--text-muted); font-size: 12px; text-align: center; padding: 10px;">NO SECTIONS LOADED</span>';
+            }
+        }
 
-                menu.style.display = 'flex';
-                toggleMenu(true); // Auto-close other menus
-                toggleQuickAddModal(false);
+        function toggleLoadedRoutesMenu(show) {
+            const modal = document.getElementById('loadedRoutesModal');
+            if (!modal) return;
+            
+            if (show === undefined) {
+                show = modal.style.display === 'none' || modal.style.display === '';
+            }
+            
+            if (show) {
+                updateLoadedRoutesMenu();
+                modal.style.display = 'flex';
+                toggleMenu(true); 
+                toggleQuickAddModal(false); 
             } else {
-                menu.style.display = 'none';
+                modal.style.display = 'none';
             }
         }
 
@@ -680,7 +700,6 @@
         document.getElementById('segments-container').addEventListener('input', (e) => checkSegmentData(e.target.closest('.segment-card')));
         document.getElementById('segments-container').addEventListener('change', (e) => checkSegmentData(e.target.closest('.segment-card')));
 
-        // RECALIBRATED OBSERVER: Updates Button Text instead of basic Span
         const scrollObserver = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
@@ -688,17 +707,10 @@
                     const routeName = entry.target.getAttribute('data-route-name');
                     const areaName = entry.target.getAttribute('data-area-name');
 
-                    const routeText = document.getElementById('active-route-text');
-                    const routeBtn = document.getElementById('active-route-display');
+                    const routeDisplay = document.getElementById('active-route-display');
                     const areaDisplay = document.getElementById('active-area-display');
 
-                    if (routeName) {
-                        routeText.textContent = routeName;
-                        routeBtn.style.display = 'inline-flex';
-                    } else {
-                        routeBtn.style.display = 'none';
-                    }
-
+                    routeDisplay.textContent = routeName ? routeName : '';
                     areaDisplay.textContent = areaName ? areaName : '';
 
                     if (areaName) {
@@ -850,7 +862,7 @@
                 currentActiveArea = "";
                 currentActiveDirection = "";
                 document.getElementById('active-area-display').textContent = '';
-                document.getElementById('active-route-display').style.display = 'none';
+                document.getElementById('active-route-display').textContent = '';
                 
                 const container = document.getElementById('segments-container');
                 if(!document.getElementById('instruction-panel')) {
