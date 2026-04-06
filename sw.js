@@ -4,6 +4,7 @@ const CACHE_NAME = 'tracer-beta-v1';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
+  './database.js',
   './manifest.json',
   './icon.png',
   './exceljs.min.js',
