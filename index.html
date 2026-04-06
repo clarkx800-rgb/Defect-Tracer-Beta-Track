@@ -259,6 +259,7 @@
             scrollbar-width: none; 
             -ms-overflow-style: none;
             padding-bottom: 90px; 
+            scroll-behavior: smooth; /* Enables smooth scrolling internally */
         }
         .mini-map-container::-webkit-scrollbar { display: none; }
 
@@ -507,6 +508,9 @@
         let currentActiveArea = "";
         let currentActiveDirection = "";
 
+        // VARIABLE TO TRACK CLICK-DRIVEN SCROLLS VS USER SCROLLS
+        let isAutoScrolling = false;
+
         // GLOBAL CLICK LISTENER TO AUTO-HIDE MENUS
         document.addEventListener('click', (e) => {
             const menu = document.getElementById('collapsible-menu');
@@ -597,6 +601,9 @@
         }
 
         function jumpToRoute(routeKey) {
+            // Tell the scroll observer we are auto-scrolling
+            isAutoScrolling = true;
+            
             // Find and scroll Main Pane
             const firstCard = document.querySelector(`.segment-card[data-route-key="${routeKey}"]`);
             if (firstCard) {
@@ -615,6 +622,9 @@
             }
             
             document.getElementById('stsShortcutMenu').style.display = 'none';
+            
+            // Release the scroll lock after animation finishes
+            setTimeout(() => { isAutoScrolling = false; }, 800);
         }
 
         function getLineColors(lineName) {
@@ -746,8 +756,22 @@
 
                     document.querySelectorAll('.map-item').forEach(item => item.classList.remove('active-map'));
                     const activeMapItem = document.querySelector(`.map-item[data-map-segment="${segNum}"]`);
+                    
                     if (activeMapItem) {
                         activeMapItem.classList.add('active-map');
+                        
+                        // NEW LOGIC: Only auto-scroll the mini-map if the user is natively scrolling the main pane.
+                        // If they clicked a shortcut, we already handled the map scroll perfectly in `jumpToRoute`.
+                        if (!isAutoScrolling) {
+                            const mapContainer = document.getElementById('miniMap');
+                            const containerRect = mapContainer.getBoundingClientRect();
+                            const itemRect = activeMapItem.getBoundingClientRect();
+                            
+                            // Check if the item is out of view in the mini-map container
+                            if (itemRect.top < containerRect.top || itemRect.bottom > containerRect.bottom) {
+                                mapContainer.scrollTop += (itemRect.top - containerRect.top) - (containerRect.height / 2) + (itemRect.height / 2);
+                            }
+                        }
                     }
                 }
             });
@@ -817,7 +841,11 @@
                 mapBtn.setAttribute('data-route-key', selectedRouteKey); 
                 mapBtn.textContent = `TS-${item.num}`;
                 mapBtn.style.borderLeft = `4px solid ${item.color}`;
-                mapBtn.onclick = () => { scrollToCard(card); };
+                mapBtn.onclick = () => {
+                    isAutoScrolling = true;
+                    scrollToCard(card);
+                    setTimeout(() => { isAutoScrolling = false; }, 800);
+                };
                 mapContainer.appendChild(mapBtn);
             });
             
@@ -1179,7 +1207,11 @@
                         mapBtn.setAttribute('data-route-key', activeKey);
                         mapBtn.textContent = `TS-${segData.segmentNum}`;
                         mapBtn.style.borderLeft = `4px solid ${segData.color || '#ccc'}`;
-                        mapBtn.onclick = () => { scrollToCard(card); };
+                        mapBtn.onclick = () => {
+                            isAutoScrolling = true;
+                            scrollToCard(card);
+                            setTimeout(() => { isAutoScrolling = false; }, 800);
+                        };
                         mapContainer.appendChild(mapBtn);
                         
                         checkSegmentData(card);
