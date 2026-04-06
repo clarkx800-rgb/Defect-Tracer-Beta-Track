@@ -269,14 +269,14 @@
             </div>
 
             <div class="control-panel">
-                <label for="general-area"><b>1. Select General Area</b></label>
+                <label for="general-area"><b>1. Select Line </b></label>
                 <div class="input-group">
                     <select id="general-area" style="background-color: #eef2f5; font-weight: bold;" onchange="updateRouteDropdown()">
-                        <option value="">tap here...</option>
+                        <option value="">(Expo, M-Lin, Evergreen) tap here...</option>
                         </select>
                 </div>
 
-                <label for="page-direction"><b>2. Select Track Direction</b></label>
+                <label for="page-direction"><b>2. Select Track (In or Out)</b></label>
                 <div class="input-group">
                     <select id="page-direction" style="background-color: #eef2f5; font-weight: bold;" onchange="updateRouteDropdown()">
                         <option value="Inbound Track">Inbound (IB)</option>
@@ -284,7 +284,7 @@
                     </select>
                 </div>
                 
-                <label for="global-section"><b>3. Select Sub-to-Sub Block</b></label>
+                <label for="global-section"><b>3. Select Sub-to-Sub</b></label>
                 <div class="input-group">
                     <select id="global-section">
                         <option value="">tap here...</option>
@@ -304,32 +304,32 @@
         <div id="segments-container">
             <div id="instruction-panel" class="segment-card" style="border-left: 6px solid var(--success);">
                 <div class="segment-header">
-                    <h3>📋 Welcome to Defect Tracker Pro</h3>
+                    <h3>📋 Welcome to Defect Tracer Beta 0.1</h3>
                 </div>
                 <div style="font-size: 15px; line-height: 1.5;">
                     <p><b>Step 1: Start a New Route</b></p>
                     <ul style="margin-top: 5px; padding-left: 20px;">
                         <li>Tap the <b>Menu</b> button at the top right.</li>
-                        <li>Select <b>1. Area</b>, <b>2. Direction</b>, and <b>3. Sub-to-Sub Block</b>.</li>
-                        <li>Tap <b>Load Sections</b> to generate your track blocks.</li>
+                        <li>Select <b>1. Line (ex: Expo, M-line, Evergreen) </b>, <b>2. Direction (IB or OB)</b>, and <b>3. Sub-to-Sub Area</b>.</li>
+                        <li>Tap <b>Load Sections</b> to generate your track-sections.</li>
                     </ul>
 
                     <p><b>Step 2: Log Defects & Take Photos</b></p>
                     <ul style="margin-top: 5px; padding-left: 20px;">
-                        <li>Scroll to your current Track Section (TS).</li>
-                        <li>Select the <b>Component</b> and the <b>Defect</b>.</li>
-                        <li>Tap <b>📷 Photo</b> to open your camera and attach a picture.</li>
+                        <li>Scroll to Track Section number (TS).</li>
+                        <li>Select the <b>Component</b> and the type of <b>Defect</b> found.</li>
+                        <li>Tap <b>📷 Photo</b> to open your camera and attach a photo of the defect.</li>
                     </ul>
 
                     <p><b>Step 3: Save Your Progress! ⚠️</b></p>
                     <ul style="margin-top: 5px; padding-left: 20px;">
-                        <li>Open the Menu and tap <b>💾 Save Work</b> frequently. This saves a backup to your phone.</li>
+                        <li>Open the Menu and tap <b>💾 Save Work</b> frequently. This saves a backup to your phone. This allows you to reload the saved file and continue in case the app has crashed, accidentally closed, or refreshed.</li>
                         <li>If you close the app, tap <b>📂 Load Work</b> and select your file to pick up right where you left off.</li>
                     </ul>
 
                     <p><b>Step 4: Export Final Report</b></p>
                     <ul style="margin-top: 5px; padding-left: 20px;">
-                        <li>When your shift is done, tap <b>📊 Export Final Report</b> to download your Excel spreadsheet and PDFs.</li>
+                        <li>When your shift is done, tap <b>📊 Export Final Report</b> to download your Excel spreadsheet and PDFs. You can then send or save the exported files (excel or pdf) to you "work One drive" or send it via e-mail to your work email.</li>
                     </ul>
                 </div>
             </div>
