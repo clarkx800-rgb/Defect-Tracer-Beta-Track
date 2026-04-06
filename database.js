@@ -1,6 +1,6 @@
 
 const globalDatabase = {
-    "Area 1": {
+    "EXPO LINE": {
         "Inbound Track": {
             "KGT-KGZ-IB": { 
                 name: "KGT-KGZ-IB", 
@@ -39,7 +39,24 @@ const globalDatabase = {
             }
         }
     },
-    "Area 2": {
+    "Millenium Line": {
+        "Inbound Track": {
+            "DEMO-AREA2-IB": {
+                name: "Demo Area 2 - Inbound",
+                segments: [
+                    { start: 0, end: 5, color: "#9c27b0" }
+                ]
+            }
+        },
+        "Outbound Track": {
+            "DEMO-AREA2-OB": {
+                name: "Demo Area 2 - Outbound",
+                segments: [
+                    { start: 10, end: 15, color: "#e91e63" }
+                ]
+            }
+        },
+        "Evergreen Line": {
         "Inbound Track": {
             "DEMO-AREA2-IB": {
                 name: "Demo Area 2 - Inbound",
