@@ -7,7 +7,7 @@
 
     <link rel="icon" type="image/png" href="icon.png">
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#0056b3">
+    <meta name="theme-color" content="#28a745">
     
     <link rel="apple-touch-icon" href="icon.png">
     <meta name="mobile-web-app-capable" content="yes">
@@ -32,7 +32,7 @@
     
     <style>
         :root {
-            --primary: #0056b3;
+            --primary: #28a745;
             --danger: #dc3545;
             --success: #28a745;
             --warning: #ffc107;
@@ -72,20 +72,32 @@
 
         h2 { 
             margin: 0; 
-            font-size: 20px;
+            font-size: 16px;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
+            flex-wrap: wrap;
         }
+
+        #active-area-display {
+            font-size: 13px;
+            color: #ffffff;
+            background: #343a40;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        #active-area-display:empty { display: none; }
 
         #active-route-display {
             font-size: 13px;
-            color: var(--primary);
-            background: #e1ecf7;
-            padding: 3px 10px;
-            border-radius: 12px;
+            color: #155724;
+            background: #d4edda;
+            padding: 4px 10px;
+            border-radius: 6px;
             font-weight: bold;
-            border: 1px solid #b9d4f0;
+            border: 1px solid #c3e6cb;
         }
         #active-route-display:empty { display: none; }
 
@@ -102,6 +114,7 @@
             display: flex;       
             align-items: center; 
             gap: 6px;
+            margin-left: auto;
         }
         
         .menu-toggle-icon { font-size: 22px; }
@@ -150,9 +163,9 @@
         }
 
         .btn-primary { background-color: var(--primary); flex: 2; }
-        .btn-success { background-color: var(--success); width: 100%; margin-bottom: 5px;}
+        .btn-success { background-color: #17a2b8; width: 100%; margin-bottom: 5px;}
         .btn-warning { background-color: var(--warning); color: #333; }
-        .btn-info { background-color: #17a2b8; }
+        .btn-info { background-color: #6c757d; }
         .btn-danger { background-color: var(--danger); }
         .btn-outline { background-color: transparent; color: var(--primary); border: 2px solid var(--primary); flex: 1; }
         button:disabled { background-color: #cccccc; cursor: not-allowed; }
@@ -161,9 +174,9 @@
 
         .mini-map-container {
             position: sticky;
-            top: 75px; 
+            top: 100px; 
             width: var(--map-width);
-            max-height: calc(100vh - 90px);
+            max-height: calc(100vh - 120px);
             overflow-y: auto;
             display: flex;
             flex-direction: column;
@@ -208,13 +221,13 @@
             padding: 15px;
             position: relative;
             animation: cascadingFadeIn 0.4s ease-out both;
-            scroll-margin-top: 75px; 
+            scroll-margin-top: 100px; 
         }
 
         .segment-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--bg-color); padding-bottom: 10px; margin-bottom: 10px; }
         .segment-header h3 { margin: 0; color: var(--primary); font-size: 18px;}
         
-        .direction-badge { font-size: 13px; font-weight: bold; color: #0056b3; background: #e1ecf7; padding: 4px 8px; border-radius: 6px; border: 1px solid #b9d4f0;}
+        .direction-badge { font-size: 13px; font-weight: bold; color: #155724; background: #d4edda; padding: 4px 8px; border-radius: 6px; border: 1px solid #c3e6cb;}
 
         .segment-notes {
             width: 100%;
@@ -251,7 +264,8 @@
     <div class="sticky-header">
         <div class="header-top-bar">
             <h2>
-                SUB TO SUB AREA:  
+                <span id="active-area-display"></span>
+                SUB TO SUB:  
                 <span id="active-route-display"></span>
             </h2>
             <button class="menu-toggle-btn" onclick="toggleMenu()" id="menuBtn">
@@ -269,14 +283,14 @@
             </div>
 
             <div class="control-panel">
-                <label for="general-area"><b>1. Select Line </b></label>
+                <label for="general-area"><b>1. Select Line (Area)</b></label>
                 <div class="input-group">
                     <select id="general-area" style="background-color: #eef2f5; font-weight: bold;" onchange="updateRouteDropdown()">
-                        <option value="">(Expo, M-Lin, Evergreen) tap here...</option>
+                        <option value="">tap here...</option>
                         </select>
                 </div>
 
-                <label for="page-direction"><b>2. Select Track (In or Out)</b></label>
+                <label for="page-direction"><b>2. Select Track Direction</b></label>
                 <div class="input-group">
                     <select id="page-direction" style="background-color: #eef2f5; font-weight: bold;" onchange="updateRouteDropdown()">
                         <option value="Inbound Track">Inbound (IB)</option>
@@ -284,7 +298,7 @@
                     </select>
                 </div>
                 
-                <label for="global-section"><b>3. Select Sub-to-Sub</b></label>
+                <label for="global-section"><b>3. Select Sub-to-Sub Block</b></label>
                 <div class="input-group">
                     <select id="global-section">
                         <option value="">tap here...</option>
@@ -293,7 +307,7 @@
                 
                 <div class="action-buttons">
                     <button class="btn-primary" onclick="generateSegments()">Load Sections</button>
-                    <button class="btn-outline" onclick="flipOrder()">🔃 Flip Direction</button>
+                    <button class="btn-outline" onclick="flipOrder()">🔃 Flip</button>
                 </div>
             </div>
         </div>
@@ -304,32 +318,32 @@
         <div id="segments-container">
             <div id="instruction-panel" class="segment-card" style="border-left: 6px solid var(--success);">
                 <div class="segment-header">
-                    <h3>📋 Welcome to Defect Tracer Beta 0.1</h3>
+                    <h3>📋 Welcome to Tracker V2</h3>
                 </div>
                 <div style="font-size: 15px; line-height: 1.5;">
                     <p><b>Step 1: Start a New Route</b></p>
                     <ul style="margin-top: 5px; padding-left: 20px;">
                         <li>Tap the <b>Menu</b> button at the top right.</li>
-                        <li>Select <b>1. Line (ex: Expo, M-line, Evergreen) </b>, <b>2. Direction (IB or OB)</b>, and <b>3. Sub-to-Sub Area</b>.</li>
-                        <li>Tap <b>Load Sections</b> to generate your track-sections.</li>
+                        <li>Select <b>1. Line</b>, <b>2. Direction</b>, and <b>3. Sub-to-Sub Block</b>.</li>
+                        <li>Tap <b>Load Sections</b> to generate your track blocks.</li>
                     </ul>
 
                     <p><b>Step 2: Log Defects & Take Photos</b></p>
                     <ul style="margin-top: 5px; padding-left: 20px;">
-                        <li>Scroll to Track Section number (TS).</li>
-                        <li>Select the <b>Component</b> and the type of <b>Defect</b> found.</li>
-                        <li>Tap <b>📷 Photo</b> to open your camera and attach a photo of the defect.</li>
+                        <li>Scroll to your current Track Section (TS).</li>
+                        <li>Select the <b>Component</b> and the <b>Defect</b>.</li>
+                        <li>Tap <b>📷 Photo</b> to open your camera and attach a picture.</li>
                     </ul>
 
                     <p><b>Step 3: Save Your Progress! ⚠️</b></p>
                     <ul style="margin-top: 5px; padding-left: 20px;">
-                        <li>Open the Menu and tap <b>💾 Save Work</b> frequently. This saves a backup to your phone. This allows you to reload the saved file and continue in case the app has crashed, accidentally closed, or refreshed.</li>
+                        <li>Open the Menu and tap <b>💾 Save Work</b> frequently. This saves a backup to your phone.</li>
                         <li>If you close the app, tap <b>📂 Load Work</b> and select your file to pick up right where you left off.</li>
                     </ul>
 
                     <p><b>Step 4: Export Final Report</b></p>
                     <ul style="margin-top: 5px; padding-left: 20px;">
-                        <li>Tap <b>📊 Export Final Report</b> to download your Excel spreadsheet and PDFs. You can then send or save the exported files (excel or pdf) to your "work One drive" or send it via e-mail to your work email.</li>
+                        <li>When your shift is done, tap <b>📊 Export Final Report</b> to download your Excel spreadsheet and PDFs.</li>
                     </ul>
                 </div>
             </div>
@@ -411,13 +425,19 @@
         document.getElementById('segments-container').addEventListener('input', (e) => checkSegmentData(e.target.closest('.segment-card')));
         document.getElementById('segments-container').addEventListener('change', (e) => checkSegmentData(e.target.closest('.segment-card')));
 
+        // SCROLL OBSERVER - UPDATES THE HEADER!
         const scrollObserver = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
                     const segNum = entry.target.getAttribute('data-segment');
+                    const areaName = entry.target.getAttribute('data-area-name');
                     const routeName = entry.target.getAttribute('data-route-name');
+                    
+                    const areaDisplay = document.getElementById('active-area-display');
                     const routeDisplay = document.getElementById('active-route-display');
-                    routeDisplay.textContent = routeName ? routeName : '';
+                    
+                    if (areaDisplay) areaDisplay.textContent = areaName ? areaName : '';
+                    if (routeDisplay) routeDisplay.textContent = routeName ? routeName : '';
 
                     document.querySelectorAll('.map-item').forEach(item => item.classList.remove('active-map'));
                     const activeMapItem = document.querySelector(`.map-item[data-map-segment="${segNum}"]`);
@@ -435,9 +455,8 @@
             const routeSelect = document.getElementById('global-section');
             const selectedRouteKey = routeSelect.value;
             
-            if (!area || !selectedRouteKey) { alert('Please select an Area and Sub-to-Sub Block.'); return; }
+            if (!area || !selectedRouteKey) { alert('Please select a Line and Sub-to-Sub Block.'); return; }
 
-            // Pull data from the globalDatabase object in the external file
             const selectedRouteData = globalDatabase[area][direction][selectedRouteKey];
             const container = document.getElementById('segments-container');
             const mapContainer = document.getElementById('miniMap');
@@ -457,7 +476,8 @@
             });
             
             newCards.forEach((item, index) => {
-                const card = createSegmentCard(item.num, selectedRouteData.name, direction, item.color);
+                // Notice 'area' is now passed to the card!
+                const card = createSegmentCard(item.num, selectedRouteData.name, direction, item.color, area);
                 card.style.animationDelay = `${index * 0.05}s`;
                 container.appendChild(card);
                 scrollObserver.observe(card);
@@ -493,12 +513,13 @@
             mapItems.forEach(item => mapContainer.appendChild(item));
         }
 
-        function createSegmentCard(segmentNum, routeText, direction, color = '#0056b3') {
+        function createSegmentCard(segmentNum, routeText, direction, color = '#0056b3', areaName = '') {
             const card = document.createElement('div');
             card.className = 'segment-card';
             card.setAttribute('data-segment', segmentNum);
             card.setAttribute('data-route-name', routeText); 
             card.setAttribute('data-direction', direction); 
+            card.setAttribute('data-area-name', areaName); 
             card.setAttribute('data-color', color);
             card.style.borderLeft = `6px solid ${color}`;
 
@@ -599,7 +620,7 @@
                             row.dataset.base64Image = canvas.toDataURL('image/jpeg', 0.8); 
                             row.dataset.imgWidth = width;
                             row.dataset.imgHeight = height;
-                            cameraLabel.style.backgroundColor = 'var(--success)';
+                            cameraLabel.style.backgroundColor = '#17a2b8';
                             cameraLabel.innerHTML = '✅ Saved';
                             photoName.textContent = "Attached";
                             checkSegmentData(row.closest('.segment-card'));
@@ -633,7 +654,7 @@
                     row.dataset.base64Image = prefill.photoBase64;
                     row.dataset.imgWidth = prefill.imgW;
                     row.dataset.imgHeight = prefill.imgH;
-                    cameraLabel.style.backgroundColor = 'var(--success)';
+                    cameraLabel.style.backgroundColor = '#17a2b8';
                     cameraLabel.innerHTML = '✅ Saved';
                     photoName.textContent = "Attached";
                 }
@@ -649,6 +670,7 @@
                 const segData = {
                     segmentNum: card.getAttribute('data-segment'),
                     routeName: card.getAttribute('data-route-name'),
+                    areaName: card.getAttribute('data-area-name'), // SAVES THE LINE NOW
                     direction: card.getAttribute('data-direction'),
                     color: card.getAttribute('data-color'),
                     notes: card.querySelector('.segment-notes').value,
@@ -703,7 +725,8 @@
                     mapContainer.innerHTML = '';
 
                     projectData.forEach((segData, index) => {
-                        const card = createSegmentCard(segData.segmentNum, segData.routeName, segData.direction, segData.color);
+                        // Pass the areaName back into the card!
+                        const card = createSegmentCard(segData.segmentNum, segData.routeName, segData.direction, segData.color, segData.areaName || 'Unknown Line');
                         card.style.animationDelay = `${index * 0.05}s`;
                         
                         card.querySelector('.segment-notes').value = segData.notes;
@@ -758,7 +781,9 @@
                 const workbook = new ExcelJS.Workbook();
                 const worksheet = workbook.addWorksheet('Defects Report');
                 
+                // ADDED LINE COLUMN HERE
                 worksheet.columns = [
+                    { header: 'Line', key: 'line', width: 20 },
                     { header: 'Route', key: 'route', width: 22 },
                     { header: 'TS', key: 'segment', width: 15 },
                     { header: 'Notes', key: 'notes', width: 35 },
@@ -773,6 +798,7 @@
                     const segmentNum = card.getAttribute('data-segment');
                     const tsId = `TS-${segmentNum}`;
                     const routeName = card.getAttribute('data-route-name');
+                    const areaName = card.getAttribute('data-area-name') || 'Unknown Line';
                     const notes = card.querySelector('.segment-notes').value;
                     const rows = card.querySelectorAll('.defect-row');
                     
@@ -785,19 +811,20 @@
                         
                         if (comp || def || photo) {
                             hasDefects = true;
-                            worksheet.addRow({ route: routeName, segment: tsId, notes: notes, component: comp, defect: def });
+                            // ADDS LINE DATA TO EXCEL
+                            worksheet.addRow({ line: areaName, route: routeName, segment: tsId, notes: notes, component: comp, defect: def });
                         }
 
                         if (photo) {
                             pdfJobs.push({
-                                routeName: routeName, tsId: tsId, notes: notes, comp: comp || "N/A", def: def || "N/A",
+                                lineName: areaName, routeName: routeName, tsId: tsId, notes: notes, comp: comp || "N/A", def: def || "N/A",
                                 img: photo, imgW: parseFloat(row.dataset.imgWidth), imgH: parseFloat(row.dataset.imgHeight), defectID: index + 1
                             });
                         }
                     });
 
                     if (!hasDefects && notes.trim() !== '') {
-                        worksheet.addRow({ route: routeName, segment: tsId, notes: notes, component: '', defect: '' });
+                        worksheet.addRow({ line: areaName, route: routeName, segment: tsId, notes: notes, component: '', defect: '' });
                     }
                 });
 
@@ -871,7 +898,8 @@
             
             doc.setFont("helvetica", "bold");
             doc.setFontSize(12);
-            doc.text(`${data.tsId} - ${data.routeName}`, leftMargin, currentY);
+            // ADDS LINE DATA TO PDF!
+            doc.text(`[${data.lineName}] ${data.tsId} - ${data.routeName}`, leftMargin, currentY);
             
             currentY += 6;
             doc.setFont("helvetica", "normal");
