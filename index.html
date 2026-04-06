@@ -54,10 +54,9 @@
             margin: 0;
             padding: 0; 
             box-sizing: border-box;
-            text-transform: uppercase; /* Gives the military HUD feel */
+            text-transform: uppercase; 
         }
 
-        /* Angular, sharp edges instead of soft rounded ones */
         * { border-radius: 2px !important; }
 
         .sticky-header {
@@ -74,8 +73,8 @@
         .header-top-bar {
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
+            align-items: flex-start; /* Keeps button at the top even if text wraps */
+            flex-wrap: nowrap; /* Forces button to stay on the same line */
             gap: 10px;
         }
 
@@ -85,9 +84,12 @@
             display: flex;
             align-items: center;
             gap: 10px;
-            flex-wrap: wrap;
+            flex-wrap: wrap; /* Allows the route text to wrap inside the h2 */
+            flex: 1;
+            min-width: 0; /* Prevents long text from pushing the menu out */
             letter-spacing: 1px;
             color: var(--primary);
+            line-height: 1.4;
         }
 
         #active-area-display {
@@ -96,6 +98,7 @@
             font-weight: bold;
             text-transform: uppercase;
             border: 1px solid transparent;
+            white-space: nowrap;
         }
         #active-area-display:empty { display: none; }
 
@@ -107,13 +110,15 @@
             font-weight: bold;
             border: 1px solid var(--primary);
             letter-spacing: 1px;
+            word-wrap: break-word; /* Wraps long names */
+            white-space: normal;
         }
         #active-route-display:empty { display: none; }
 
         .menu-toggle-btn {
-            background-color: transparent;
-            color: var(--text-color); 
-            border: 1px solid var(--border-color);
+            background-color: #e0e0e0; /* Clean white/gray background */
+            color: #000000; /* Black text */
+            border: 1px solid #ffffff;
             padding: 6px 12px;
             font-size: 14px;
             font-weight: bold;
@@ -121,9 +126,10 @@
             display: flex;       
             align-items: center; 
             gap: 6px;
+            flex-shrink: 0; /* Protects button from being squashed */
         }
         
-        .menu-toggle-btn:active { background-color: var(--border-color); }
+        .menu-toggle-btn:active { background-color: #999999; }
         .menu-toggle-icon { font-size: 18px; }
 
         #collapsible-menu {
@@ -236,7 +242,7 @@
         }
 
         .segment-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; margin-bottom: 10px; }
-        .segment-header h3 { margin: 0; color: var(--primary); font-size: 16px; letter-spacing: 2px;}
+        .segment-header h3 { margin: 0; font-size: 16px; letter-spacing: 2px;}
         .segment-header-badges { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
         
         .direction-badge { font-size: 12px; font-weight: bold; color: var(--text-color); background: var(--input-bg); padding: 4px 8px; border: 1px solid var(--border-color);}
@@ -254,7 +260,6 @@
 
         select { flex: 1 1 40%; min-width: 120px; }
 
-        /* REWORKED PHOTO WRAPPER & TACTICAL REMOVE BUTTON */
         .photo-wrapper { display: flex; align-items: center; gap: 10px; flex: 1 1 100%; justify-content: space-between; background: #000; padding: 5px; border: 1px solid var(--border-color); }
         .file-input { display: none; }
         .camera-btn { background-color: #333; color: white; padding: 8px 12px; font-size: 13px; font-weight: bold; cursor: pointer; text-align: center; border: 1px solid #555; flex: 0 1 auto; }
@@ -341,7 +346,7 @@
         <div id="segments-container">
             <div id="instruction-panel" class="segment-card" style="border-left: 6px solid var(--primary);">
                 <div class="segment-header">
-                    <h3>SYSTEM INITIALIZED</h3>
+                    <h3 style="color: var(--primary);">SYSTEM INITIALIZED</h3>
                 </div>
                 <div style="font-size: 13px; line-height: 1.6; color: var(--text-muted); text-transform: none;">
                     <p style="color: var(--text-color); font-weight: bold; text-transform: uppercase;">STEP 1: ESTABLISH ROUTE</p>
@@ -385,7 +390,7 @@
             if (forceClose || menu.classList.contains('expanded')) {
                 menu.classList.remove('expanded');
                 menu.classList.add('collapsed');
-                btn.innerHTML = '<span class="menu-toggle-icon">≡</span> MENU';
+                btn.innerHTML = '<span class="menu-toggle-icon">⚙</span> MENU';
             } else {
                 menu.classList.remove('collapsed');
                 menu.classList.add('expanded');
@@ -566,7 +571,7 @@
 
             card.innerHTML = `
                 <div class="segment-header">
-                    <h3>TS-${segmentNum}</h3>
+                    <h3 style="color: ${color};">TS-${segmentNum}</h3>
                     <div class="segment-header-badges">
                         ${areaBadge}
                         <span class="direction-badge">${routeText}</span>
@@ -627,7 +632,6 @@
 
             compSelect.addEventListener('change', function() { updateDefects(this.value); });
 
-            // TACTICAL PHOTO WRAPPER & INLINE DELETE BUTTON
             const photoWrapper = document.createElement('div');
             photoWrapper.className = 'photo-wrapper';
             const fileInputId = 'photo-' + Math.random().toString(36).substr(2, 9);
@@ -648,7 +652,7 @@
 
             const delBtn = document.createElement('button');
             delBtn.className = 'delete-btn';
-            delBtn.innerHTML = '✖'; // Small system close icon
+            delBtn.innerHTML = '✖'; 
             delBtn.onclick = function() { const card = row.closest('.segment-card'); row.remove(); checkSegmentData(card); };
 
             fileInput.addEventListener('change', function(e) {
@@ -686,7 +690,7 @@
             photoWrapper.appendChild(cameraLabel);
             photoWrapper.appendChild(fileInput);
             photoWrapper.appendChild(photoName);
-            photoWrapper.appendChild(delBtn); // Placed right beside the photo tools
+            photoWrapper.appendChild(delBtn); 
             
             row.appendChild(compSelect);
             row.appendChild(defSelect);
