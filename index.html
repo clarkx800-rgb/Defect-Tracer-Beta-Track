@@ -198,6 +198,8 @@
         .btn-success { background-color: #1b5e20; color: #fff; border-color: #4caf50; width: 100%; margin-bottom: 5px;}
         .btn-warning { background-color: #ff8f00; color: #000; border-color: #ffca28; }
         .btn-info { background-color: #01579b; color: #fff; border-color: #29b6f6; }
+        .btn-danger { background-color: transparent; color: var(--danger); border-color: var(--danger); }
+        .btn-danger:active { background-color: var(--danger); color: #fff; }
         .btn-outline { background-color: transparent; color: var(--primary); border: 1px solid var(--primary); flex: 1; }
         button:disabled { background-color: #333; color: #666; border-color: #444; cursor: not-allowed; }
 
@@ -250,8 +252,7 @@
             padding: 15px;
             position: relative;
             animation: cascadingFadeIn 0.3s ease-out both;
-            /* Increased to guarantee perfect clearance below the sticky header */
-            scroll-margin-top: 120px; 
+            scroll-margin-top: 140px; /* Aligns card perfectly below the header */
             will-change: opacity, transform;
         }
 
@@ -445,13 +446,37 @@
             <button class="btn-primary" style="flex: 1; padding: 10px;" onclick="generateSegments(true)">ADD</button>
             <button class="btn-outline" style="flex: 1; padding: 10px;" onclick="toggleQuickAddModal(false)">CANCEL</button>
         </div>
+        <div style="display: flex; gap: 8px; margin-top: 5px;">
+            <button class="btn-danger" style="flex: 1; padding: 10px;" onclick="undoLastLoad()">↺ UNDO LAST</button>
+        </div>
     </div>
 
     <script>
         let currentFileName = null;
+        
+        // SYSTEM STATE MEMORY 
         let loadedRoutes = new Set();
+        let routeLoadHistory = []; // Stack for the Undo feature
         let currentActiveArea = "";
         let currentActiveDirection = "";
+
+        // GLOBAL CLICK LISTENER TO AUTO-HIDE MENUS
+        document.addEventListener('click', (e) => {
+            const menu = document.getElementById('collapsible-menu');
+            const fabModal = document.getElementById('quickAddModal');
+            const menuBtn = document.getElementById('menuBtn');
+            const fabBtn = document.getElementById('quickAddBtn');
+
+            // If click is outside top menu and menu button, close top menu
+            if (!menu.contains(e.target) && !menuBtn.contains(e.target) && menu.classList.contains('expanded')) {
+                toggleMenu(true);
+            }
+            
+            // If click is outside fab modal and fab button, close fab modal
+            if (!fabModal.contains(e.target) && !fabBtn.contains(e.target) && fabModal.style.display === 'flex') {
+                toggleQuickAddModal(false);
+            }
+        });
 
         window.addEventListener('beforeunload', function (e) {
             const cards = document.querySelectorAll('.segment-card');
@@ -555,6 +580,7 @@
                 document.getElementById('quick-add-title').textContent = `${currentActiveArea} [${dirCode}]`;
                 updateQuickAddDropdown();
                 modal.style.display = 'flex';
+                toggleMenu(true); // Close top menu if open
             } else {
                 modal.style.display = 'none';
             }
@@ -580,7 +606,7 @@
         document.getElementById('segments-container').addEventListener('input', (e) => checkSegmentData(e.target.closest('.segment-card')));
         document.getElementById('segments-container').addEventListener('change', (e) => checkSegmentData(e.target.closest('.segment-card')));
 
-        // OFFSET TRIPWIRE FIX: rootMargin adjusted to guarantee the top card steals the highlight perfectly.
+        // RECALIBRATED INTERSECTION OBSERVER FOR FLAWLESS HIGHLIGHTING
         const scrollObserver = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
@@ -609,7 +635,7 @@
                     }
                 }
             });
-        }, { rootMargin: '-80px 0px -60% 0px' });
+        }, { rootMargin: '-130px 0px -40% 0px' }); 
 
         function generateSegments(isQuickAdd = false) {
             let area, direction, routeSelect, selectedRouteKey;
@@ -663,19 +689,22 @@
                 const mapBtn = document.createElement('div');
                 mapBtn.className = 'map-item';
                 mapBtn.setAttribute('data-map-segment', item.num);
+                mapBtn.setAttribute('data-route-key', selectedRouteKey); // Memory for Undo
                 mapBtn.textContent = `TS-${item.num}`;
                 mapBtn.style.borderLeft = `4px solid ${item.color}`;
-                // EXPLICIT TOP ALIGNMENT FIX FOR CLICK SCROLLING
-                mapBtn.onclick = () => { card.scrollIntoView({ behavior: 'smooth', block: 'start' }); };
+                mapBtn.onclick = () => { card.scrollIntoView({ behavior: 'smooth' }); };
                 mapContainer.appendChild(mapBtn);
             });
             
+            // UPDATE SYSTEM MEMORY
             loadedRoutes.add(selectedRouteKey);
+            routeLoadHistory.push(selectedRouteKey);
             currentActiveArea = area;
             currentActiveDirection = direction;
 
             document.getElementById('quickAddBtn').style.display = 'flex';
 
+            // CLEANUP UI
             routeSelect.value = '';
             if (isQuickAdd) {
                 toggleQuickAddModal(false);
@@ -684,6 +713,54 @@
                 updateRouteDropdown();
                 toggleMenu(true);
             }
+        }
+
+        function undoLastLoad() {
+            if (routeLoadHistory.length === 0) {
+                alert("SYSTEM: No actions to undo.");
+                return;
+            }
+            
+            const lastRouteKey = routeLoadHistory.pop();
+            
+            // Erase from DOM
+            document.querySelectorAll(`.segment-card[data-route-key="${lastRouteKey}"]`).forEach(el => el.remove());
+            document.querySelectorAll(`.map-item[data-route-key="${lastRouteKey}"]`).forEach(el => el.remove());
+            
+            // Erase from Memory
+            loadedRoutes.delete(lastRouteKey);
+            
+            // If empty, reset system
+            if (loadedRoutes.size === 0) {
+                document.getElementById('quickAddBtn').style.display = 'none';
+                currentActiveArea = "";
+                currentActiveDirection = "";
+                document.getElementById('active-area-display').textContent = '';
+                document.getElementById('active-route-display').textContent = '';
+                
+                // Bring back instruction panel
+                const container = document.getElementById('segments-container');
+                if(!document.getElementById('instruction-panel')) {
+                    container.innerHTML = `
+                        <div id="instruction-panel" class="segment-card" style="border-left: 6px solid var(--primary);">
+                            <div class="segment-header">
+                                <h3>SYSTEM INITIALIZED</h3>
+                            </div>
+                            <div style="font-size: 13px; line-height: 1.6; color: var(--text-muted); text-transform: none;">
+                                <p style="color: var(--text-color); font-weight: bold; text-transform: uppercase;">STEP 1: ESTABLISH ROUTE</p>
+                                <ul style="margin-top: 5px; padding-left: 20px;">
+                                    <li>Open the top right menu.</li>
+                                    <li>Select <b>1. AREA</b>, <b>2. DIRECTION</b>, and <b>3. SUB-TO-SUB BLOCK</b>.</li>
+                                    <li>Tap <b>INITIATE SECTIONS</b> to generate your track blocks.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+            
+            toggleQuickAddModal(false);
+            updateRouteDropdown();
         }
 
         function flipOrder() {
@@ -928,6 +1005,7 @@
                     mapContainer.innerHTML = '';
                     
                     loadedRoutes.clear(); 
+                    routeLoadHistory = [];
 
                     projectData.forEach((segData, index) => {
                         const safeAreaName = segData.areaName || '';
@@ -949,14 +1027,18 @@
                         const mapBtn = document.createElement('div');
                         mapBtn.className = 'map-item';
                         mapBtn.setAttribute('data-map-segment', segData.segmentNum);
+                        mapBtn.setAttribute('data-route-key', activeKey);
                         mapBtn.textContent = `TS-${segData.segmentNum}`;
                         mapBtn.style.borderLeft = `4px solid ${segData.color || '#ccc'}`;
-                        mapBtn.onclick = () => { card.scrollIntoView({ behavior: 'smooth', block: 'start' }); };
+                        mapBtn.onclick = () => { card.scrollIntoView({ behavior: 'smooth' }); };
                         mapContainer.appendChild(mapBtn);
                         
                         checkSegmentData(card);
 
-                        if (activeKey) loadedRoutes.add(activeKey);
+                        if (activeKey && !loadedRoutes.has(activeKey)) {
+                            loadedRoutes.add(activeKey);
+                            routeLoadHistory.push(activeKey);
+                        }
                         currentActiveArea = safeAreaName;
                         currentActiveDirection = segData.direction;
                     });
