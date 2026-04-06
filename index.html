@@ -14,7 +14,6 @@
     <meta name="mobile-web-app-status-bar-style" content="black">
 
     <script src="database.js"></script>
-
     <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
@@ -32,7 +31,7 @@
     
     <style>
         :root {
-            --primary: #28a745;
+            --primary: #0056b3;
             --danger: #dc3545;
             --success: #28a745;
             --warning: #ffc107;
@@ -72,32 +71,32 @@
 
         h2 { 
             margin: 0; 
-            font-size: 16px;
+            font-size: 20px;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
             flex-wrap: wrap;
         }
 
         #active-area-display {
-            font-size: 13px;
-            color: #ffffff;
-            background: #343a40;
-            padding: 4px 10px;
+            font-size: 14px;
+            padding: 4px 12px;
             border-radius: 6px;
             font-weight: bold;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             text-transform: uppercase;
+            border: 2px solid transparent;
         }
         #active-area-display:empty { display: none; }
 
         #active-route-display {
             font-size: 13px;
-            color: #155724;
-            background: #d4edda;
-            padding: 4px 10px;
-            border-radius: 6px;
+            color: var(--primary);
+            background: #e1ecf7;
+            padding: 3px 10px;
+            border-radius: 12px;
             font-weight: bold;
-            border: 1px solid #c3e6cb;
+            border: 1px solid #b9d4f0;
         }
         #active-route-display:empty { display: none; }
 
@@ -114,7 +113,6 @@
             display: flex;       
             align-items: center; 
             gap: 6px;
-            margin-left: auto;
         }
         
         .menu-toggle-icon { font-size: 22px; }
@@ -163,9 +161,9 @@
         }
 
         .btn-primary { background-color: var(--primary); flex: 2; }
-        .btn-success { background-color: #17a2b8; width: 100%; margin-bottom: 5px;}
+        .btn-success { background-color: var(--success); width: 100%; margin-bottom: 5px;}
         .btn-warning { background-color: var(--warning); color: #333; }
-        .btn-info { background-color: #6c757d; }
+        .btn-info { background-color: #17a2b8; }
         .btn-danger { background-color: var(--danger); }
         .btn-outline { background-color: transparent; color: var(--primary); border: 2px solid var(--primary); flex: 1; }
         button:disabled { background-color: #cccccc; cursor: not-allowed; }
@@ -174,9 +172,9 @@
 
         .mini-map-container {
             position: sticky;
-            top: 100px; 
+            top: 75px; 
             width: var(--map-width);
-            max-height: calc(100vh - 120px);
+            max-height: calc(100vh - 90px);
             overflow-y: auto;
             display: flex;
             flex-direction: column;
@@ -226,8 +224,9 @@
 
         .segment-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--bg-color); padding-bottom: 10px; margin-bottom: 10px; }
         .segment-header h3 { margin: 0; color: var(--primary); font-size: 18px;}
+        .segment-header-badges { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
         
-        .direction-badge { font-size: 13px; font-weight: bold; color: #155724; background: #d4edda; padding: 4px 8px; border-radius: 6px; border: 1px solid #c3e6cb;}
+        .direction-badge { font-size: 13px; font-weight: bold; color: #0056b3; background: #e1ecf7; padding: 4px 8px; border-radius: 6px; border: 1px solid #b9d4f0;}
 
         .segment-notes {
             width: 100%;
@@ -265,7 +264,7 @@
         <div class="header-top-bar">
             <h2>
                 <span id="active-area-display"></span>
-                SUB TO SUB:  
+                SUB TO SUB AREA:  
                 <span id="active-route-display"></span>
             </h2>
             <button class="menu-toggle-btn" onclick="toggleMenu()" id="menuBtn">
@@ -283,11 +282,11 @@
             </div>
 
             <div class="control-panel">
-                <label for="general-area"><b>1. Select Line (Area)</b></label>
+                <label for="general-area"><b>1. Select General Area</b></label>
                 <div class="input-group">
                     <select id="general-area" style="background-color: #eef2f5; font-weight: bold;" onchange="updateRouteDropdown()">
                         <option value="">tap here...</option>
-                        </select>
+                    </select>
                 </div>
 
                 <label for="page-direction"><b>2. Select Track Direction</b></label>
@@ -307,7 +306,7 @@
                 
                 <div class="action-buttons">
                     <button class="btn-primary" onclick="generateSegments()">Load Sections</button>
-                    <button class="btn-outline" onclick="flipOrder()">🔃 Flip</button>
+                    <button class="btn-outline" onclick="flipOrder()">🔃 Flip Direction</button>
                 </div>
             </div>
         </div>
@@ -318,13 +317,13 @@
         <div id="segments-container">
             <div id="instruction-panel" class="segment-card" style="border-left: 6px solid var(--success);">
                 <div class="segment-header">
-                    <h3>📋 Welcome to Tracker V2</h3>
+                    <h3>📋 Welcome to Defect Tracker V2</h3>
                 </div>
                 <div style="font-size: 15px; line-height: 1.5;">
                     <p><b>Step 1: Start a New Route</b></p>
                     <ul style="margin-top: 5px; padding-left: 20px;">
                         <li>Tap the <b>Menu</b> button at the top right.</li>
-                        <li>Select <b>1. Line</b>, <b>2. Direction</b>, and <b>3. Sub-to-Sub Block</b>.</li>
+                        <li>Select <b>1. Area</b>, <b>2. Direction</b>, and <b>3. Sub-to-Sub Block</b>.</li>
                         <li>Tap <b>Load Sections</b> to generate your track blocks.</li>
                     </ul>
 
@@ -375,7 +374,27 @@
             }
         }
 
-        // POPULATE AREA DROPDOWN ON LOAD
+        // SMART COLOR CODING FOR LINES
+        function getLineColors(lineName) {
+            if (!lineName) return { bg: '#e1ecf7', text: '#0056b3', border: '#b9d4f0' };
+            const name = lineName.toUpperCase();
+            
+            // Yellow for Area 1 or Expo Line
+            if (name.includes("AREA 1") || name.includes("EXPO")) {
+                return { bg: '#ffc107', text: '#000000', border: '#d39e00' };
+            }
+            // Blue for Area 2 or Millenium Line
+            else if (name.includes("AREA 2") || name.includes("MILLENIUM") || name.includes("MILLENNIUM")) {
+                return { bg: '#007bff', text: '#ffffff', border: '#004a99' };
+            }
+            // Green for Area 3 or Evergreen Line
+            else if (name.includes("AREA 3") || name.includes("EVERGREEN")) {
+                return { bg: '#28a745', text: '#ffffff', border: '#1e7e34' };
+            }
+            // Default Grey for anything else
+            return { bg: '#6c757d', text: '#ffffff', border: '#545b62' };
+        }
+
         document.addEventListener("DOMContentLoaded", () => {
             const areaSelect = document.getElementById('general-area');
             for (let area in globalDatabase) {
@@ -386,7 +405,6 @@
             }
         });
 
-        // CASCADING DROPDOWN LOGIC
         function updateRouteDropdown() {
             const area = document.getElementById('general-area').value;
             const direction = document.getElementById('page-direction').value;
@@ -425,19 +443,25 @@
         document.getElementById('segments-container').addEventListener('input', (e) => checkSegmentData(e.target.closest('.segment-card')));
         document.getElementById('segments-container').addEventListener('change', (e) => checkSegmentData(e.target.closest('.segment-card')));
 
-        // SCROLL OBSERVER - UPDATES THE HEADER!
         const scrollObserver = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
                     const segNum = entry.target.getAttribute('data-segment');
-                    const areaName = entry.target.getAttribute('data-area-name');
                     const routeName = entry.target.getAttribute('data-route-name');
-                    
-                    const areaDisplay = document.getElementById('active-area-display');
+                    const areaName = entry.target.getAttribute('data-area-name');
+
                     const routeDisplay = document.getElementById('active-route-display');
-                    
-                    if (areaDisplay) areaDisplay.textContent = areaName ? areaName : '';
-                    if (routeDisplay) routeDisplay.textContent = routeName ? routeName : '';
+                    const areaDisplay = document.getElementById('active-area-display');
+
+                    routeDisplay.textContent = routeName ? routeName : '';
+                    areaDisplay.textContent = areaName ? areaName : '';
+
+                    if (areaName) {
+                        const colors = getLineColors(areaName);
+                        areaDisplay.style.backgroundColor = colors.bg;
+                        areaDisplay.style.color = colors.text;
+                        areaDisplay.style.borderColor = colors.border;
+                    }
 
                     document.querySelectorAll('.map-item').forEach(item => item.classList.remove('active-map'));
                     const activeMapItem = document.querySelector(`.map-item[data-map-segment="${segNum}"]`);
@@ -455,7 +479,7 @@
             const routeSelect = document.getElementById('global-section');
             const selectedRouteKey = routeSelect.value;
             
-            if (!area || !selectedRouteKey) { alert('Please select a Line and Sub-to-Sub Block.'); return; }
+            if (!area || !selectedRouteKey) { alert('Please select an Area and Sub-to-Sub Block.'); return; }
 
             const selectedRouteData = globalDatabase[area][direction][selectedRouteKey];
             const container = document.getElementById('segments-container');
@@ -476,7 +500,6 @@
             });
             
             newCards.forEach((item, index) => {
-                // Notice 'area' is now passed to the card!
                 const card = createSegmentCard(item.num, selectedRouteData.name, direction, item.color, area);
                 card.style.animationDelay = `${index * 0.05}s`;
                 container.appendChild(card);
@@ -519,14 +542,20 @@
             card.setAttribute('data-segment', segmentNum);
             card.setAttribute('data-route-name', routeText); 
             card.setAttribute('data-direction', direction); 
-            card.setAttribute('data-area-name', areaName); 
             card.setAttribute('data-color', color);
+            card.setAttribute('data-area-name', areaName); 
             card.style.borderLeft = `6px solid ${color}`;
+
+            const colors = getLineColors(areaName);
+            const areaBadge = areaName ? `<span class="direction-badge" style="background-color: ${colors.bg}; color: ${colors.text}; border-color: ${colors.border};">${areaName}</span>` : '';
 
             card.innerHTML = `
                 <div class="segment-header">
                     <h3>TS-${segmentNum}</h3>
-                    <span class="direction-badge">${routeText}</span>
+                    <div class="segment-header-badges">
+                        ${areaBadge}
+                        <span class="direction-badge">${routeText}</span>
+                    </div>
                 </div>
                 <textarea class="segment-notes" placeholder="Add TS details or comments here..."></textarea>
                 <div class="defect-list"></div>
@@ -620,7 +649,7 @@
                             row.dataset.base64Image = canvas.toDataURL('image/jpeg', 0.8); 
                             row.dataset.imgWidth = width;
                             row.dataset.imgHeight = height;
-                            cameraLabel.style.backgroundColor = '#17a2b8';
+                            cameraLabel.style.backgroundColor = 'var(--success)';
                             cameraLabel.innerHTML = '✅ Saved';
                             photoName.textContent = "Attached";
                             checkSegmentData(row.closest('.segment-card'));
@@ -654,7 +683,7 @@
                     row.dataset.base64Image = prefill.photoBase64;
                     row.dataset.imgWidth = prefill.imgW;
                     row.dataset.imgHeight = prefill.imgH;
-                    cameraLabel.style.backgroundColor = '#17a2b8';
+                    cameraLabel.style.backgroundColor = 'var(--success)';
                     cameraLabel.innerHTML = '✅ Saved';
                     photoName.textContent = "Attached";
                 }
@@ -670,9 +699,9 @@
                 const segData = {
                     segmentNum: card.getAttribute('data-segment'),
                     routeName: card.getAttribute('data-route-name'),
-                    areaName: card.getAttribute('data-area-name'), // SAVES THE LINE NOW
                     direction: card.getAttribute('data-direction'),
                     color: card.getAttribute('data-color'),
+                    areaName: card.getAttribute('data-area-name'), 
                     notes: card.querySelector('.segment-notes').value,
                     defects: []
                 };
@@ -725,8 +754,8 @@
                     mapContainer.innerHTML = '';
 
                     projectData.forEach((segData, index) => {
-                        // Pass the areaName back into the card!
-                        const card = createSegmentCard(segData.segmentNum, segData.routeName, segData.direction, segData.color, segData.areaName || 'Unknown Line');
+                        const safeAreaName = segData.areaName || '';
+                        const card = createSegmentCard(segData.segmentNum, segData.routeName, segData.direction, segData.color, safeAreaName);
                         card.style.animationDelay = `${index * 0.05}s`;
                         
                         card.querySelector('.segment-notes').value = segData.notes;
@@ -781,9 +810,8 @@
                 const workbook = new ExcelJS.Workbook();
                 const worksheet = workbook.addWorksheet('Defects Report');
                 
-                // ADDED LINE COLUMN HERE
                 worksheet.columns = [
-                    { header: 'Line', key: 'line', width: 20 },
+                    { header: 'Line / Area', key: 'line', width: 18 },
                     { header: 'Route', key: 'route', width: 22 },
                     { header: 'TS', key: 'segment', width: 15 },
                     { header: 'Notes', key: 'notes', width: 35 },
@@ -798,7 +826,7 @@
                     const segmentNum = card.getAttribute('data-segment');
                     const tsId = `TS-${segmentNum}`;
                     const routeName = card.getAttribute('data-route-name');
-                    const areaName = card.getAttribute('data-area-name') || 'Unknown Line';
+                    const areaName = card.getAttribute('data-area-name') || '';
                     const notes = card.querySelector('.segment-notes').value;
                     const rows = card.querySelectorAll('.defect-row');
                     
@@ -811,7 +839,6 @@
                         
                         if (comp || def || photo) {
                             hasDefects = true;
-                            // ADDS LINE DATA TO EXCEL
                             worksheet.addRow({ line: areaName, route: routeName, segment: tsId, notes: notes, component: comp, defect: def });
                         }
 
@@ -898,8 +925,9 @@
             
             doc.setFont("helvetica", "bold");
             doc.setFontSize(12);
-            // ADDS LINE DATA TO PDF!
-            doc.text(`[${data.lineName}] ${data.tsId} - ${data.routeName}`, leftMargin, currentY);
+            
+            const lineLabel = data.lineName ? `${data.lineName} | ` : '';
+            doc.text(`${lineLabel}${data.tsId} - ${data.routeName}`, leftMargin, currentY);
             
             currentY += 6;
             doc.setFont("helvetica", "normal");
