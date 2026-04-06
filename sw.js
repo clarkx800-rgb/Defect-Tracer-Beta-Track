@@ -1,5 +1,5 @@
 // CHANGE THIS NAME EVERY TIME YOU UPDATE YOUR CODE (e.g., v2, v3, v4)
-const CACHE_NAME = 'tracer-beta-v0'; 
+const CACHE_NAME = 'tracer-beta-v1'; 
 
 const ASSETS_TO_CACHE = [
   './',
