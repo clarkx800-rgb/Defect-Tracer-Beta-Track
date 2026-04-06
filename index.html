@@ -138,7 +138,9 @@
         }
         
         .menu-toggle-btn:active { background-color: #333; }
-        .menu-toggle-icon { font-size: 22px; font-family: sans-serif; line-height: 1; }
+        
+        /* FIXED: pointer-events: none prevents the icon from hijacking the click */
+        .menu-toggle-icon { font-size: 22px; font-family: sans-serif; line-height: 1; pointer-events: none; }
 
         #collapsible-menu {
             overflow: hidden;
@@ -252,7 +254,7 @@
             padding: 15px;
             position: relative;
             animation: cascadingFadeIn 0.3s ease-out both;
-            scroll-margin-top: 140px; /* Aligns card perfectly below the header */
+            scroll-margin-top: 140px; 
             will-change: opacity, transform;
         }
 
@@ -434,7 +436,7 @@
     </div>
 
     <button class="quick-add-fab" id="quickAddBtn" onclick="toggleQuickAddModal(true)">
-        <span style="transform: translateY(-2px);">+</span>
+        <span style="transform: translateY(-2px); pointer-events: none;">+</span>
     </button>
     
     <div class="quick-add-modal" id="quickAddModal">
@@ -456,7 +458,7 @@
         
         // SYSTEM STATE MEMORY 
         let loadedRoutes = new Set();
-        let routeLoadHistory = []; // Stack for the Undo feature
+        let routeLoadHistory = []; 
         let currentActiveArea = "";
         let currentActiveDirection = "";
 
@@ -467,12 +469,10 @@
             const menuBtn = document.getElementById('menuBtn');
             const fabBtn = document.getElementById('quickAddBtn');
 
-            // If click is outside top menu and menu button, close top menu
             if (!menu.contains(e.target) && !menuBtn.contains(e.target) && menu.classList.contains('expanded')) {
                 toggleMenu(true);
             }
             
-            // If click is outside fab modal and fab button, close fab modal
             if (!fabModal.contains(e.target) && !fabBtn.contains(e.target) && fabModal.style.display === 'flex') {
                 toggleQuickAddModal(false);
             }
@@ -580,7 +580,7 @@
                 document.getElementById('quick-add-title').textContent = `${currentActiveArea} [${dirCode}]`;
                 updateQuickAddDropdown();
                 modal.style.display = 'flex';
-                toggleMenu(true); // Close top menu if open
+                toggleMenu(true); 
             } else {
                 modal.style.display = 'none';
             }
@@ -606,7 +606,6 @@
         document.getElementById('segments-container').addEventListener('input', (e) => checkSegmentData(e.target.closest('.segment-card')));
         document.getElementById('segments-container').addEventListener('change', (e) => checkSegmentData(e.target.closest('.segment-card')));
 
-        // RECALIBRATED INTERSECTION OBSERVER FOR FLAWLESS HIGHLIGHTING
         const scrollObserver = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
@@ -689,14 +688,13 @@
                 const mapBtn = document.createElement('div');
                 mapBtn.className = 'map-item';
                 mapBtn.setAttribute('data-map-segment', item.num);
-                mapBtn.setAttribute('data-route-key', selectedRouteKey); // Memory for Undo
+                mapBtn.setAttribute('data-route-key', selectedRouteKey); 
                 mapBtn.textContent = `TS-${item.num}`;
                 mapBtn.style.borderLeft = `4px solid ${item.color}`;
                 mapBtn.onclick = () => { card.scrollIntoView({ behavior: 'smooth' }); };
                 mapContainer.appendChild(mapBtn);
             });
             
-            // UPDATE SYSTEM MEMORY
             loadedRoutes.add(selectedRouteKey);
             routeLoadHistory.push(selectedRouteKey);
             currentActiveArea = area;
@@ -704,7 +702,6 @@
 
             document.getElementById('quickAddBtn').style.display = 'flex';
 
-            // CLEANUP UI
             routeSelect.value = '';
             if (isQuickAdd) {
                 toggleQuickAddModal(false);
@@ -723,14 +720,11 @@
             
             const lastRouteKey = routeLoadHistory.pop();
             
-            // Erase from DOM
             document.querySelectorAll(`.segment-card[data-route-key="${lastRouteKey}"]`).forEach(el => el.remove());
             document.querySelectorAll(`.map-item[data-route-key="${lastRouteKey}"]`).forEach(el => el.remove());
             
-            // Erase from Memory
             loadedRoutes.delete(lastRouteKey);
             
-            // If empty, reset system
             if (loadedRoutes.size === 0) {
                 document.getElementById('quickAddBtn').style.display = 'none';
                 currentActiveArea = "";
@@ -738,7 +732,6 @@
                 document.getElementById('active-area-display').textContent = '';
                 document.getElementById('active-route-display').textContent = '';
                 
-                // Bring back instruction panel
                 const container = document.getElementById('segments-container');
                 if(!document.getElementById('instruction-panel')) {
                     container.innerHTML = `
