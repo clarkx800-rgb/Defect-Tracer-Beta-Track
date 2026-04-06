@@ -1,4 +1,3 @@
-
 const globalDatabase = {
     "EXPO LINE": {
         "Inbound Track": {
@@ -55,26 +54,27 @@ const globalDatabase = {
                     { start: 10, end: 15, color: "#e91e63" }
                 ]
             }
-        },
-        "Evergreen Line": {
+        }
+    }, // <--- THIS BRACKET AND COMMA WERE MISSING!
+    "Evergreen Line": {
         "Inbound Track": {
-            "DEMO-AREA2-IB": {
-                name: "Demo Area 2 - Inbound",
+            "DEMO-AREA3-IB": {
+                name: "Demo Area 3 - Inbound",
                 segments: [
                     { start: 0, end: 5, color: "#9c27b0" }
                 ]
             }
         },
         "Outbound Track": {
-            "DEMO-AREA2-OB": {
-                name: "Demo Area 2 - Outbound",
+            "DEMO-AREA3-OB": {
+                name: "Demo Area 3 - Outbound",
                 segments: [
                     { start: 10, end: 15, color: "#e91e63" }
                 ]
             }
         }
     }
-    // You can keep adding "Area 3", "Area 4", etc. below!
+    // You can keep adding "Area 4", "Area 5", etc. below!
 };
 
 // Defect definitions are also kept here for safety
