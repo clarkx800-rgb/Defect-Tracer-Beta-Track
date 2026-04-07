@@ -439,13 +439,13 @@ const globalDatabase = {
             "SAZ-BDZ-IB": {
                 name: "SAZ-BDZ-IB",
                 segments: [
-                    { start: 4639, end: 4712, color: "#9c27b0" }
+                    { start: 4639, end: 4712, color: "#6364B6" }
                 ]
             },
             "BDZ-LHZ-IB": {
                 name: "SAZ-BDZ-IB",
                 segments: [
-                    { start: 4639, end: 4712, color: "#9c27b0" }
+                    { start: 4639, end: 4712, color: "#B6638E" }
                 ]
             }
         },
@@ -469,19 +469,19 @@ const globalDatabase = {
             "FCZ-NPZ-IB": {
                 name: "FCZ-NPZ-IB",
                 segments: [
-                    { start: 7124, end: 7266, color: "#9c27b0" }
+                    { start: 7124, end: 7266, color: "#B66463" }
                 ]
             },
             "NPZ-BQZ-IB": {
                 name: "NPZ-BQZ-IB",
                 segments: [
-                    { start: 7267, end: 7355, color: "#9c27b0" }
+                    { start: 7267, end: 7355, color: "#8BB663" }
                 ]
             },
             "BQZ-LHZ-IB": {
                 name: "BQZ-LHZ-IB",
                 segments: [
-                    { start: 7001, end: 6366, color: "#9c27b0" }
+                    { start: 7001, end: 6366, color: "#63B5B6" }
                 ]
             }
         },
