@@ -487,18 +487,116 @@ const globalDatabase = {
         },
         
         "Outbound Track": {
-            "DEMO-AREA3-OB": {
-                name: "Demo Area 3 - Outbound",
+            "LHZ-BQZ-OB": {
+                name: "LHZ-BQZ-OB",
                 segments: [
-                    { start: 10, end: 15, color: "#e91e63" }
+                    { start: 6400, end: 7774, color: "#CC3752" }
+                ]
+            },
+
+            "LHZ-BQZ-OB": {
+                name: "LHZ-BQZ-OB DC201-200",
+                segments: [
+                    { start: 7896, end: 7897, color: "#CC3752" }
+                ]
+            },
+
+            "LHZ-BQZ-OB": {
+                name: "LHZ-BQZ-OB DC202-203",
+                segments: [
+                    { start: 7895, end: 7893, color: "#E7A2AE" }
+                ]
+            },
+            
+            "BQZ-NPZ-OB": {
+                name: "BQZ-NPZ-OB",
+                segments: [
+                    { start: 7773, end: 7686, color: "#9DCC37" }
+                ]
+            },
+            "NPZ-FCZ-OB": {
+                name: "NPZ-FCZ-OB",
+                segments: [
+                    { start: 7685, end: 7545, color: "#37CCB1" }
+                ]
+            },
+
+            "NPZ-FCZ-OB": {
+                name: "NPZ-FCZ-OB DC205-204",
+                segments: [
+                    { start: 7890, end: 7892, color: "#3752CC" }
+                ]
+            },
+
+            "NPZ-FCZ-OB": {
+                name: "NPZ-FCZ-OB DC206-207",
+                segments: [
+                    { start: 7889, end: 7887, color: "#CC3752" }
+                ]
+            },
+
+            "NPZ-FCZ-OB": {
+                name: "NPZ-FCZ-OB DC214-215",
+                segments: [
+                    { start: 7685, end: 7545, color: "#37CCB1" }
+                ]
+            },
+
+
+            
+            "FCZ-LAT-OB": {
+                name: "FCZ-LAT-OB",
+                segments: [
+                    { start: 7544, end: 7421, color: "#6637CC" }
+                ]
+            },
+            "FCZ-LAT-OB": {
+                name: "FCZ-LAT-OB DC219-218",
+                segments: [
+                    { start: 7861, end: 7862, color: "#CC6637" }
+                ]
+            },
+            "FCZ-LAT-OB": {
+                name: "FCZ-LAT-OB DC221-222",
+                segments: [
+                    { start: 7860, end: 7860, color: "#CCB137" }
+                ]
+            },
+            "FCZ-LAT-OB": {
+                name: "FCZ-LAT-OB DC220-RH Spur End",
+                segments: [
+                    { start: 7857, end: 7852, color: "#37CC66" }
+                ]
+            },
+            "FCZ-LAT-OB": {
+                name: "FCZ-LAT-OB DC223-LH Spur End",
+                segments: [
+                    { start: 7850, end: 7848, color: "#52CC37" }
+                ]
+            },
+            "FCZ-LAT-OB": {
+                name: "FCZ-LAT-OB DC223-LH Spur End",
+                segments: [
+                    { start: 7850, end: 7848, color: "#52CC37" }
+                ]
+            },
+            "FCZ-LAT-OB": {
+                name: "FCZ-LAT-OB DC225-224",
+                segments: [
+                    { start: 7845, end: 7847, color: "#3752CC" }
+                ]
+            },
+            "FCZ-LAT-OB": {
+                name: "FCZ-LAT DC226-227",
+                segments: [
+                    { start: 7844, end: 7840, color: "#CC3752" }
                 ]
             }
         }
     }
-    // You can keep adding "Area 4", "Area 5", etc. below!
 };
 
-// Defect definitions are also kept here for safety
+// Defect definitions
 const defectMap = {
     'Inboard Running Rail': ['Broken', 'Wear', 'Corrugation', 'Spall', 'Missing Clips', 'Flow'],
     'Outboard Running Rail': ['Broken', 'Wear', 'Corrugation', 'Spall', 'Missing Clips', 'Flow'],
