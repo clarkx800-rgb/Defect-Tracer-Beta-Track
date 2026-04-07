@@ -422,7 +422,7 @@ const globalDatabase = {
             },
             // End of GW Switches 53-59
             "KGZ-KGT-OB": { 
-                name: "GWZ-KGZ-OB", 
+                name: "KGZ-KGT-OB", 
                 segments: [
                     { start: 4435, end: 4435, color: "#A4FF94" },
                     { start: 4430, end: 4430, color: "#A4FF94" },
@@ -433,13 +433,19 @@ const globalDatabase = {
                 ]   
             }
         }
-    }, // <--- THIS WAS THE MISSING BRACKET AND COMMA!
+    }, 
     "Millenium Line": {
         "Inbound Track": {
-            "DEMO-AREA2-IB": {
-                name: "Demo Area 2 - Inbound",
+            "SAZ-BDZ-IB": {
+                name: "SAZ-BDZ-IB",
                 segments: [
-                    { start: 0, end: 5, color: "#9c27b0" }
+                    { start: 4639, end: 4712, color: "#9c27b0" }
+                ]
+            }
+            "BDZ-LHZ-IB": {
+                name: "SAZ-BDZ-IB",
+                segments: [
+                    { start: 4639, end: 4712, color: "#9c27b0" }
                 ]
             }
         },
@@ -454,13 +460,32 @@ const globalDatabase = {
     },
     "Evergreen Line": {
         "Inbound Track": {
-            "DEMO-AREA3-IB": {
-                name: "Demo Area 3 - Inbound",
+            "LAT-FCZ-IB": {
+                name: "LAT & LAZ-FCZ-IB",
                 segments: [
-                    { start: 0, end: 5, color: "#9c27b0" }
+                    { start: 7001, end: 7123, color: "#9c27b0" }
+                ]
+            },
+            "FCZ-NPZ-IB": {
+                name: "FCZ-NPZ-IB",
+                segments: [
+                    { start: 7124, end: 7266, color: "#9c27b0" }
+                ]
+            },
+            "NPZ-BQZ-IB": {
+                name: "NPZ-BQZ-IB",
+                segments: [
+                    { start: 7267, end: 7355, color: "#9c27b0" }
+                ]
+            },
+            "BQZ-LHZ-IB": {
+                name: "BQZ-LHZ-IB",
+                segments: [
+                    { start: 7001, end: 6366, color: "#9c27b0" }
                 ]
             }
         },
+        
         "Outbound Track": {
             "DEMO-AREA3-OB": {
                 name: "Demo Area 3 - Outbound",
