@@ -208,7 +208,7 @@ const globalDatabase = {
             "BWZ-NAZ-OB-X1": { 
                 name: "STZ-MNZ-OB | Pocket - DC13-18", 
                 segments: [
-                    { start: 1141, end: 1132, color: "#FFE100" },
+                    { start: 1160, end: 1151, color: "#FFE100" },
                 ]   
             },
             "BWZ-NAZ-OB-X2": { 
