@@ -484,8 +484,7 @@ const globalDatabase = {
                     { start: 7001, end: 6366, color: "#63B5B6" }
                 ]
             }
-        },
-        
+        },        
         "Outbound Track": {
             "LHZ-BQZ-OB": {
                 name: "LHZ-BQZ-OB",
@@ -493,21 +492,18 @@ const globalDatabase = {
                     { start: 6400, end: 7774, color: "#CC3752" }
                 ]
             },
-
             "LHZ-BQZ-OB": {
                 name: "LHZ-BQZ-OB DC201-200",
                 segments: [
                     { start: 7896, end: 7897, color: "#CC3752" }
                 ]
             },
-
             "LHZ-BQZ-OB": {
                 name: "LHZ-BQZ-OB DC202-203",
                 segments: [
                     { start: 7895, end: 7893, color: "#E7A2AE" }
                 ]
-            },
-            
+            },            
             "BQZ-NPZ-OB": {
                 name: "BQZ-NPZ-OB",
                 segments: [
@@ -520,30 +516,24 @@ const globalDatabase = {
                     { start: 7685, end: 7545, color: "#37CCB1" }
                 ]
             },
-
             "NPZ-FCZ-OB": {
                 name: "NPZ-FCZ-OB DC205-204",
                 segments: [
                     { start: 7890, end: 7892, color: "#3752CC" }
                 ]
             },
-
             "NPZ-FCZ-OB": {
                 name: "NPZ-FCZ-OB DC206-207",
                 segments: [
                     { start: 7889, end: 7887, color: "#CC3752" }
                 ]
             },
-
             "NPZ-FCZ-OB": {
                 name: "NPZ-FCZ-OB DC214-215",
                 segments: [
                     { start: 7685, end: 7545, color: "#37CCB1" }
                 ]
-            },
-
-
-            
+            },            
             "FCZ-LAT-OB": {
                 name: "FCZ-LAT-OB",
                 segments: [
