@@ -492,19 +492,19 @@ const globalDatabase = {
                     { start: 6400, end: 7774, color: "#CC3752" }
                 ]
             },
-            "LHZ-BQZ-OB": {
+            "LHZ-BQZ-OB-X1": {
                 name: "LHZ-BQZ-OB DC201-200",
                 segments: [
                     { start: 7896, end: 7897, color: "#37CCB1" }
                 ]
             },
-            "LHZ-BQZ-OB-X1": {
+            "LHZ-BQZ-OB-X2": {
                 name: "LHZ-BQZ-OB DC202-203",
                 segments: [
                     { start: 7895, end: 7893, color: "#E7A2AE" }
                 ]
             },            
-            "BQZ-NPZ-OB-X": {
+            "BQZ-NPZ-OB": {
                 name: "BQZ-NPZ-OB",
                 segments: [
                     { start: 7773, end: 7686, color: "#9DCC37" }
