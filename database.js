@@ -441,7 +441,7 @@ const globalDatabase = {
                 segments: [
                     { start: 4639, end: 4712, color: "#9c27b0" }
                 ]
-            }
+            },
             "BDZ-LHZ-IB": {
                 name: "SAZ-BDZ-IB",
                 segments: [
