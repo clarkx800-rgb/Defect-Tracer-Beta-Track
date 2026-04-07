@@ -481,7 +481,8 @@ const globalDatabase = {
             "BQZ-LHZ-IB": {
                 name: "BQZ-LHZ-IB",
                 segments: [
-                    { start: 7001, end: 6366, color: "#63B5B6" }
+                    { start: 7356, end: 7420, color: "#63B5B6" },
+                    { start: 6321, end: 6366, color: "#63B5B6" }
                 ]
             }
         },        
@@ -489,7 +490,8 @@ const globalDatabase = {
             "LHZ-BQZ-OB": {
                 name: "LHZ-BQZ-OB",
                 segments: [
-                    { start: 6400, end: 7774, color: "#CC3752" }
+                    { start: 6400, end: 6368, color: "#CC3752" },
+                    { start: 7839, end: 7774, color: "#CC3752" }
                 ]
             },
             "LHZ-BQZ-OB-X1": {
