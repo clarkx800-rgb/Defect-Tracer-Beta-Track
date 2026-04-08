@@ -1,16 +1,18 @@
-// This is the permanent Service Worker for V2
-const CACHE_NAME = 'defect-tracker-v2-prod-1.2.47'; 
+// Change version number to force users' phones to update!
+const CACHE_NAME = 'defect-tracker-v2-prod-1.2.68'; 
 
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
-  './database.js',
+  './db_expo.js',         // <-- NEW
+  './db_millennium.js',   // <-- NEW
+  './db_evergreen.js',    // <-- NEW
+  './themes.js',
   './manifest.json',
   './icon.png',
   './exceljs.min.js',
   './jspdf.umd.min.js'
 ];
-// ... rest of the code stays exactly the same ...
 
 // 1. Install Event: Cache the new files
 self.addEventListener('install', event => {
