@@ -259,7 +259,8 @@
         .control-panel label { font-size: var(--base-font); letter-spacing: 1px; color: var(--text-muted); margin-top: 5px; }
         .input-group { display: flex; gap: 8px; }
         
-        select, .segment-notes {
+        /* SHARED INPUT STYLES (Dropdowns + Custom Fields) */
+        select, .segment-notes, .custom-comp, .custom-def {
             flex: 1;
             padding: 12px;
             border: 1px solid var(--border-color) !important;
@@ -271,12 +272,14 @@
             appearance: none; 
             transition: background-color 0.3s ease;
         }
-        select:focus, .segment-notes:focus {
+        select:focus, .segment-notes:focus, .custom-comp:focus, .custom-def:focus {
             outline: none;
             border-color: var(--primary) !important;
             box-shadow: var(--hud-glow);
         }
         select:disabled { background-color: var(--border-color) !important; color: var(--text-muted) !important; cursor: not-allowed; }
+        
+        .custom-comp, .custom-def { flex: 1 1 35%; min-width: 100px; }
 
         .action-buttons { display: flex; gap: 8px; margin-top: 5px; }
         .save-load-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 5px; }
@@ -300,6 +303,9 @@
         .btn-danger { background-color: transparent; color: var(--danger); border-color: var(--danger); }
         .btn-danger:active { background-color: var(--danger); color: #fff; }
         .btn-outline { background-color: transparent; color: var(--primary); border: 1px solid var(--primary); flex: 1; }
+        
+        .revert-btn { border: 1px solid var(--warning); color: var(--warning); flex: 0 1 auto;}
+        .revert-btn:active { background-color: var(--warning); color: #000; }
 
         .app-layout { display: flex; align-items: flex-start; gap: 10px; padding: 0 15px 30px 10px; }
 
@@ -331,7 +337,7 @@
             transition: all 0.2s ease;
             user-select: none;
             will-change: transform, background-color;
-            touch-action: pan-y; /* Fixes touch delay on mobile */
+            touch-action: pan-y;
         }
         
         .map-item:active { transform: scale(0.9); }
@@ -731,7 +737,6 @@
         let currentRowForGallery = null; 
         let currentInsertTargetTS = null;
 
-        // --- CUSTOM MODAL ENGINE ---
         let confirmResolve = null;
 
         function showSystemAlert(message, title = "SYSTEM NOTICE", isDanger = false) {
@@ -773,7 +778,6 @@
             document.getElementById('systemModalOverlay').style.display = 'none';
         }
 
-        // 1. DESKTOP & REFRESH TRAP
         window.addEventListener('beforeunload', function (e) {
             const cards = document.querySelectorAll('.segment-card');
             if (cards.length > 0) {
@@ -782,7 +786,6 @@
             }
         });
 
-        // 2. MOBILE SYSTEM BACK BUTTON TRAP
         window.history.pushState({ isAppOpen: true }, "", "");
 
         window.addEventListener('popstate', function(event) {
@@ -1067,7 +1070,6 @@
             setTimeout(() => { isAutoScrolling = false; }, 800); 
         }
 
-        // --- SPLICE / INSERT MODAL CONTROLS ---
         function openInsertModal(tsNumber, baseRouteKey) {
             currentInsertTargetTS = tsNumber;
             document.getElementById('insert-target-ts').textContent = tsNumber;
@@ -1180,7 +1182,6 @@
             }
         }
 
-        // Centralized Map Button Listeners (Click + LongPress/RightClick)
         function attachMapItemListeners(mapBtn, card, itemNum, routeKey) {
             mapBtn.onclick = () => {
                 isAutoScrolling = true; 
@@ -1299,7 +1300,12 @@
             
             card.querySelectorAll('.defect-row').forEach(row => {
                 const images = JSON.parse(row.dataset.images || "[]");
-                if (row.querySelector('.component-select').value || row.querySelector('.defect-select').value || images.length > 0) {
+                
+                const isCustom = row.dataset.isCustom === "true";
+                const compVal = isCustom ? row.querySelector('.custom-comp').value : row.querySelector('.component-select').value;
+                const defVal = isCustom ? row.querySelector('.custom-def').value : row.querySelector('.defect-select').value;
+
+                if (compVal || defVal || images.length > 0) {
                     hasData = true;
                 }
             });
@@ -1464,7 +1470,11 @@
                 
                 card.querySelectorAll('.defect-row').forEach(row => {
                     const images = JSON.parse(row.dataset.images || "[]");
-                    if (row.querySelector('.component-select').value || row.querySelector('.defect-select').value || images.length > 0) {
+                    const isCustom = row.dataset.isCustom === "true";
+                    const compVal = isCustom ? row.querySelector('.custom-comp').value : row.querySelector('.component-select').value;
+                    const defVal = isCustom ? row.querySelector('.custom-def').value : row.querySelector('.defect-select').value;
+
+                    if (compVal || defVal || images.length > 0) {
                         hasData = true;
                     }
                 });
@@ -1569,10 +1579,13 @@
             const row = document.createElement('div');
             row.className = 'defect-row';
             row.dataset.images = "[]"; 
+            row.dataset.isCustom = "false"; 
 
             const compSelect = document.createElement('select');
             compSelect.className = 'component-select';
-            components.forEach(c => {
+            
+            const extendedComponents = [...components, 'CUSTOM ENTRY...'];
+            extendedComponents.forEach(c => {
                 let opt = document.createElement('option');
                 opt.value = c === 'Select Component' ? '' : c;
                 opt.textContent = c.toUpperCase();
@@ -1586,6 +1599,37 @@
             defaultOpt.value = '';
             defaultOpt.textContent = 'AWAITING COMPONENT';
             defSelect.appendChild(defaultOpt);
+
+            // CUSTOM INPUT FIELDS
+            const customCompInput = document.createElement('input');
+            customCompInput.type = 'text';
+            customCompInput.placeholder = 'COMP NAME...';
+            customCompInput.className = 'custom-comp';
+            customCompInput.style.display = 'none';
+
+            const customDefInput = document.createElement('input');
+            customDefInput.type = 'text';
+            customDefInput.placeholder = 'DEFECT TYPE...';
+            customDefInput.className = 'custom-def';
+            customDefInput.style.display = 'none';
+
+            const revertBtn = document.createElement('button');
+            revertBtn.className = 'delete-btn revert-btn';
+            revertBtn.innerHTML = '↺'; 
+            revertBtn.style.display = 'none';
+            revertBtn.onclick = function() { 
+                row.dataset.isCustom = "false";
+                compSelect.style.display = '';
+                defSelect.style.display = '';
+                customCompInput.style.display = 'none';
+                customDefInput.style.display = 'none';
+                revertBtn.style.display = 'none';
+                compSelect.value = '';
+                customCompInput.value = '';
+                customDefInput.value = '';
+                updateDefects('');
+                checkSegmentData(row.closest('.segment-card'));
+            };
 
             function updateDefects(selectedComp, selectedDefect = '') {
                 defSelect.innerHTML = '';
@@ -1611,7 +1655,23 @@
                 }
             }
 
-            compSelect.addEventListener('change', function() { updateDefects(this.value); });
+            compSelect.addEventListener('change', function() { 
+                if (this.value === 'CUSTOM ENTRY...') {
+                    row.dataset.isCustom = "true";
+                    compSelect.style.display = 'none';
+                    defSelect.style.display = 'none';
+                    customCompInput.style.display = 'block';
+                    customDefInput.style.display = 'block';
+                    revertBtn.style.display = 'flex';
+                    customCompInput.focus();
+                } else {
+                    updateDefects(this.value); 
+                }
+                checkSegmentData(row.closest('.segment-card'));
+            });
+
+            customCompInput.addEventListener('input', () => checkSegmentData(row.closest('.segment-card')));
+            customDefInput.addEventListener('input', () => checkSegmentData(row.closest('.segment-card')));
 
             const photoWrapper = document.createElement('div');
             photoWrapper.className = 'photo-wrapper';
@@ -1675,11 +1735,23 @@
             
             row.appendChild(compSelect);
             row.appendChild(defSelect);
+            row.appendChild(customCompInput);
+            row.appendChild(customDefInput);
+            row.appendChild(revertBtn);
             row.appendChild(photoWrapper);
             container.appendChild(row);
 
             if (prefill) {
-                if (prefill.comp) {
+                if (prefill.isCustom || (prefill.comp && prefill.comp !== '' && !defectMap[prefill.comp])) {
+                    row.dataset.isCustom = "true";
+                    compSelect.style.display = 'none';
+                    defSelect.style.display = 'none';
+                    customCompInput.style.display = 'block';
+                    customDefInput.style.display = 'block';
+                    revertBtn.style.display = 'flex';
+                    customCompInput.value = prefill.comp || '';
+                    customDefInput.value = prefill.def || '';
+                } else if (prefill.comp) {
                     compSelect.value = prefill.comp;
                     updateDefects(prefill.comp, prefill.def);
                 }
@@ -1708,9 +1780,11 @@
                 };
 
                 card.querySelectorAll('.defect-row').forEach(row => {
+                    const isCustom = row.dataset.isCustom === "true";
                     segData.defects.push({
-                        comp: row.querySelector('.component-select').value,
-                        def: row.querySelector('.defect-select').value,
+                        isCustom: isCustom,
+                        comp: isCustom ? row.querySelector('.custom-comp').value : row.querySelector('.component-select').value,
+                        def: isCustom ? row.querySelector('.custom-def').value : row.querySelector('.defect-select').value,
                         images: JSON.parse(row.dataset.images || "[]") 
                     });
                 });
@@ -1860,8 +1934,9 @@
                     let hasDefects = false;
 
                     rows.forEach((row, index) => {
-                        const comp = row.querySelector('.component-select').value;
-                        const def = row.querySelector('.defect-select').value;
+                        const isCustom = row.dataset.isCustom === "true";
+                        const comp = isCustom ? row.querySelector('.custom-comp').value : row.querySelector('.component-select').value;
+                        const def = isCustom ? row.querySelector('.custom-def').value : row.querySelector('.defect-select').value;
                         const images = JSON.parse(row.dataset.images || "[]");
                         
                         if (comp || def || images.length > 0) {
