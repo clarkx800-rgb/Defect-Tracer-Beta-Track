@@ -181,12 +181,13 @@
         }
         .sts-menu-item:active { background: var(--primary-dark); border-color: var(--primary); color: #fff;}
 
+        /* TACTICAL SEARCH MENU SYSTEM */
         .search-container {
             display: none;
             gap: 8px;
             margin-top: 15px;
             align-items: center;
-            animation: cascadingFadeIn 0.2s ease-out;
+            animation: cascadingFadeIn 0.2s ease-out both;
         }
         .search-input-wrapper {
             display: flex;
@@ -333,9 +334,9 @@
         }
         
         .map-item:active { transform: scale(0.9); }
-        .map-item.has-data { background-color: var(--primary-dark); color: #fff; border-color: var(--primary-dark); }
+        .map-item.has-data { background-color: #3e2700; color: var(--warning); border-color: var(--warning); }
         .map-item.active-map { background: var(--primary); color: #fff; border-color: var(--primary-dark) !important; box-shadow: var(--hud-glow);}
-        .map-item.active-map.has-data { background-color: var(--warning); color: #000; border-color: var(--danger) !important;}
+        .map-item.active-map.has-data { background-color: var(--warning); color: #fff; border-color: var(--danger) !important;}
 
         #segments-container { flex: 1; display: flex; flex-direction: column; gap: 15px; min-width: 0; padding-bottom: 90px; }
 
@@ -392,6 +393,7 @@
 
         select { flex: 1 1 40%; min-width: 120px; }
 
+        /* MULTI-PHOTO UI REWORK */
         .photo-wrapper { display: flex; align-items: stretch; gap: 8px; flex: 1 1 100%; justify-content: space-between; background: var(--card-bg); padding: 5px; border: 1px solid var(--border-color); }
         .file-input { display: none; }
         .camera-btn { background-color: var(--border-color); color: var(--text-color); padding: 10px 12px; font-size: var(--base-font); font-weight: bold; cursor: pointer; text-align: center; border: 1px solid var(--border-color); flex: 0 1 auto; transition: background-color 0.2s; display: flex; align-items: center; justify-content: center;}
@@ -904,11 +906,10 @@
             
             if (targetCard) {
                 isAutoScrolling = true;
+                
+                // 1. Start the scroll
                 scrollToCard(targetCard);
                 
-                targetCard.classList.add('search-highlight');
-                setTimeout(() => { targetCard.classList.remove('search-highlight'); }, 1200);
-
                 const targetMapItem = document.querySelector(`.map-item[data-map-segment="${tsNumber}"]`);
                 if (targetMapItem) {
                     const mapContainer = document.getElementById('miniMap');
@@ -922,6 +923,13 @@
 
                 document.getElementById('searchContainer').style.display = 'none';
                 input.value = '';
+                
+                // 2. Wait for smooth scroll to finish (approx 500ms), THEN flash
+                setTimeout(() => {
+                    targetCard.classList.add('search-highlight');
+                    setTimeout(() => { targetCard.classList.remove('search-highlight'); }, 1200);
+                }, 500);
+
                 setTimeout(() => { isAutoScrolling = false; }, 800);
             } else {
                 showSystemAlert(`Could not find TS-${tsNumber}.\nSub to sub section may have not been loaded.`, "TS MISSING", true);
@@ -1740,11 +1748,10 @@
                     doc.setLineWidth(0.5);
                     doc.roundedRect(margin, margin, borderW, borderH, 3, 3, 'S');
                 } else if (activeTheme === 'pokemongo') {
-                    // Trainer Pokedex Gamified Border
-                    doc.setDrawColor(227, 53, 13); // Pokeball Red outer
+                    doc.setDrawColor(227, 53, 13); 
                     doc.setLineWidth(1.0);
                     doc.roundedRect(margin, margin, borderW, borderH, 5, 5, 'S');
-                    doc.setDrawColor(40, 172, 168); // Teal inner line
+                    doc.setDrawColor(40, 172, 168); 
                     doc.setLineWidth(0.3);
                     doc.roundedRect(margin + 1, margin + 1, borderW - 2, borderH - 2, 4, 4, 'S');
                 } else {
