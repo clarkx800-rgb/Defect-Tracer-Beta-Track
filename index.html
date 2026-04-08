@@ -7,30 +7,43 @@
 
     <link rel="icon" type="image/png" href="icon.png">
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#1a1a1a">
+    <meta id="themeColorMeta" name="theme-color" content="#1a1a1a">
     
     <link rel="apple-touch-icon" href="icon.png">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-status-bar-style" content="black-translucent">
 
     <script src="database.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
+    <script src="themes.js"></script> <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js').then(registration => {
-                    console.log('Offline mode activated!', registration.scope);
-                }).catch(err => {
-                    console.log('ServiceWorker registration failed: ', err);
-                });
+                navigator.serviceWorker.register('sw.js').catch(err => console.log('SW fail:', err));
             });
         }
+        
+        // INSTANT THEME LOADER (Prevents flashing white/black on page reload)
+        function applySavedSettings() {
+            const savedTheme = localStorage.getItem('appTheme') || 'tactical';
+            const savedFont = localStorage.getItem('appFontSize') || 'small';
+            
+            const themeData = systemThemes[savedTheme];
+            const fontData = systemFonts[savedFont];
+            
+            const root = document.documentElement;
+            for (let key in themeData) root.style.setProperty(key, themeData[key]);
+            for (let key in fontData) root.style.setProperty(key, fontData[key]);
+            
+            document.getElementById('themeColorMeta').setAttribute('content', themeData['--theme-color-meta']);
+        }
+        // Run immediately
+        applySavedSettings();
     </script>
     
     <style>
-        /* TACTICAL / HUD THEME VARIABLES */
+        /* FALLBACK DEFAULTS IF SCRIPT FAILS */
         :root {
             --primary: #8bc34a; 
             --primary-dark: #33691e;
@@ -44,7 +57,13 @@
             --text-muted: #888888;
             --border-color: #333333;
             --hud-glow: 0 0 8px rgba(139, 195, 74, 0.4);
-            --map-width: 85px; 
+            --border-radius: 2px;
+            
+            --base-font: 13px;
+            --header-font: 16px;
+            --map-font: 15px;
+            --btn-font: 14px;
+            --map-width: 80px; 
         }
 
         body {
@@ -56,20 +75,22 @@
             box-sizing: border-box;
             text-transform: uppercase; 
             -webkit-font-smoothing: antialiased; 
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
 
-        * { border-radius: 2px !important; }
+        * { border-radius: var(--border-radius) !important; }
 
         .sticky-header {
             position: sticky;
             top: 0;
             z-index: 1000;
-            background-color: #111111;
+            background-color: var(--card-bg);
             padding: 10px 15px;
             border-bottom: 2px solid var(--primary);
             box-shadow: var(--hud-glow); 
             margin-bottom: 15px;
             will-change: transform;
+            transition: background-color 0.3s ease;
         }
 
         .header-top-bar {
@@ -83,12 +104,12 @@
         .header-title-container {
             flex: 1;
             min-width: 0; 
-            position: relative; /* Anchor for the shortcut menu */
+            position: relative; 
         }
 
         h2 { 
             margin: 0; 
-            font-size: 16px;
+            font-size: var(--header-font);
             line-height: 1.5;
             letter-spacing: 1px;
             color: var(--primary);
@@ -96,7 +117,7 @@
         }
 
         #active-area-display {
-            font-size: 12px;
+            font-size: var(--base-font);
             padding: 3px 8px;
             font-weight: bold;
             text-transform: uppercase;
@@ -107,14 +128,13 @@
         }
         #active-area-display:empty { display: none; }
 
-        /* TACTICAL STS SHORTCUT BUTTON */
         .sts-header-btn {
             background-color: var(--input-bg);
             border: 1px solid var(--primary);
             color: var(--text-color);
             padding: 4px 10px;
             font-family: inherit;
-            font-size: 13px;
+            font-size: var(--base-font);
             font-weight: bold;
             letter-spacing: 1px;
             cursor: pointer;
@@ -123,7 +143,7 @@
             margin-top: 4px;
             text-transform: uppercase;
             transition: background-color 0.2s ease;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            box-shadow: var(--hud-glow);
             word-wrap: break-word;
             white-space: normal;
             text-align: left;
@@ -131,7 +151,6 @@
         .sts-header-btn:active { background-color: var(--border-color); }
         .sts-header-btn span#active-route-display { color: var(--text-color); }
 
-        /* STS SHORTCUT DROPDOWN MENU */
         .sts-shortcut-menu {
             position: absolute;
             top: 100%; 
@@ -155,17 +174,17 @@
             border: 1px solid var(--border-color);
             color: var(--text-color);
             cursor: pointer;
-            font-size: 13px;
+            font-size: var(--base-font);
             font-weight: bold;
             text-align: left;
             letter-spacing: 1px;
             transition: background 0.2s;
         }
-        .sts-menu-item:active { background: var(--primary-dark); border-color: var(--primary); }
+        .sts-menu-item:active { background: var(--primary-dark); border-color: var(--primary); color: #fff;}
 
         .menu-toggle-btn {
             background-color: var(--card-bg);
-            color: #ffffff; 
+            color: var(--text-color); 
             border: 1px solid var(--border-color);
             width: 42px; 
             height: 42px; 
@@ -179,7 +198,7 @@
             transition: background-color 0.2s ease;
         }
         
-        .menu-toggle-btn:active { background-color: #333; }
+        .menu-toggle-btn:active { background-color: var(--border-color); }
         .menu-toggle-icon { font-size: 22px; font-family: sans-serif; line-height: 1; pointer-events: none; }
 
         #collapsible-menu {
@@ -187,7 +206,7 @@
             transition: max-height 0.3s ease-out, opacity 0.3s ease-out, margin-top 0.3s ease-out;
             will-change: max-height, opacity; 
         }
-        #collapsible-menu.expanded { max-height: 800px; opacity: 1; margin-top: 15px; }
+        #collapsible-menu.expanded { max-height: 1200px; opacity: 1; margin-top: 15px; }
         #collapsible-menu.collapsed { max-height: 0; opacity: 0; margin-top: 0; }
 
         .control-panel {
@@ -198,28 +217,30 @@
             display: flex;
             flex-direction: column;
             gap: 8px;
+            transition: background-color 0.3s ease;
         }
 
-        .control-panel label { font-size: 13px; letter-spacing: 1px; color: var(--text-muted); margin-top: 5px; }
+        .control-panel label { font-size: var(--base-font); letter-spacing: 1px; color: var(--text-muted); margin-top: 5px; }
         .input-group { display: flex; gap: 8px; }
         
         select, .segment-notes {
             flex: 1;
             padding: 12px;
             border: 1px solid var(--border-color) !important;
-            font-size: 15px; 
+            font-size: var(--base-font); 
             background-color: var(--input-bg) !important;
             color: var(--text-color) !important;
             text-transform: uppercase;
             font-family: inherit;
             appearance: none; 
+            transition: background-color 0.3s ease;
         }
         select:focus, .segment-notes:focus {
             outline: none;
             border-color: var(--primary) !important;
-            box-shadow: 0 0 5px rgba(139, 195, 74, 0.2);
+            box-shadow: var(--hud-glow);
         }
-        select:disabled { background-color: #000 !important; color: #555 !important; cursor: not-allowed; }
+        select:disabled { background-color: var(--border-color) !important; color: var(--text-muted) !important; cursor: not-allowed; }
 
         .action-buttons { display: flex; gap: 8px; margin-top: 5px; }
         .save-load-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 5px; }
@@ -227,7 +248,7 @@
         button {
             padding: 12px;
             border: 1px solid transparent;
-            font-size: 14px;
+            font-size: var(--btn-font);
             font-weight: bold;
             letter-spacing: 1px;
             color: white;
@@ -237,13 +258,12 @@
         }
 
         .btn-primary { background-color: var(--primary-dark); color: #fff; border-color: var(--primary); flex: 2; }
-        .btn-success { background-color: #1b5e20; color: #fff; border-color: #4caf50; width: 100%; margin-bottom: 5px;}
-        .btn-warning { background-color: #ff8f00; color: #000; border-color: #ffca28; }
+        .btn-success { background-color: var(--success); color: #fff; width: 100%; margin-bottom: 5px;}
+        .btn-warning { background-color: var(--warning); color: #000; }
         .btn-info { background-color: #01579b; color: #fff; border-color: #29b6f6; }
         .btn-danger { background-color: transparent; color: var(--danger); border-color: var(--danger); }
         .btn-danger:active { background-color: var(--danger); color: #fff; }
         .btn-outline { background-color: transparent; color: var(--primary); border: 1px solid var(--primary); flex: 1; }
-        button:disabled { background-color: #333; color: #666; border-color: #444; cursor: not-allowed; }
 
         .app-layout { display: flex; align-items: flex-start; gap: 10px; padding: 0 15px 30px 10px; }
 
@@ -259,17 +279,17 @@
             scrollbar-width: none; 
             -ms-overflow-style: none;
             padding-bottom: 90px; 
-            scroll-behavior: smooth; /* Ensures auto-scroll animates nicely */
+            scroll-behavior: smooth; 
         }
         .mini-map-container::-webkit-scrollbar { display: none; }
 
         .map-item {
             background: var(--card-bg);
             border: 1px solid var(--border-color);
-            padding: 12px 0;
+            padding: 10px 0;
             text-align: center;
             font-weight: bold;
-            font-size: 15px;
+            font-size: var(--map-font);
             color: var(--text-muted);
             cursor: pointer;
             transition: all 0.2s ease;
@@ -279,8 +299,10 @@
         
         .map-item:active { transform: scale(0.9); }
         .map-item.has-data { background-color: #3e2700; color: var(--warning); border-color: var(--warning); }
-        .map-item.active-map { background: var(--primary-dark); color: #fff; border-color: var(--primary) !important; box-shadow: var(--hud-glow);}
-        .map-item.active-map.has-data { background-color: #b26500; color: #fff; border-color: var(--warning) !important;}
+        
+        /* Adapts the active map color depending on light/dark mode */
+        .map-item.active-map { background: var(--primary); color: #fff; border-color: var(--primary-dark) !important; box-shadow: var(--hud-glow);}
+        .map-item.active-map.has-data { background-color: var(--warning); color: #fff; border-color: var(--danger) !important;}
 
         #segments-container { flex: 1; display: flex; flex-direction: column; gap: 15px; min-width: 0; padding-bottom: 90px; }
 
@@ -297,13 +319,15 @@
             animation: cascadingFadeIn 0.3s ease-out both;
             scroll-margin-top: 150px; 
             will-change: opacity, transform;
+            transition: background-color 0.3s ease;
+            box-shadow: var(--hud-glow);
         }
 
         .segment-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; margin-bottom: 10px; }
-        .segment-header h3 { margin: 0; color: var(--primary); font-size: 16px; letter-spacing: 2px;}
+        .segment-header h3 { margin: 0; color: var(--primary); font-size: var(--header-font); letter-spacing: 2px;}
         .segment-header-badges { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
         
-        .direction-badge { font-size: 12px; font-weight: bold; color: var(--text-color); background: var(--input-bg); padding: 4px 8px; border: 1px solid var(--border-color);}
+        .direction-badge { font-size: var(--base-font); font-weight: bold; color: var(--text-color); background: var(--input-bg); padding: 4px 8px; border: 1px solid var(--border-color);}
 
         .segment-notes {
             width: 100%; 
@@ -319,11 +343,11 @@
 
         select { flex: 1 1 40%; min-width: 120px; }
 
-        .photo-wrapper { display: flex; align-items: center; gap: 10px; flex: 1 1 100%; justify-content: space-between; background: #000; padding: 5px; border: 1px solid var(--border-color); }
+        .photo-wrapper { display: flex; align-items: center; gap: 10px; flex: 1 1 100%; justify-content: space-between; background: var(--card-bg); padding: 5px; border: 1px solid var(--border-color); }
         .file-input { display: none; }
-        .camera-btn { background-color: #333; color: white; padding: 8px 12px; font-size: 13px; font-weight: bold; cursor: pointer; text-align: center; border: 1px solid #555; flex: 0 1 auto; transition: background-color 0.2s;}
-        .camera-btn:active { background-color: #555; }
-        .photo-name { font-size: 12px; color: var(--success); font-weight: bold; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; text-align: center; }
+        .camera-btn { background-color: var(--border-color); color: var(--text-color); padding: 8px 12px; font-size: var(--base-font); font-weight: bold; cursor: pointer; text-align: center; border: 1px solid var(--border-color); flex: 0 1 auto; transition: background-color 0.2s;}
+        .camera-btn:active { background-color: var(--primary); color: white;}
+        .photo-name { font-size: var(--base-font); color: var(--success); font-weight: bold; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; text-align: center; }
         
         .delete-btn { 
             background-color: transparent; 
@@ -344,7 +368,6 @@
         .add-defect-btn { background-color: transparent; color: var(--text-muted); border: 1px dashed var(--text-muted); margin-top: 10px; width: 100%; transition: all 0.2s;}
         .add-defect-btn:active { border-color: var(--primary); color: var(--primary); }
 
-        /* QUICK ADD FAB */
         .quick-add-fab {
             position: fixed;
             bottom: 20px;
@@ -367,7 +390,6 @@
         }
         .quick-add-fab:active { transform: scale(0.9); background-color: var(--primary-dark); color: #fff; }
 
-        /* QUICK ADD MODAL HUD */
         .quick-add-modal {
             position: fixed;
             bottom: 85px;
@@ -383,7 +405,7 @@
             gap: 10px;
             will-change: opacity, transform;
         }
-        .quick-add-modal h4 { margin: 0 0 5px 0; color: var(--text-color); font-size: 13px; letter-spacing: 1px; border-bottom: 1px solid var(--border-color); padding-bottom: 8px;}
+        .quick-add-modal h4 { margin: 0 0 5px 0; color: var(--text-color); font-size: var(--base-font); letter-spacing: 1px; border-bottom: 1px solid var(--border-color); padding-bottom: 8px;}
         
         @media (max-width: 600px) { select { flex: 1 1 100%; } }
     </style>
@@ -410,6 +432,26 @@
         </div>
         
         <div id="collapsible-menu" class="expanded">
+            <div class="control-panel" style="margin-bottom: 15px; border-color: var(--primary);">
+                <div style="display: flex; gap: 8px;">
+                    <div style="flex: 1;">
+                        <label for="theme-selector" style="color: var(--primary); font-weight: bold;">UI THEME</label>
+                        <select id="theme-selector" onchange="changeTheme(this.value)">
+                            <option value="tactical">TACTICAL (DARK)</option>
+                            <option value="windows11">WINDOWS 11 (LIGHT)</option>
+                        </select>
+                    </div>
+                    <div style="flex: 1;">
+                        <label for="font-selector" style="color: var(--primary); font-weight: bold;">FONT SIZE</label>
+                        <select id="font-selector" onchange="changeFontSize(this.value)">
+                            <option value="small">STANDARD</option>
+                            <option value="medium">MEDIUM</option>
+                            <option value="large">LARGE</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
             <button id="exportBtn" class="btn-success" onclick="exportData()">📊 EXPORT REPORT (Excel & PDF)</button>
             
             <div class="save-load-grid">
@@ -456,7 +498,7 @@
                 <div class="segment-header">
                     <h3>SYSTEM INITIALIZED</h3>
                 </div>
-                <div style="font-size: 13px; line-height: 1.6; color: var(--text-muted); text-transform: none;">
+                <div style="font-size: var(--base-font); line-height: 1.6; color: var(--text-muted); text-transform: none;">
                     <p style="color: var(--text-color); font-weight: bold; text-transform: uppercase;">STEP 1: ESTABLISH ROUTE (In Order)</p>
                     <ul style="margin-top: 5px; padding-left: 20px;">
                         <li>Open the top right menu.</li>
@@ -502,16 +544,30 @@
     <script>
         let currentFileName = null;
         
-        // SYSTEM STATE MEMORY 
         let loadedRoutes = new Set();
         let routeLoadHistory = []; 
         let currentActiveArea = "";
         let currentActiveDirection = "";
         
-        // PREVENTS MINI-MAP AUTO-SCROLL WHEN A USER CLICKS A SHORTCUT
         let isAutoScrolling = false;
 
-        // GLOBAL CLICK LISTENER TO AUTO-HIDE MENUS
+        // THEME CONTROLLERS
+        function changeTheme(themeName) {
+            localStorage.setItem('appTheme', themeName);
+            applySavedSettings(); // Defined in <head>
+        }
+
+        function changeFontSize(sizeName) {
+            localStorage.setItem('appFontSize', sizeName);
+            applySavedSettings(); // Defined in <head>
+        }
+
+        // Initialize selectors to match saved state
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('theme-selector').value = localStorage.getItem('appTheme') || 'tactical';
+            document.getElementById('font-selector').value = localStorage.getItem('appFontSize') || 'small';
+        });
+
         document.addEventListener('click', (e) => {
             const menu = document.getElementById('collapsible-menu');
             const fabModal = document.getElementById('quickAddModal');
@@ -521,15 +577,12 @@
             const fabBtn = document.getElementById('quickAddBtn');
             const stsBtn = document.getElementById('stsDropdownBtn');
 
-            // Hide main menu
             if (!menu.contains(e.target) && !menuBtn.contains(e.target) && menu.classList.contains('expanded')) {
                 toggleMenu(true);
             }
-            // Hide quick add modal
             if (!fabModal.contains(e.target) && !fabBtn.contains(e.target) && fabModal.style.display === 'flex') {
                 toggleQuickAddModal(false);
             }
-            // Hide STS Shortcut Menu
             if (stsMenu && stsBtn && !stsMenu.contains(e.target) && !stsBtn.contains(e.target) && stsMenu.style.display === 'flex') {
                 stsMenu.style.display = 'none';
             }
@@ -557,7 +610,6 @@
             }
         }
 
-        // TACTICAL STS SHORTCUT MENU CONTROLS
         function toggleStsMenu(e) {
             if (e) e.stopPropagation();
             const menu = document.getElementById('stsShortcutMenu');
@@ -566,7 +618,7 @@
             } else {
                 populateStsMenu();
                 menu.style.display = 'flex';
-                toggleMenu(true); // Auto close other menus
+                toggleMenu(true); 
                 toggleQuickAddModal(false); 
             }
         }
@@ -577,11 +629,10 @@
             
             const cards = document.querySelectorAll('.segment-card');
             if (cards.length === 0) {
-                menu.innerHTML = '<div style="padding:10px; color:var(--text-muted); font-size:12px;">NO SECTIONS LOADED</div>';
+                menu.innerHTML = '<div style="padding:10px; color:var(--text-muted); font-size:var(--base-font);">NO SECTIONS LOADED</div>';
                 return;
             }
 
-            // Extract unique routes matching exact current DOM order
             const orderedRoutes = [];
             cards.forEach(card => {
                 const key = card.getAttribute('data-route-key');
@@ -601,22 +652,19 @@
         }
 
         function jumpToRoute(routeKey) {
-            isAutoScrolling = true; // Tell the system we are handling the map scroll manually
+            isAutoScrolling = true; 
             
-            // Find and scroll Main Pane
             const firstCard = document.querySelector(`.segment-card[data-route-key="${routeKey}"]`);
             if (firstCard) {
                 scrollToCard(firstCard);
             }
 
-            // Find and perfectly scroll Mini-Map
             const firstMapItem = document.querySelector(`.map-item[data-route-key="${routeKey}"]`);
             if (firstMapItem) {
                 const mapContainer = document.getElementById('miniMap');
                 const containerRect = mapContainer.getBoundingClientRect();
                 const itemRect = firstMapItem.getBoundingClientRect();
                 
-                // Calculates exact pixel distance to align map item in center of sidebar
                 mapContainer.scrollTo({
                     top: mapContainer.scrollTop + (itemRect.top - containerRect.top) - (containerRect.height / 2) + (itemRect.height / 2),
                     behavior: 'smooth'
@@ -624,23 +672,26 @@
             }
             
             document.getElementById('stsShortcutMenu').style.display = 'none';
-            setTimeout(() => { isAutoScrolling = false; }, 800); // Release the manual override after animation finishes
+            setTimeout(() => { isAutoScrolling = false; }, 800); 
         }
 
         function getLineColors(lineName) {
+            // Check if Windows 11 mode is active. If yes, map badge text to white for contrast on light colors
+            const isLightMode = localStorage.getItem('appTheme') === 'windows11';
+            
             if (!lineName) return { bg: 'transparent', text: 'var(--text-color)', border: 'var(--border-color)' };
             const name = lineName.toUpperCase();
             
             if (name.includes("AREA 1") || name.includes("EXPO")) {
-                return { bg: '#3e3000', text: '#ffc107', border: '#ffc107' };
+                return { bg: isLightMode ? '#ffc107' : '#3e3000', text: isLightMode ? '#000' : '#ffc107', border: '#ffc107' };
             }
             else if (name.includes("AREA 2") || name.includes("MILLENIUM") || name.includes("MILLENNIUM")) {
-                return { bg: '#00254d', text: '#3399ff', border: '#3399ff' };
+                return { bg: isLightMode ? '#3399ff' : '#00254d', text: isLightMode ? '#fff' : '#3399ff', border: '#3399ff' };
             }
             else if (name.includes("AREA 3") || name.includes("EVERGREEN")) {
-                return { bg: '#0f3316', text: '#4caf50', border: '#4caf50' };
+                return { bg: isLightMode ? '#4caf50' : '#0f3316', text: isLightMode ? '#fff' : '#4caf50', border: '#4caf50' };
             }
-            return { bg: '#222', text: '#aaa', border: '#555' };
+            return { bg: isLightMode ? '#e5e5e5' : '#222', text: isLightMode ? '#000' : '#aaa', border: '#555' };
         }
 
         document.addEventListener("DOMContentLoaded", () => {
@@ -708,7 +759,7 @@
                 updateQuickAddDropdown();
                 modal.style.display = 'flex';
                 toggleMenu(true); 
-                document.getElementById('stsShortcutMenu').style.display = 'none'; // Close shortcut menu
+                document.getElementById('stsShortcutMenu').style.display = 'none'; 
             } else {
                 modal.style.display = 'none';
             }
@@ -760,13 +811,11 @@
                     if (activeMapItem) {
                         activeMapItem.classList.add('active-map');
 
-                        // NEW LOGIC: Smooth auto-scrolling of the mini-map when user swipes down the main pane.
                         if (!isAutoScrolling) {
                             const mapContainer = document.getElementById('miniMap');
                             const containerRect = mapContainer.getBoundingClientRect();
                             const itemRect = activeMapItem.getBoundingClientRect();
                             
-                            // If the active item gets close to the top or bottom boundaries of the visible sidebar, recenter it
                             if (itemRect.top < containerRect.top + 20 || itemRect.bottom > containerRect.bottom - 20) {
                                 mapContainer.scrollTo({
                                     top: mapContainer.scrollTop + (itemRect.top - containerRect.top) - (containerRect.height / 2) + (itemRect.height / 2),
@@ -844,7 +893,7 @@
                 mapBtn.textContent = `TS-${item.num}`;
                 mapBtn.style.borderLeft = `4px solid ${item.color}`;
                 mapBtn.onclick = () => {
-                    isAutoScrolling = true; // Tell the observer we are handling the scroll manually
+                    isAutoScrolling = true; 
                     scrollToCard(card);
                     setTimeout(() => { isAutoScrolling = false; }, 800);
                 };
@@ -925,7 +974,7 @@
                             <div class="segment-header">
                                 <h3>SYSTEM INITIALIZED</h3>
                             </div>
-                            <div style="font-size: 13px; line-height: 1.6; color: var(--text-muted); text-transform: none;">
+                            <div style="font-size: var(--base-font); line-height: 1.6; color: var(--text-muted); text-transform: none;">
                                 <p style="color: var(--text-color); font-weight: bold; text-transform: uppercase;">STEP 1: ESTABLISH ROUTE</p>
                                 <ul style="margin-top: 5px; padding-left: 20px;">
                                     <li>Open the top right menu.</li>
