@@ -14,7 +14,9 @@
     <meta name="mobile-web-app-status-bar-style" content="black-translucent">
 
     <script src="database.js"></script>
-    <script src="themes.js"></script> <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
+    <script src="themes.js"></script> 
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
     <script>
@@ -24,7 +26,6 @@
             });
         }
         
-        // INSTANT THEME LOADER (Prevents flashing white/black on page reload)
         function applySavedSettings() {
             const savedTheme = localStorage.getItem('appTheme') || 'tactical';
             const savedFont = localStorage.getItem('appFontSize') || 'small';
@@ -38,12 +39,10 @@
             
             document.getElementById('themeColorMeta').setAttribute('content', themeData['--theme-color-meta']);
         }
-        // Run immediately
         applySavedSettings();
     </script>
     
     <style>
-        /* FALLBACK DEFAULTS IF SCRIPT FAILS */
         :root {
             --primary: #8bc34a; 
             --primary-dark: #33691e;
@@ -182,6 +181,43 @@
         }
         .sts-menu-item:active { background: var(--primary-dark); border-color: var(--primary); color: #fff;}
 
+        /* TACTICAL SEARCH MENU SYSTEM */
+        .search-container {
+            display: none;
+            gap: 8px;
+            margin-top: 15px;
+            align-items: center;
+            animation: cascadingFadeIn 0.2s ease-out both;
+        }
+        .search-input-wrapper {
+            display: flex;
+            align-items: center;
+            background: var(--input-bg);
+            border: 1px solid var(--primary);
+            flex: 1;
+            padding: 0 10px;
+            box-shadow: var(--hud-glow);
+        }
+        .search-prefix {
+            color: var(--primary);
+            font-weight: bold;
+            font-size: var(--base-font);
+            letter-spacing: 1px;
+        }
+        #tsSearchInput {
+            background: transparent !important;
+            border: none !important;
+            color: var(--text-color) !important;
+            font-size: var(--base-font);
+            font-weight: bold;
+            flex: 1;
+            padding: 12px 5px;
+            outline: none;
+            box-shadow: none !important;
+            width: 100%;
+            -webkit-appearance: none;
+        }
+
         .menu-toggle-btn {
             background-color: var(--card-bg);
             color: var(--text-color); 
@@ -199,7 +235,7 @@
         }
         
         .menu-toggle-btn:active { background-color: var(--border-color); }
-        .menu-toggle-icon { font-size: 22px; font-family: sans-serif; line-height: 1; pointer-events: none; }
+        .menu-toggle-icon { font-size: 20px; font-family: sans-serif; line-height: 1; pointer-events: none; }
 
         #collapsible-menu {
             overflow: hidden;
@@ -299,8 +335,6 @@
         
         .map-item:active { transform: scale(0.9); }
         .map-item.has-data { background-color: #3e2700; color: var(--warning); border-color: var(--warning); }
-        
-        /* Adapts the active map color depending on light/dark mode */
         .map-item.active-map { background: var(--primary); color: #fff; border-color: var(--primary-dark) !important; box-shadow: var(--hud-glow);}
         .map-item.active-map.has-data { background-color: var(--warning); color: #fff; border-color: var(--danger) !important;}
 
@@ -309,6 +343,16 @@
         @keyframes cascadingFadeIn {
             from { opacity: 0; transform: translateY(-10px); }
             to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Animation for when a card is found via search */
+        @keyframes tacticalPulse {
+            0% { box-shadow: 0 0 0 0 var(--primary); background-color: var(--primary-dark); }
+            70% { box-shadow: 0 0 0 15px rgba(139, 195, 74, 0); background-color: var(--card-bg); }
+            100% { box-shadow: 0 0 0 0 rgba(139, 195, 74, 0); background-color: var(--card-bg); }
+        }
+        .search-highlight {
+            animation: tacticalPulse 1.5s ease-out !important;
         }
 
         .segment-card {
@@ -426,9 +470,22 @@
                 <div id="stsShortcutMenu" class="sts-shortcut-menu"></div>
             </div>
             
-            <button class="menu-toggle-btn" onclick="toggleMenu()" id="menuBtn">
-                <span class="menu-toggle-icon">✖</span>
-            </button>
+            <div style="display: flex; gap: 8px;">
+                <button class="menu-toggle-btn" onclick="toggleSearch(event)" id="searchToggleBtn">
+                    <span class="menu-toggle-icon" style="font-size: 16px;">&#128269;&#xFE0E;</span>
+                </button>
+                <button class="menu-toggle-btn" onclick="toggleMenu()" id="menuBtn">
+                    <span class="menu-toggle-icon">✖</span>
+                </button>
+            </div>
+        </div>
+        
+        <div id="searchContainer" class="search-container">
+            <div class="search-input-wrapper">
+                <span class="search-prefix">TS-</span>
+                <input type="tel" id="tsSearchInput" placeholder="NUMBER..." onkeypress="if(event.key === 'Enter') searchTS()">
+            </div>
+            <button class="btn-primary" onclick="searchTS()" style="flex: 0 1 auto; padding: 10px 15px;">FIND</button>
         </div>
         
         <div id="collapsible-menu" class="expanded">
@@ -554,28 +611,30 @@
         // THEME CONTROLLERS
         function changeTheme(themeName) {
             localStorage.setItem('appTheme', themeName);
-            applySavedSettings(); // Defined in <head>
+            applySavedSettings(); 
         }
 
         function changeFontSize(sizeName) {
             localStorage.setItem('appFontSize', sizeName);
-            applySavedSettings(); // Defined in <head>
+            applySavedSettings(); 
         }
 
-        // Initialize selectors to match saved state
         document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('theme-selector').value = localStorage.getItem('appTheme') || 'tactical';
             document.getElementById('font-selector').value = localStorage.getItem('appFontSize') || 'small';
         });
 
+        // GLOBAL CLICK LISTENER
         document.addEventListener('click', (e) => {
             const menu = document.getElementById('collapsible-menu');
             const fabModal = document.getElementById('quickAddModal');
             const stsMenu = document.getElementById('stsShortcutMenu');
+            const searchContainer = document.getElementById('searchContainer');
             
             const menuBtn = document.getElementById('menuBtn');
             const fabBtn = document.getElementById('quickAddBtn');
             const stsBtn = document.getElementById('stsDropdownBtn');
+            const searchBtn = document.getElementById('searchToggleBtn');
 
             if (!menu.contains(e.target) && !menuBtn.contains(e.target) && menu.classList.contains('expanded')) {
                 toggleMenu(true);
@@ -585,6 +644,10 @@
             }
             if (stsMenu && stsBtn && !stsMenu.contains(e.target) && !stsBtn.contains(e.target) && stsMenu.style.display === 'flex') {
                 stsMenu.style.display = 'none';
+            }
+            // Auto hide search if clicked outside
+            if (searchContainer && searchBtn && !searchContainer.contains(e.target) && !searchBtn.contains(e.target) && searchContainer.style.display === 'flex') {
+                searchContainer.style.display = 'none';
             }
         });
 
@@ -607,6 +670,63 @@
                 menu.classList.remove('collapsed');
                 menu.classList.add('expanded');
                 btn.innerHTML = '<span class="menu-toggle-icon">✖</span>';
+                
+                // Close other menus
+                document.getElementById('searchContainer').style.display = 'none';
+                document.getElementById('stsShortcutMenu').style.display = 'none';
+            }
+        }
+
+        // TACTICAL SEARCH ENGINE
+        function toggleSearch(e) {
+            if (e) e.stopPropagation();
+            const searchContainer = document.getElementById('searchContainer');
+            if (searchContainer.style.display === 'flex') {
+                searchContainer.style.display = 'none';
+            } else {
+                searchContainer.style.display = 'flex';
+                document.getElementById('tsSearchInput').focus();
+                
+                // Close other menus
+                toggleMenu(true);
+                toggleQuickAddModal(false);
+                document.getElementById('stsShortcutMenu').style.display = 'none';
+            }
+        }
+
+        function searchTS() {
+            const input = document.getElementById('tsSearchInput');
+            const tsNumber = input.value.trim();
+            if (!tsNumber) return;
+
+            const targetCard = document.querySelector(`.segment-card[data-segment="${tsNumber}"]`);
+            
+            if (targetCard) {
+                isAutoScrolling = true;
+                scrollToCard(targetCard);
+                
+                // Add tactical pulse glow to the found card
+                targetCard.classList.add('search-highlight');
+                setTimeout(() => { targetCard.classList.remove('search-highlight'); }, 1500);
+
+                // Sync the mini-map to exactly match the found section
+                const targetMapItem = document.querySelector(`.map-item[data-map-segment="${tsNumber}"]`);
+                if (targetMapItem) {
+                    const mapContainer = document.getElementById('miniMap');
+                    const containerRect = mapContainer.getBoundingClientRect();
+                    const itemRect = targetMapItem.getBoundingClientRect();
+                    mapContainer.scrollTo({
+                        top: mapContainer.scrollTop + (itemRect.top - containerRect.top) - (containerRect.height / 2) + (itemRect.height / 2),
+                        behavior: 'smooth'
+                    });
+                }
+
+                // Cleanup UI
+                document.getElementById('searchContainer').style.display = 'none';
+                input.value = '';
+                setTimeout(() => { isAutoScrolling = false; }, 800);
+            } else {
+                alert(`Could not find TS-${tsNumber}.\nSub to sub section may have not been loaded.`);
             }
         }
 
@@ -620,6 +740,7 @@
                 menu.style.display = 'flex';
                 toggleMenu(true); 
                 toggleQuickAddModal(false); 
+                document.getElementById('searchContainer').style.display = 'none';
             }
         }
 
@@ -676,7 +797,6 @@
         }
 
         function getLineColors(lineName) {
-            // Check if Windows 11 mode is active. If yes, map badge text to white for contrast on light colors
             const isLightMode = localStorage.getItem('appTheme') === 'windows11';
             
             if (!lineName) return { bg: 'transparent', text: 'var(--text-color)', border: 'var(--border-color)' };
@@ -760,6 +880,7 @@
                 modal.style.display = 'flex';
                 toggleMenu(true); 
                 document.getElementById('stsShortcutMenu').style.display = 'none'; 
+                document.getElementById('searchContainer').style.display = 'none';
             } else {
                 modal.style.display = 'none';
             }
