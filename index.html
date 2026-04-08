@@ -1157,7 +1157,7 @@
 
             if (hasData) {
                 // Await the user's choice from the custom tactical modal
-                const proceed = await showSystemConfirm(`TS-${conflictTS} has data.\n\nUndoing this will erase the "${conflictRoute}" and details.\n\nAre you sure you want to undo?`);
+                const proceed = await showSystemConfirm(`TS-${conflictTS} has data.\n\nUndoing this will erase "${conflictRoute}" and details within the sub range.\n\nAre you sure you want to undo?`);
                 if (!proceed) return; 
             }
             
