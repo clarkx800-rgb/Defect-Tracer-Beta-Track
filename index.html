@@ -181,7 +181,6 @@
         }
         .sts-menu-item:active { background: var(--primary-dark); border-color: var(--primary); color: #fff;}
 
-        /* TACTICAL SEARCH MENU SYSTEM */
         .search-container {
             display: none;
             gap: 8px;
@@ -329,14 +328,17 @@
             color: var(--text-muted);
             cursor: pointer;
             transition: all 0.2s ease;
-            user-select: none;
             will-change: transform, background-color;
+            /* CRITICAL: Prevent text selection/copy menus during long press */
+            -webkit-user-select: none;
+            user-select: none;
+            -webkit-touch-callout: none; 
         }
         
         .map-item:active { transform: scale(0.9); }
-        .map-item.has-data { background-color: #3e2700; color: var(--warning); border-color: var(--warning); }
+        .map-item.has-data { background-color: var(--primary-dark); color: #fff; border-color: var(--primary-dark); }
         .map-item.active-map { background: var(--primary); color: #fff; border-color: var(--primary-dark) !important; box-shadow: var(--hud-glow);}
-        .map-item.active-map.has-data { background-color: var(--warning); color: #fff; border-color: var(--danger) !important;}
+        .map-item.active-map.has-data { background-color: var(--warning); color: #000; border-color: var(--danger) !important;}
 
         #segments-container { flex: 1; display: flex; flex-direction: column; gap: 15px; min-width: 0; padding-bottom: 90px; }
 
@@ -345,7 +347,6 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* NEW DOUBLE FLASH OUTLINE ANIMATION */
         @keyframes searchFlash {
             0%   { box-shadow: var(--hud-glow); border-color: var(--border-color); }
             20%  { box-shadow: 0 0 20px 4px var(--primary); border-color: var(--primary); }
@@ -394,7 +395,6 @@
 
         select { flex: 1 1 40%; min-width: 120px; }
 
-        /* MULTI-PHOTO UI REWORK */
         .photo-wrapper { display: flex; align-items: stretch; gap: 8px; flex: 1 1 100%; justify-content: space-between; background: var(--card-bg); padding: 5px; border: 1px solid var(--border-color); }
         .file-input { display: none; }
         .camera-btn { background-color: var(--border-color); color: var(--text-color); padding: 10px 12px; font-size: var(--base-font); font-weight: bold; cursor: pointer; text-align: center; border: 1px solid var(--border-color); flex: 0 1 auto; transition: background-color 0.2s; display: flex; align-items: center; justify-content: center;}
@@ -466,7 +466,6 @@
         }
         .quick-add-modal h4 { margin: 0 0 5px 0; color: var(--text-color); font-size: var(--base-font); letter-spacing: 1px; border-bottom: 1px solid var(--border-color); padding-bottom: 8px;}
         
-        /* CUSTOM TACTICAL ALERT MODAL */
         .system-modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0, 0, 0, 0.7);
@@ -500,7 +499,6 @@
         }
         .system-modal-btn-group { display: flex; gap: 10px; }
 
-        /* MULTI-PHOTO VIEWER GALLERY MODAL */
         .gallery-modal {
             background: var(--bg-color);
             border: 1px solid var(--primary);
@@ -666,7 +664,7 @@
     </button>
     
     <div class="quick-add-modal" id="quickAddModal">
-        <h4>ADD TO: <span id="quick-add-title" style="color: var(--primary);"></span></h4>
+        <h4><span id="quick-add-title" style="color: var(--text-color);"></span></h4>
         <select id="quick-add-select" style="width: 100%; margin-bottom: 5px;">
             <option value="">AWAITING INPUT...</option>
         </select>
@@ -709,10 +707,15 @@
         let routeLoadHistory = []; 
         let currentActiveArea = "";
         let currentActiveDirection = "";
+        
         let isAutoScrolling = false;
         let currentRowForGallery = null; 
 
-        // --- CUSTOM MODAL ENGINE ---
+        // LONG PRESS MEMORY ENGINE
+        let pressTimer;
+        let isLongPress = false;
+        let insertTargetTS = null;
+
         let confirmResolve = null;
 
         function showSystemAlert(message, title = "SYSTEM NOTICE", isDanger = false) {
@@ -754,7 +757,6 @@
             document.getElementById('systemModalOverlay').style.display = 'none';
         }
 
-        // 1. DESKTOP & REFRESH TRAP
         window.addEventListener('beforeunload', function (e) {
             const cards = document.querySelectorAll('.segment-card');
             if (cards.length > 0) {
@@ -763,19 +765,13 @@
             }
         });
 
-        // 2. MOBILE SYSTEM BACK BUTTON TRAP
         window.history.pushState({ isAppOpen: true }, "", "");
-
         window.addEventListener('popstate', function(event) {
             const cards = document.querySelectorAll('.segment-card');
-            
             if (cards.length > 0) {
                 window.history.pushState({ isAppOpen: true }, "", "");
-                
                 showSystemConfirm("WARNING: Using the system back button will exit the app and delete unsaved data.\n\nAre you sure you want to exit?", "DATA LOSS IMMINENT").then(proceed => {
-                    if (proceed) {
-                        window.history.go(-2); 
-                    }
+                    if (proceed) { window.history.go(-2); }
                 });
             } else {
                 window.history.back();
@@ -1101,11 +1097,48 @@
             }
         }
 
+        // TACTICAL LONG PRESS INJECTION ENGINE
+        function handleMapItemTouchStart(e, tsNumber) {
+            isLongPress = false;
+            pressTimer = setTimeout(() => {
+                isLongPress = true;
+                if (navigator.vibrate) navigator.vibrate(50); // Haptic feedback confirm
+                triggerInsertModal(tsNumber);
+            }, 600); // 0.6 seconds hold to trigger
+        }
+
+        function handleMapItemTouchEnd() {
+            clearTimeout(pressTimer);
+        }
+
+        function triggerInsertModal(tsNumber) {
+            insertTargetTS = tsNumber; // Store memory of where to slice the DOM
+            
+            const refCard = document.querySelector(`.segment-card[data-segment="${tsNumber}"]`);
+            if (refCard) {
+                currentActiveArea = refCard.getAttribute('data-area-name');
+                currentActiveDirection = refCard.getAttribute('data-direction');
+            }
+
+            const modal = document.getElementById('quickAddModal');
+            const dirCode = currentActiveDirection === "Inbound Track" ? "IB" : "OB";
+            
+            // Update Title to show they are INSERTING
+            document.getElementById('quick-add-title').innerHTML = `INSERT BELOW TS-${tsNumber} <br><span style="font-size:11px; color:var(--primary);">${currentActiveArea} [${dirCode}]</span>`;
+            
+            updateQuickAddDropdown();
+            modal.style.display = 'flex';
+            toggleMenu(true); 
+            document.getElementById('stsShortcutMenu').style.display = 'none'; 
+            document.getElementById('searchContainer').style.display = 'none';
+        }
+
         function toggleQuickAddModal(show) {
             const modal = document.getElementById('quickAddModal');
             if (show) {
+                insertTargetTS = null; // Standard append mode
                 const dirCode = currentActiveDirection === "Inbound Track" ? "IB" : "OB";
-                document.getElementById('quick-add-title').textContent = `${currentActiveArea} [${dirCode}]`;
+                document.getElementById('quick-add-title').innerHTML = `APPEND TO: <br><span style="font-size:11px; color:var(--primary);">${currentActiveArea} [${dirCode}]</span>`;
                 updateQuickAddDropdown();
                 modal.style.display = 'flex';
                 toggleMenu(true); 
@@ -1113,6 +1146,7 @@
                 document.getElementById('searchContainer').style.display = 'none';
             } else {
                 modal.style.display = 'none';
+                insertTargetTS = null;
             }
         }
 
@@ -1235,11 +1269,17 @@
                 }
             });
             
+            // Check if we are slicing the DOM via Long Press
+            let refCard = null;
+            let refMapItem = null;
+            if (isQuickAdd && insertTargetTS) {
+                refCard = document.querySelector(`.segment-card[data-segment="${insertTargetTS}"]`);
+                refMapItem = document.querySelector(`.map-item[data-map-segment="${insertTargetTS}"]`);
+            }
+            
             newCards.forEach((item, index) => {
                 const card = createSegmentCard(item.num, selectedRouteKey, selectedRouteData.name, direction, item.color, area);
                 card.style.animationDelay = `${index * 0.05}s`;
-                container.appendChild(card);
-                scrollObserver.observe(card);
 
                 const mapBtn = document.createElement('div');
                 mapBtn.className = 'map-item';
@@ -1247,14 +1287,38 @@
                 mapBtn.setAttribute('data-route-key', selectedRouteKey); 
                 mapBtn.textContent = `TS-${item.num}`;
                 mapBtn.style.borderLeft = `4px solid ${item.color}`;
+                
+                // LONG PRESS EVENT BINDINGS
+                mapBtn.addEventListener('touchstart', (e) => handleMapItemTouchStart(e, item.num), {passive: true});
+                mapBtn.addEventListener('mousedown', (e) => handleMapItemTouchStart(e, item.num));
+                mapBtn.addEventListener('touchend', handleMapItemTouchEnd);
+                mapBtn.addEventListener('mouseup', handleMapItemTouchEnd);
+                mapBtn.addEventListener('mouseleave', handleMapItemTouchEnd);
+                mapBtn.addEventListener('touchcancel', handleMapItemTouchEnd);
+
                 mapBtn.onclick = () => {
+                    if (isLongPress) return; // Ignore click if they were holding to insert
                     isAutoScrolling = true; 
                     scrollToCard(card);
                     setTimeout(() => { isAutoScrolling = false; }, 800);
                 };
-                mapContainer.appendChild(mapBtn);
+                
+                if (refCard && refMapItem) {
+                    // Surgical injection into the DOM right after the target node
+                    refCard.parentNode.insertBefore(card, refCard.nextSibling);
+                    refMapItem.parentNode.insertBefore(mapBtn, refMapItem.nextSibling);
+                    refCard = card;       // Update memory so the next card drops in under this one
+                    refMapItem = mapBtn;
+                } else {
+                    // Standard append to the absolute bottom
+                    container.appendChild(card);
+                    mapContainer.appendChild(mapBtn);
+                }
+                
+                scrollObserver.observe(card);
             });
             
+            insertTargetTS = null; // Clear injection memory
             loadedRoutes.add(selectedRouteKey);
             routeLoadHistory.push(selectedRouteKey);
             currentActiveArea = area;
@@ -1614,7 +1678,16 @@
                         mapBtn.setAttribute('data-route-key', activeKey);
                         mapBtn.textContent = `TS-${segData.segmentNum}`;
                         mapBtn.style.borderLeft = `4px solid ${segData.color || '#ccc'}`;
+                        
+                        mapBtn.addEventListener('touchstart', (e) => handleMapItemTouchStart(e, segData.segmentNum), {passive: true});
+                        mapBtn.addEventListener('mousedown', (e) => handleMapItemTouchStart(e, segData.segmentNum));
+                        mapBtn.addEventListener('touchend', handleMapItemTouchEnd);
+                        mapBtn.addEventListener('mouseup', handleMapItemTouchEnd);
+                        mapBtn.addEventListener('mouseleave', handleMapItemTouchEnd);
+                        mapBtn.addEventListener('touchcancel', handleMapItemTouchEnd);
+                        
                         mapBtn.onclick = () => {
+                            if (isLongPress) return;
                             isAutoScrolling = true;
                             scrollToCard(card);
                             setTimeout(() => { isAutoScrolling = false; }, 800);
