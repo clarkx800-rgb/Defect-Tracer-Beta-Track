@@ -261,6 +261,7 @@
         .control-panel label { font-size: var(--base-font); letter-spacing: 1px; color: var(--text-muted); margin-top: 5px; }
         .input-group { display: flex; gap: 8px; }
         
+        /* SHARED INPUT STYLES (Dropdowns + Custom Fields) */
         select, .segment-notes, .custom-comp, .custom-def {
             flex: 1;
             padding: 12px;
@@ -308,6 +309,7 @@
         .revert-btn { border: 1px solid var(--warning); color: var(--warning); flex: 0 1 auto;}
         .revert-btn:active { background-color: var(--warning); color: #000; }
 
+        /* MAIN LAYOUT */
         .app-layout { display: flex; align-items: flex-start; gap: 10px; padding: 15px 15px 30px 10px; }
 
         .mini-map-container {
@@ -399,6 +401,7 @@
         .defect-list { display: flex; flex-direction: column; gap: 12px; }
         .defect-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; background: var(--input-bg); padding: 10px; border: 1px solid var(--border-color); }
 
+        /* MULTI-PHOTO UI REWORK */
         .photo-wrapper { display: flex; align-items: stretch; gap: 8px; flex: 1 1 100%; justify-content: space-between; background: var(--card-bg); padding: 5px; border: 1px solid var(--border-color); }
         .file-input { display: none; }
         .camera-btn { background-color: var(--border-color); color: var(--text-color); padding: 10px 12px; font-size: var(--base-font); font-weight: bold; cursor: pointer; text-align: center; border: 1px solid var(--border-color); flex: 0 1 auto; transition: background-color 0.2s; display: flex; align-items: center; justify-content: center;}
@@ -431,6 +434,7 @@
         .add-defect-btn { background-color: transparent; color: var(--text-muted); border: 1px dashed var(--text-muted); margin-top: 10px; width: 100%; transition: all 0.2s;}
         .add-defect-btn:active { border-color: var(--primary); color: var(--primary); }
 
+        /* QUICK ADD FAB (BOTTOM LEFT) */
         .quick-add-fab {
             position: fixed;
             bottom: 20px;
@@ -453,7 +457,7 @@
         }
         .quick-add-fab:active { transform: scale(0.9); background-color: var(--primary-dark); color: #fff; }
 
-        /* NEW HELP FLOATING BUTTON (BOTTOM RIGHT) */
+        /* HELP FLOATING BUTTON (BOTTOM RIGHT) */
         .help-fab {
             position: fixed;
             bottom: 20px;
@@ -561,11 +565,11 @@
         .help-overlay {
             position: fixed;
             left: 0; width: 100%;
-            background: rgba(0, 0, 0, 0.85); /* Dark cinematic backdrop */
+            background: rgba(0, 0, 0, 0.85); 
             backdrop-filter: blur(4px);
-            z-index: 990; /* Sits exactly below header */
+            z-index: 990; 
             display: flex;
-            align-items: center; /* PERFECT VERTICAL CENTER */
+            align-items: center; 
             justify-content: center;
             padding: 20px;
             animation: cascadingFadeIn 0.2s ease-out;
@@ -707,7 +711,7 @@
             </div>
     </div>
 
-    <button class="quick-add-fab" id="quickAddBtn" onclick="toggleQuickAddModal(true)">
+    <button class="quick-add-fab" id="quickAddBtn" onclick="toggleQuickAddModal(event)">
         <span style="transform: translateY(-2px); pointer-events: none;">+</span>
     </button>
     
@@ -985,9 +989,6 @@
             if (!menu.contains(e.target) && !menuBtn.contains(e.target) && menu.classList.contains('expanded')) {
                 toggleMenu(true);
             }
-            if (!fabModal.contains(e.target) && !fabBtn.contains(e.target) && fabModal.style.display === 'flex') {
-                toggleQuickAddModal(false);
-            }
             if (stsMenu && stsBtn && !stsMenu.contains(e.target) && !stsBtn.contains(e.target) && stsMenu.style.display === 'flex') {
                 stsMenu.style.display = 'none';
             }
@@ -1000,6 +1001,10 @@
             // Auto close help if clicked outside the content modal box
             if (helpOverlay.style.display === 'flex' && e.target === helpOverlay && !helpFab.contains(e.target)) {
                 toggleHelp(false);
+            }
+            // Auto close + Menu if clicked outside
+            if (!fabModal.contains(e.target) && !fabBtn.contains(e.target) && fabModal.style.display === 'flex') {
+                toggleQuickAddModal(false);
             }
         });
 
@@ -1356,9 +1361,22 @@
             }
         }
 
-        function toggleQuickAddModal(show) {
+        // --- UPDATED FAB TOGGLE ENGINE ---
+        function toggleQuickAddModal(eventOrShow) {
             const modal = document.getElementById('quickAddModal');
-            if (show) {
+            
+            let shouldShow;
+            // Detect if parameter is true/false or a click Event object
+            if (eventOrShow === true || eventOrShow === false) {
+                shouldShow = eventOrShow;
+            } else if (eventOrShow && typeof eventOrShow === 'object' && eventOrShow.stopPropagation) {
+                eventOrShow.stopPropagation();
+                shouldShow = modal.style.display !== 'flex'; // Toggle state
+            } else {
+                shouldShow = modal.style.display !== 'flex';
+            }
+
+            if (shouldShow) {
                 const dirCode = currentActiveDirection === "Inbound Track" ? "IB" : "OB";
                 document.getElementById('quick-add-title').textContent = `${currentActiveArea} [${dirCode}]`;
                 updateQuickAddDropdown();
