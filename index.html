@@ -17,8 +17,7 @@
     <script src="db_millennium.js"></script>
     <script src="db_evergreen.js"></script>
     <script src="themes.js"></script> 
-    
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
+    <script src="instructions.js"></script> <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
     <script>
@@ -89,7 +88,6 @@
             padding: 10px 15px;
             border-bottom: 2px solid var(--primary);
             box-shadow: var(--hud-glow); 
-            margin-bottom: 15px;
             will-change: transform;
             transition: background-color 0.3s ease;
         }
@@ -115,6 +113,9 @@
             letter-spacing: 1px;
             color: var(--primary);
             word-wrap: break-word;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         #active-area-display {
@@ -125,7 +126,6 @@
             border: 1px solid transparent;
             vertical-align: middle;
             display: inline-block;
-            margin-bottom: 4px;
         }
         #active-area-display:empty { display: none; }
 
@@ -183,7 +183,6 @@
         }
         .sts-menu-item:active { background: var(--primary-dark); border-color: var(--primary); color: #fff;}
 
-        /* TACTICAL SEARCH MENU SYSTEM */
         .search-container {
             display: none;
             gap: 8px;
@@ -235,7 +234,6 @@
             padding: 0;
             transition: background-color 0.2s ease;
         }
-        
         .menu-toggle-btn:active { background-color: var(--border-color); }
         .menu-toggle-icon { font-size: 20px; font-family: sans-serif; line-height: 1; pointer-events: none; }
 
@@ -261,7 +259,6 @@
         .control-panel label { font-size: var(--base-font); letter-spacing: 1px; color: var(--text-muted); margin-top: 5px; }
         .input-group { display: flex; gap: 8px; }
         
-        /* SHARED INPUT STYLES (Dropdowns + Custom Fields) */
         select, .segment-notes, .custom-comp, .custom-def {
             flex: 1;
             padding: 12px;
@@ -309,13 +306,14 @@
         .revert-btn { border: 1px solid var(--warning); color: var(--warning); flex: 0 1 auto;}
         .revert-btn:active { background-color: var(--warning); color: #000; }
 
-        .app-layout { display: flex; align-items: flex-start; gap: 10px; padding: 0 15px 30px 10px; }
+        /* MAIN LAYOUT */
+        .app-layout { display: flex; align-items: flex-start; gap: 10px; padding: 15px 15px 30px 10px; }
 
         .mini-map-container {
             position: sticky;
-            top: 75px; 
+            top: 90px; 
             width: var(--map-width);
-            max-height: calc(100vh - 90px);
+            max-height: calc(100vh - 105px);
             overflow-y: auto;
             display: flex;
             flex-direction: column;
@@ -399,8 +397,6 @@
 
         .defect-list { display: flex; flex-direction: column; gap: 12px; }
         .defect-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; background: var(--input-bg); padding: 10px; border: 1px solid var(--border-color); }
-
-        select { flex: 1 1 40%; min-width: 120px; }
 
         /* MULTI-PHOTO UI REWORK */
         .photo-wrapper { display: flex; align-items: stretch; gap: 8px; flex: 1 1 100%; justify-content: space-between; background: var(--card-bg); padding: 5px; border: 1px solid var(--border-color); }
@@ -538,6 +534,33 @@
         }
         .remove-img-btn:active { transform: translateX(-50%) scale(0.9); }
 
+        /* NEW HOW TO USE OVERLAY */
+        .help-overlay {
+            position: fixed;
+            left: 0; width: 100%;
+            background: var(--bg-color);
+            z-index: 990; /* Sits exactly below header */
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            padding: 20px;
+            overflow-y: auto;
+            animation: cascadingFadeIn 0.2s ease-out;
+            box-sizing: border-box;
+        }
+        .help-modal {
+            background: var(--card-bg);
+            border: 2px solid var(--primary);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5), var(--hud-glow);
+            width: 100%; max-width: 600px;
+            padding: 20px; margin-bottom: 40px;
+        }
+        .help-header {
+            display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 2px solid var(--border-color); padding-bottom: 10px; margin-bottom: 20px;
+        }
+        .help-header h3 { color: var(--primary); font-size: var(--header-font); margin: 0; letter-spacing: 2px; }
+
         @media (max-width: 600px) { select { flex: 1 1 100%; } }
     </style>
 </head>
@@ -547,6 +570,9 @@
         <div class="header-top-bar">
             <div class="header-title-container">
                 <h2>
+                    <button class="menu-toggle-btn" onclick="toggleHelp()" id="helpBtn" style="border-radius: 50% !important; border-color: var(--primary); color: var(--primary); width: 36px; height: 36px; flex-shrink: 0;">
+                        <span style="font-size: 18px; font-weight: bold; pointer-events: none;">?</span>
+                    </button>
                     <span id="active-area-display"></span>
                 </h2>
                 <button id="stsDropdownBtn" class="sts-header-btn" onclick="toggleStsMenu(event)">
@@ -636,36 +662,23 @@
         </div>
     </div>
 
+    <div id="helpOverlay" class="help-overlay" style="display: none;">
+        <div class="help-modal">
+            <div class="help-header">
+                <h3>HOW TO USE</h3>
+                <button class="menu-toggle-btn" onclick="toggleHelp(false)" style="width: 32px; height: 32px; border-color: transparent;">
+                    <span class="menu-toggle-icon" style="font-size: 14px;">✖</span>
+                </button>
+            </div>
+            <div id="helpBodyContent">
+                </div>
+        </div>
+    </div>
+
     <div class="app-layout">
         <div class="mini-map-container" id="miniMap"></div>
         <div id="segments-container">
-            <div id="instruction-panel" class="segment-card" style="border-left: 6px solid var(--primary);">
-                <div class="segment-header">
-                    <h3>SYSTEM INITIALIZED</h3>
-                </div>
-                <div style="font-size: var(--base-font); line-height: 1.6; color: var(--text-muted); text-transform: none;">
-                    <p style="color: var(--text-color); font-weight: bold; text-transform: uppercase;">STEP 1: ESTABLISH ROUTE (In Order)</p>
-                    <ul style="margin-top: 5px; padding-left: 20px;">
-                        <li>Open the top right menu.</li>
-                        <li>Select <b>1. LINE</b>, <b>2. DIRECTION</b> (IB or OB), and <b>3. SUB-TO-SUB AREA</b>.</li>
-                        <li>Tap <b>INITIATE SECTIONS</b> to generate your inspection route.</li>
-                    </ul>
-
-                    <p style="color: var(--text-color); font-weight: bold; text-transform: uppercase; margin-top: 15px;">STEP 2: LOG DEFECTS</p>
-                    <ul style="margin-top: 5px; padding-left: 20px;">
-                        <li>Scroll to current Track Section (TS).</li>
-                        <li>Select <b>COMPONENT</b> and <b>DEFECT</b> from dropdowns.</li>
-                        <li>Tap <b>📷 PHOTO</b> (if needed) to attach visual evidence or start reference of progressing defect.</li>
-                    </ul>
-
-                    <p style="color: var(--warning); font-weight: bold; text-transform: uppercase; margin-top: 15px;">STEP 3: SAVE DATA (not export) ⚠️</p>
-                    <ul style="margin-top: 5px; padding-left: 20px;">
-                        <li>System does not auto-save. Open menu and tap <b>💾 SAVE DATA</b> frequently incase phone crash or browser accidental refresh.</li>
-                        <li>If system restarts, tap <b>📂 LOAD DATA</b> and load saved file to resume.</li>
-                    </ul>
-                </div>
             </div>
-        </div>
     </div>
 
     <button class="quick-add-fab" id="quickAddBtn" onclick="toggleQuickAddModal(true)">
@@ -741,6 +754,26 @@
         let currentInsertTargetTS = null;
 
         let confirmResolve = null;
+
+        // --- NEW HELP ENGINE ---
+        function toggleHelp(forceShow = null) {
+            const overlay = document.getElementById('helpOverlay');
+            const header = document.getElementById('stickyHeader');
+            
+            const shouldShow = forceShow !== null ? forceShow : overlay.style.display === 'none';
+            
+            if (shouldShow) {
+                // Dynamically calculate header height so it sits perfectly flush
+                const headerHeight = header.offsetHeight;
+                overlay.style.top = `${headerHeight}px`;
+                overlay.style.height = `calc(100vh - ${headerHeight}px)`;
+                document.getElementById('helpBodyContent').innerHTML = systemInstructions;
+                overlay.style.display = 'flex';
+                toggleMenu(true); // Close main menu if open
+            } else {
+                overlay.style.display = 'none';
+            }
+        }
 
         function showSystemAlert(message, title = "SYSTEM NOTICE", isDanger = false) {
             document.getElementById('systemModalTitle').textContent = title;
@@ -889,11 +922,16 @@
             document.getElementById('font-selector').value = localStorage.getItem('appFontSize') || 'small';
             
             const areaSelect = document.getElementById('general-area');
-            for (let area in globalDatabase) {
+            for (let area in window.globalDatabase) {
                 let opt = document.createElement('option');
                 opt.value = area;
                 opt.textContent = area;
                 areaSelect.appendChild(opt);
+            }
+
+            // AUTO-SHOW HOW TO USE IF EMPTY
+            if (loadedRoutes.size === 0) {
+                toggleHelp(true);
             }
         });
 
@@ -1096,8 +1134,8 @@
             const dropdown = document.getElementById('insert-route-select');
             dropdown.innerHTML = '<option value="">AWAITING INPUT...</option>';
             
-            if (currentActiveArea && currentActiveDirection && globalDatabase[currentActiveArea] && globalDatabase[currentActiveArea][currentActiveDirection]) {
-                const routes = globalDatabase[currentActiveArea][currentActiveDirection];
+            if (currentActiveArea && currentActiveDirection && window.globalDatabase[currentActiveArea] && window.globalDatabase[currentActiveArea][currentActiveDirection]) {
+                const routes = window.globalDatabase[currentActiveArea][currentActiveDirection];
                 let hasOptions = false;
                 for (let key in routes) {
                     if (!loadedRoutes.has(key) && (key.includes('-X') || key.includes('-ST') || key.includes('Pocket') || key.includes('Cross'))) {
@@ -1132,7 +1170,7 @@
                 return;
             }
 
-            const selectedRouteData = globalDatabase[area][direction][routeKey];
+            const selectedRouteData = window.globalDatabase[area][direction][routeKey];
             const container = document.getElementById('segments-container');
             const mapContainer = document.getElementById('miniMap');
 
@@ -1239,8 +1277,8 @@
             
             dropdown.innerHTML = '<option value="">AWAITING INPUT...</option>';
             
-            if (area && direction && globalDatabase[area] && globalDatabase[area][direction]) {
-                const routes = globalDatabase[area][direction];
+            if (area && direction && window.globalDatabase[area] && window.globalDatabase[area][direction]) {
+                const routes = window.globalDatabase[area][direction];
                 let hasOptions = false;
                 for (let routeKey in routes) {
                     if (!loadedRoutes.has(routeKey)) {
@@ -1261,8 +1299,8 @@
             const dropdown = document.getElementById('quick-add-select');
             dropdown.innerHTML = '<option value="">AWAITING INPUT...</option>';
             
-            if (currentActiveArea && currentActiveDirection && globalDatabase[currentActiveArea] && globalDatabase[currentActiveArea][currentActiveDirection]) {
-                const routes = globalDatabase[currentActiveArea][currentActiveDirection];
+            if (currentActiveArea && currentActiveDirection && window.globalDatabase[currentActiveArea] && window.globalDatabase[currentActiveArea][currentActiveDirection]) {
+                const routes = window.globalDatabase[currentActiveArea][currentActiveDirection];
                 let hasOptions = false;
                 for (let routeKey in routes) {
                     if (!loadedRoutes.has(routeKey)) {
@@ -1299,7 +1337,6 @@
             const segNum = card.getAttribute('data-segment');
             let hasData = false;
             
-            // Only consider it "having data" if there are notes, OR if a dropdown/custom field actually has a value, OR if there's a photo
             if (card.querySelector('.segment-notes').value.trim() !== '') hasData = true;
             
             card.querySelectorAll('.defect-row').forEach(row => {
@@ -1401,12 +1438,12 @@
                 return;
             }
 
-            const selectedRouteData = globalDatabase[area][direction][selectedRouteKey];
+            const selectedRouteData = window.globalDatabase[area][direction][selectedRouteKey];
             const container = document.getElementById('segments-container');
             const mapContainer = document.getElementById('miniMap');
-            
-            const instructions = document.getElementById('instruction-panel');
-            if (instructions) instructions.remove();
+
+            // HIDE HELP OVERLAY ONCE A ROUTE IS LOADED
+            toggleHelp(false);
 
             const newCards = []; 
 
@@ -1507,24 +1544,8 @@
                 document.getElementById('active-area-display').textContent = '';
                 document.getElementById('active-route-display').textContent = 'AWAITING...';
                 
-                const container = document.getElementById('segments-container');
-                if(!document.getElementById('instruction-panel')) {
-                    container.innerHTML = `
-                        <div id="instruction-panel" class="segment-card" style="border-left: 6px solid var(--primary);">
-                            <div class="segment-header">
-                                <h3>SYSTEM INITIALIZED</h3>
-                            </div>
-                            <div style="font-size: var(--base-font); line-height: 1.6; color: var(--text-muted); text-transform: none;">
-                                <p style="color: var(--text-color); font-weight: bold; text-transform: uppercase;">STEP 1: ESTABLISH ROUTE</p>
-                                <ul style="margin-top: 5px; padding-left: 20px;">
-                                    <li>Open the top right menu.</li>
-                                    <li>Select <b>1. AREA</b>, <b>2. DIRECTION</b>, and <b>3. SUB-TO-SUB BLOCK</b>.</li>
-                                    <li>Tap <b>INITIATE SECTIONS</b> to generate your track blocks.</li>
-                                </ul>
-                            </div>
-                        </div>
-                    `;
-                }
+                // IF WORKSPACE IS EMPTY, SHOW THE HELP SCREEN AGAIN
+                toggleHelp(true);
             }
             
             toggleQuickAddModal(false);
@@ -1579,22 +1600,18 @@
             return card;
         }
 
-        // NEW DYNAMIC DEFECT ROW GENERATOR
         function addDefectRow(container, prefill = null, areaName = '') {
             const row = document.createElement('div');
             row.className = 'defect-row';
             row.dataset.images = "[]"; 
             row.dataset.isCustom = "false"; 
 
-            // Get exactly the right map for this line, or fallback to an empty object
-            const specificDefectMap = window.globalDefectMaps[areaName] || {};
-            // Extract the component names
+            const specificDefectMap = window.globalDefectMaps && window.globalDefectMaps[areaName] ? window.globalDefectMaps[areaName] : {};
             const lineComponents = Object.keys(specificDefectMap);
 
             const compSelect = document.createElement('select');
             compSelect.className = 'component-select';
             
-            // Build the dropdown: Default + Dynamic Parts + Custom
             const extendedComponents = ['Select Component', ...lineComponents, 'CUSTOM ENTRY...'];
             
             extendedComponents.forEach(c => {
@@ -1839,6 +1856,9 @@
                     
                     loadedRoutes.clear(); 
                     routeLoadHistory = [];
+
+                    // HIDE HELP OVERLAY ON SUCCESSFUL LOAD
+                    toggleHelp(false);
 
                     projectData.forEach((segData, index) => {
                         const safeAreaName = segData.areaName || '';
