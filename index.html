@@ -451,6 +451,42 @@
         }
         .quick-add-modal h4 { margin: 0 0 5px 0; color: var(--text-color); font-size: var(--base-font); letter-spacing: 1px; border-bottom: 1px solid var(--border-color); padding-bottom: 8px;}
         
+        /* CUSTOM TACTICAL ALERT MODAL STYLES */
+        .system-modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 9999; display: none; align-items: center; justify-content: center;
+            backdrop-filter: blur(3px);
+        }
+        .system-modal {
+            background: var(--card-bg);
+            border: 1px solid var(--primary);
+            box-shadow: 0 0 20px rgba(139, 195, 74, 0.3);
+            width: 85%; max-width: 320px;
+            padding: 20px;
+            text-align: center;
+            animation: cascadingFadeIn 0.2s ease-out;
+        }
+        .system-modal-title {
+            color: var(--warning);
+            font-size: var(--header-font);
+            font-weight: bold;
+            margin-bottom: 15px;
+            letter-spacing: 2px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+        }
+        .system-modal-message {
+            color: var(--text-color);
+            font-size: var(--base-font);
+            margin-bottom: 20px;
+            line-height: 1.5;
+            white-space: pre-wrap;
+        }
+        .system-modal-btn-group {
+            display: flex; gap: 10px;
+        }
+
         @media (max-width: 600px) { select { flex: 1 1 100%; } }
     </style>
 </head>
@@ -598,6 +634,16 @@
         </div>
     </div>
 
+    <div class="system-modal-overlay" id="systemModalOverlay">
+        <div class="system-modal">
+            <div class="system-modal-title" id="systemModalTitle">SYSTEM ALERT</div>
+            <div class="system-modal-message" id="systemModalMessage">Message goes here</div>
+            <div class="system-modal-btn-group" id="systemModalBtnGroup">
+                <button class="btn-primary" style="width: 100%;" onclick="closeSystemModal()">ACKNOWLEDGE</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         let currentFileName = null;
         
@@ -607,6 +653,49 @@
         let currentActiveDirection = "";
         
         let isAutoScrolling = false;
+
+        // --- CUSTOM MODAL ENGINE ---
+        let confirmResolve = null;
+
+        function showSystemAlert(message, title = "SYSTEM NOTICE", isDanger = false) {
+            document.getElementById('systemModalTitle').textContent = title;
+            document.getElementById('systemModalTitle').style.color = isDanger ? "var(--danger)" : "var(--primary)";
+            document.getElementById('systemModalTitle').style.borderColor = isDanger ? "var(--danger)" : "var(--primary)";
+            document.getElementById('systemModalMessage').textContent = message;
+            
+            document.getElementById('systemModalBtnGroup').innerHTML = `
+                <button class="btn-primary" style="width: 100%;" onclick="closeSystemModal()">ACKNOWLEDGE</button>
+            `;
+            
+            document.getElementById('systemModalOverlay').style.display = 'flex';
+        }
+
+        function showSystemConfirm(message, title = "SYSTEM WARNING") {
+            return new Promise((resolve) => {
+                document.getElementById('systemModalTitle').textContent = title;
+                document.getElementById('systemModalTitle').style.color = "var(--warning)";
+                document.getElementById('systemModalTitle').style.borderColor = "var(--warning)";
+                document.getElementById('systemModalMessage').textContent = message;
+                
+                document.getElementById('systemModalBtnGroup').innerHTML = `
+                    <button class="btn-danger" style="flex: 1;" onclick="resolveSystemConfirm(true)">PROCEED</button>
+                    <button class="btn-outline" style="flex: 1;" onclick="resolveSystemConfirm(false)">ABORT</button>
+                `;
+                
+                confirmResolve = resolve;
+                document.getElementById('systemModalOverlay').style.display = 'flex';
+            });
+        }
+
+        function resolveSystemConfirm(result) {
+            closeSystemModal();
+            if (confirmResolve) confirmResolve(result);
+        }
+
+        function closeSystemModal() {
+            document.getElementById('systemModalOverlay').style.display = 'none';
+        }
+        // -----------------------------
 
         // THEME CONTROLLERS
         function changeTheme(themeName) {
@@ -630,6 +719,7 @@
             const fabModal = document.getElementById('quickAddModal');
             const stsMenu = document.getElementById('stsShortcutMenu');
             const searchContainer = document.getElementById('searchContainer');
+            const sysModal = document.getElementById('systemModalOverlay');
             
             const menuBtn = document.getElementById('menuBtn');
             const fabBtn = document.getElementById('quickAddBtn');
@@ -645,7 +735,6 @@
             if (stsMenu && stsBtn && !stsMenu.contains(e.target) && !stsBtn.contains(e.target) && stsMenu.style.display === 'flex') {
                 stsMenu.style.display = 'none';
             }
-            // Auto hide search if clicked outside
             if (searchContainer && searchBtn && !searchContainer.contains(e.target) && !searchBtn.contains(e.target) && searchContainer.style.display === 'flex') {
                 searchContainer.style.display = 'none';
             }
@@ -671,7 +760,6 @@
                 menu.classList.add('expanded');
                 btn.innerHTML = '<span class="menu-toggle-icon">✖</span>';
                 
-                // Close other menus
                 document.getElementById('searchContainer').style.display = 'none';
                 document.getElementById('stsShortcutMenu').style.display = 'none';
             }
@@ -687,7 +775,6 @@
                 searchContainer.style.display = 'flex';
                 document.getElementById('tsSearchInput').focus();
                 
-                // Close other menus
                 toggleMenu(true);
                 toggleQuickAddModal(false);
                 document.getElementById('stsShortcutMenu').style.display = 'none';
@@ -705,11 +792,9 @@
                 isAutoScrolling = true;
                 scrollToCard(targetCard);
                 
-                // Add tactical pulse glow to the found card
                 targetCard.classList.add('search-highlight');
                 setTimeout(() => { targetCard.classList.remove('search-highlight'); }, 1500);
 
-                // Sync the mini-map to exactly match the found section
                 const targetMapItem = document.querySelector(`.map-item[data-map-segment="${tsNumber}"]`);
                 if (targetMapItem) {
                     const mapContainer = document.getElementById('miniMap');
@@ -721,12 +806,11 @@
                     });
                 }
 
-                // Cleanup UI
                 document.getElementById('searchContainer').style.display = 'none';
                 input.value = '';
                 setTimeout(() => { isAutoScrolling = false; }, 800);
             } else {
-                alert(`Could not find TS-${tsNumber}.\nSub to sub section may have not been loaded.`);
+                showSystemAlert(`Could not find TS-${tsNumber}.\nSub to sub section may have not been loaded.`, "TARGET NOT FOUND", true);
             }
         }
 
@@ -974,12 +1058,12 @@
             }
             
             if (!area || !selectedRouteKey) { 
-                alert('ERROR: Invalid Selection. Ensure Area and Block are selected.'); 
+                showSystemAlert('Invalid Selection. Ensure Area and Block are selected.', 'SELECTION ERROR', true); 
                 return; 
             }
             
             if (loadedRoutes.has(selectedRouteKey)) {
-                alert('SYSTEM: This section is already loaded in the workspace.');
+                showSystemAlert('This section is already loaded in the workspace.', 'DUPLICATE LOAD');
                 return;
             }
 
@@ -1038,9 +1122,10 @@
             }
         }
 
-        function undoLastLoad() {
+        // UPDATED ASYNC FUNCTION FOR CUSTOM CONFIRM MODAL
+        async function undoLastLoad() {
             if (routeLoadHistory.length === 0) {
-                alert("SYSTEM: No actions to undo.");
+                showSystemAlert("No actions to undo.", "SYSTEM NOTICE");
                 return;
             }
             
@@ -1071,7 +1156,8 @@
             });
 
             if (hasData) {
-                const proceed = confirm(`TS-${conflictTS} has data. Undoing this will erase the "${conflictRoute}" and details. Are you sure you want to undo?`);
+                // Await the user's choice from the custom tactical modal
+                const proceed = await showSystemConfirm(`TS-${conflictTS} has data.\n\nUndoing this will erase the "${conflictRoute}" and details.\n\nAre you sure you want to undo?`);
                 if (!proceed) return; 
             }
             
@@ -1291,7 +1377,7 @@
 
         function saveProject() {
             const cards = document.querySelectorAll('.segment-card');
-            if (cards.length === 0) { alert('SYSTEM: No data available to save.'); return; }
+            if (cards.length === 0) { showSystemAlert('No data available to save.', 'SAVE FAILED'); return; }
 
             const projectData = [];
             cards.forEach(card => {
@@ -1401,11 +1487,11 @@
                         updateRouteDropdown(); 
                     }
 
-                    alert('SYSTEM: Data loaded successfully.');
+                    showSystemAlert('Backup file imported successfully.', 'DATA LOADED');
                     toggleMenu(true);
 
                 } catch (err) {
-                    alert('SYSTEM ERROR: Corrupt or invalid JSON file.');
+                    showSystemAlert('Corrupt or invalid JSON file.', 'SYSTEM ERROR', true);
                     console.error(err);
                 }
                 document.getElementById('importFile').value = '';
@@ -1417,12 +1503,12 @@
 
         async function exportData() {
             if (typeof ExcelJS === 'undefined' || typeof window.jspdf === 'undefined') {
-                alert("SYSTEM ERROR: Libraries offline. Requires network connection for initial boot.");
+                showSystemAlert("Libraries offline. Requires network connection for initial boot.", "EXPORT ERROR", true);
                 return;
             }
 
             const cards = document.querySelectorAll('.segment-card');
-            if (cards.length === 0) { alert('SYSTEM: No data to export.'); return; }
+            if (cards.length === 0) { showSystemAlert('No data available to export.', 'EXPORT FAILED'); return; }
 
             const exportBtn = document.getElementById('exportBtn');
             exportBtn.disabled = true;
@@ -1488,7 +1574,7 @@
                     link.click();
                     document.body.removeChild(link);
                 } else {
-                    alert("SYSTEM: No filled track sections found to export to Excel.");
+                    showSystemAlert("No filled track sections found to export to Excel.", "EXPORT NOTICE");
                 }
 
                 if (pdfJobs.length > 0) {
@@ -1499,7 +1585,7 @@
 
             } catch (error) {
                 console.error(error);
-                alert("SYSTEM ERROR: Export failed.");
+                showSystemAlert("File compiling failed.", "EXPORT ERROR", true);
             } finally {
                 exportBtn.disabled = false;
                 exportBtn.innerHTML = '📊 EXPORT FINAL REPORT';
