@@ -17,20 +17,36 @@ const systemThemes = {
         "--theme-color-meta": "#1a1a1a"
     },
     "windows11": {
-        "--primary": "#0078D4",      // Microsoft Blue
+        "--primary": "#0078D4",      
         "--primary-dark": "#005A9E",
         "--danger": "#D13438", 
         "--success": "#107C10",
         "--warning": "#D83B01", 
-        "--bg-color": "#F3F3F3",     // Light gray background
-        "--card-bg": "#FFFFFF",      // Pure white cards
+        "--bg-color": "#F3F3F3",     
+        "--card-bg": "#FFFFFF",      
         "--input-bg": "#FFFFFF",
-        "--text-color": "#202020",   // Dark gray text
+        "--text-color": "#202020",   
         "--text-muted": "#605E5C",
-        "--border-color": "#E1DFDD", // Soft borders
-        "--hud-glow": "0 4px 12px rgba(0,0,0,0.08)", // Soft drop shadow
-        "--border-radius": "8px",     // Windows 11 rounded corners
+        "--border-color": "#E1DFDD", 
+        "--hud-glow": "0 4px 12px rgba(0,0,0,0.08)", 
+        "--border-radius": "8px",     
         "--theme-color-meta": "#F3F3F3"
+    },
+    "pokemongo": {
+        "--primary": "#28ACA8",      // UI Teal
+        "--primary-dark": "#1F8A87",
+        "--danger": "#E3350D",       // Pokeball Red
+        "--success": "#4CAF50",
+        "--warning": "#FFCB05",      // Electric Yellow
+        "--bg-color": "#E1F5FE",     // Map Sky Blue
+        "--card-bg": "#FFFFFF",      // Pokedex White
+        "--input-bg": "#F5F5F5",
+        "--text-color": "#2A2A2A",   
+        "--text-muted": "#757575",
+        "--border-color": "#CFD8DC", 
+        "--hud-glow": "0 6px 16px rgba(0,0,0,0.12)", // Bouncy drop shadow
+        "--border-radius": "16px",   // Highly rounded, game-like corners
+        "--theme-color-meta": "#E1F5FE"
     }
 };
 
@@ -47,7 +63,7 @@ const systemFonts = {
         "--header-font": "18px",
         "--map-font": "18px",
         "--btn-font": "16px",
-        "--map-width": "95px" // Widens map column so bigger numbers don't squish
+        "--map-width": "95px" 
     },
     "large": {
         "--base-font": "17px",
