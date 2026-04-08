@@ -1,5 +1,5 @@
 // This is the permanent Service Worker for V2
-const CACHE_NAME = 'defect-tracker-v2-prod-1.2.40'; 
+const CACHE_NAME = 'defect-tracker-v2-prod-1.2.41'; 
 
 const ASSETS_TO_CACHE = [
   './',
