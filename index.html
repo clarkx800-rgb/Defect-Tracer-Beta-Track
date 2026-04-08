@@ -345,7 +345,6 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Animation for when a card is found via search */
         @keyframes tacticalPulse {
             0% { box-shadow: 0 0 0 0 var(--primary); background-color: var(--primary-dark); }
             70% { box-shadow: 0 0 0 15px rgba(139, 195, 74, 0); background-color: var(--card-bg); }
@@ -387,18 +386,26 @@
 
         select { flex: 1 1 40%; min-width: 120px; }
 
-        .photo-wrapper { display: flex; align-items: center; gap: 10px; flex: 1 1 100%; justify-content: space-between; background: var(--card-bg); padding: 5px; border: 1px solid var(--border-color); }
+        /* MULTI-PHOTO UI REWORK */
+        .photo-wrapper { display: flex; align-items: stretch; gap: 8px; flex: 1 1 100%; justify-content: space-between; background: var(--card-bg); padding: 5px; border: 1px solid var(--border-color); }
         .file-input { display: none; }
-        .camera-btn { background-color: var(--border-color); color: var(--text-color); padding: 8px 12px; font-size: var(--base-font); font-weight: bold; cursor: pointer; text-align: center; border: 1px solid var(--border-color); flex: 0 1 auto; transition: background-color 0.2s;}
+        .camera-btn { background-color: var(--border-color); color: var(--text-color); padding: 10px 12px; font-size: var(--base-font); font-weight: bold; cursor: pointer; text-align: center; border: 1px solid var(--border-color); flex: 0 1 auto; transition: background-color 0.2s; display: flex; align-items: center; justify-content: center;}
         .camera-btn:active { background-color: var(--primary); color: white;}
-        .photo-name { font-size: var(--base-font); color: var(--success); font-weight: bold; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; text-align: center; }
+        
+        .status-badge-container { flex: 1; display: flex; align-items: center;}
+        .photo-status-badge { 
+            background: var(--primary-dark); color: #fff; padding: 8px 10px; cursor: pointer; 
+            font-size: var(--base-font); font-weight: bold; flex: 1; text-align: center; 
+            border: 1px solid var(--primary); transition: background 0.2s; box-shadow: var(--hud-glow);
+            display: flex; align-items: center; justify-content: center; height: 100%; box-sizing: border-box;
+        }
+        .photo-status-badge:active { background: var(--primary); }
         
         .delete-btn { 
             background-color: transparent; 
             color: var(--danger); 
             border: 1px solid var(--danger); 
-            width: 36px; 
-            height: 36px; 
+            width: 40px; 
             font-size: 18px; 
             display: flex; 
             align-items: center; 
@@ -451,7 +458,7 @@
         }
         .quick-add-modal h4 { margin: 0 0 5px 0; color: var(--text-color); font-size: var(--base-font); letter-spacing: 1px; border-bottom: 1px solid var(--border-color); padding-bottom: 8px;}
         
-        /* CUSTOM TACTICAL ALERT MODAL STYLES */
+        /* CUSTOM TACTICAL ALERT MODAL */
         .system-modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0, 0, 0, 0.7);
@@ -483,9 +490,38 @@
             line-height: 1.5;
             white-space: pre-wrap;
         }
-        .system-modal-btn-group {
-            display: flex; gap: 10px;
+        .system-modal-btn-group { display: flex; gap: 10px; }
+
+        /* MULTI-PHOTO VIEWER GALLERY MODAL */
+        .gallery-modal {
+            background: var(--bg-color);
+            border: 1px solid var(--primary);
+            box-shadow: 0 0 25px rgba(0,0,0,0.9), var(--hud-glow);
+            width: 90%; max-width: 500px; max-height: 85vh;
+            display: flex; flex-direction: column;
+            animation: cascadingFadeIn 0.2s ease-out;
         }
+        .gallery-header {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 15px; border-bottom: 1px solid var(--border-color);
+            background: var(--card-bg);
+        }
+        .gallery-header h3 { margin: 0; color: var(--primary); font-size: var(--header-font); letter-spacing: 1px;}
+        .gallery-grid {
+            padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 20px; flex: 1;
+            background: #000; /* Dark contrast for photos */
+        }
+        .gallery-item {
+            position: relative; border: 1px solid var(--border-color); background: var(--card-bg); padding: 5px;
+        }
+        .gallery-item img { width: 100%; height: auto; display: block; }
+        .remove-img-btn {
+            position: absolute; top: 10px; right: 10px;
+            background: var(--danger); color: #fff; border: 2px solid #fff;
+            width: 36px; height: 36px; font-size: 20px; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; box-shadow: 0 4px 8px rgba(0,0,0,0.8);
+        }
+        .remove-img-btn:active { transform: scale(0.9); }
 
         @media (max-width: 600px) { select { flex: 1 1 100%; } }
     </style>
@@ -644,6 +680,19 @@
         </div>
     </div>
 
+    <div class="system-modal-overlay" id="galleryModalOverlay">
+        <div class="gallery-modal">
+            <div class="gallery-header">
+                <h3 id="galleryTitle">ATTACHED PHOTOS</h3>
+                <button class="menu-toggle-btn" onclick="closeGallery()" style="width: 32px; height: 32px;">
+                    <span class="menu-toggle-icon" style="font-size: 14px;">✖</span>
+                </button>
+            </div>
+            <div class="gallery-grid" id="galleryGrid">
+                </div>
+        </div>
+    </div>
+
     <script>
         let currentFileName = null;
         
@@ -651,8 +700,8 @@
         let routeLoadHistory = []; 
         let currentActiveArea = "";
         let currentActiveDirection = "";
-        
         let isAutoScrolling = false;
+        let currentRowForGallery = null; // Memory for photo manager
 
         // --- CUSTOM MODAL ENGINE ---
         let confirmResolve = null;
@@ -695,9 +744,78 @@
         function closeSystemModal() {
             document.getElementById('systemModalOverlay').style.display = 'none';
         }
-        // -----------------------------
 
-        // THEME CONTROLLERS
+        // --- MULTI-PHOTO GALLERY ENGINE ---
+        function updatePhotoUI(row, cameraBtn, badgeContainer) {
+            const images = JSON.parse(row.dataset.images || "[]");
+            
+            if (images.length === 0) {
+                cameraBtn.innerHTML = '📷 PHOTO';
+                cameraBtn.style.backgroundColor = 'var(--border-color)';
+                cameraBtn.style.color = 'var(--text-color)';
+                badgeContainer.innerHTML = ''; // Empty out the badge
+            } else {
+                cameraBtn.innerHTML = '➕ ADD';
+                cameraBtn.style.backgroundColor = 'var(--success)';
+                cameraBtn.style.color = '#fff';
+                badgeContainer.innerHTML = `<div class="photo-status-badge" onclick="openGallery(this.closest('.defect-row'))">${images.length} ATTACHED (VIEW)</div>`;
+            }
+        }
+
+        function openGallery(row) {
+            currentRowForGallery = row;
+            const images = JSON.parse(row.dataset.images || "[]");
+            const grid = document.getElementById('galleryGrid');
+            grid.innerHTML = ''; // Clear old
+
+            images.forEach((imgObj, index) => {
+                const item = document.createElement('div');
+                item.className = 'gallery-item';
+                
+                const img = document.createElement('img');
+                img.src = imgObj.img;
+                
+                const delBtn = document.createElement('button');
+                delBtn.className = 'remove-img-btn';
+                delBtn.innerHTML = '✖';
+                delBtn.onclick = () => removeImageFromGallery(index);
+                
+                item.appendChild(img);
+                item.appendChild(delBtn);
+                grid.appendChild(item);
+            });
+
+            document.getElementById('galleryModalOverlay').style.display = 'flex';
+        }
+
+        function removeImageFromGallery(indexToRemove) {
+            if (!currentRowForGallery) return;
+            
+            let images = JSON.parse(currentRowForGallery.dataset.images || "[]");
+            images.splice(indexToRemove, 1); // Remove target image
+            currentRowForGallery.dataset.images = JSON.stringify(images); // Save back to row memory
+            
+            // Update the main UI badge immediately
+            const wrapper = currentRowForGallery.querySelector('.photo-wrapper');
+            const cameraBtn = wrapper.querySelector('.camera-btn');
+            const badgeContainer = wrapper.querySelector('.status-badge-container');
+            updatePhotoUI(currentRowForGallery, cameraBtn, badgeContainer);
+            checkSegmentData(currentRowForGallery.closest('.segment-card'));
+
+            // If empty, auto close. Else, re-render gallery to fix indexes
+            if (images.length === 0) {
+                closeGallery();
+            } else {
+                openGallery(currentRowForGallery); 
+            }
+        }
+
+        function closeGallery() {
+            document.getElementById('galleryModalOverlay').style.display = 'none';
+            currentRowForGallery = null;
+        }
+
+        // --- THEME CONTROLLERS ---
         function changeTheme(themeName) {
             localStorage.setItem('appTheme', themeName);
             applySavedSettings(); 
@@ -719,7 +837,6 @@
             const fabModal = document.getElementById('quickAddModal');
             const stsMenu = document.getElementById('stsShortcutMenu');
             const searchContainer = document.getElementById('searchContainer');
-            const sysModal = document.getElementById('systemModalOverlay');
             
             const menuBtn = document.getElementById('menuBtn');
             const fabBtn = document.getElementById('quickAddBtn');
@@ -974,12 +1091,16 @@
             if (!card) return;
             const segNum = card.getAttribute('data-segment');
             let hasData = false;
+            
             if (card.querySelector('.segment-notes').value.trim() !== '') hasData = true;
+            
             card.querySelectorAll('.defect-row').forEach(row => {
-                if (row.querySelector('.component-select').value || row.querySelector('.defect-select').value || row.dataset.base64Image) {
+                const images = JSON.parse(row.dataset.images || "[]");
+                if (row.querySelector('.component-select').value || row.querySelector('.defect-select').value || images.length > 0) {
                     hasData = true;
                 }
             });
+            
             const mapItem = document.querySelector(`.map-item[data-map-segment="${segNum}"]`);
             if (mapItem) {
                 if (hasData) mapItem.classList.add('has-data');
@@ -1138,17 +1259,16 @@
             cardsToRemove.forEach(card => {
                 if (hasData) return; 
                 
-                let cardHasData = false;
-                if (card.querySelector('.segment-notes').value.trim() !== '') cardHasData = true;
+                if (card.querySelector('.segment-notes').value.trim() !== '') hasData = true;
                 
                 card.querySelectorAll('.defect-row').forEach(row => {
-                    if (row.querySelector('.component-select').value || row.querySelector('.defect-select').value || row.dataset.base64Image) {
-                        cardHasData = true;
+                    const images = JSON.parse(row.dataset.images || "[]");
+                    if (row.querySelector('.component-select').value || row.querySelector('.defect-select').value || images.length > 0) {
+                        hasData = true;
                     }
                 });
 
-                if (cardHasData) {
-                    hasData = true;
+                if (hasData) {
                     conflictTS = card.getAttribute('data-segment');
                     conflictRoute = card.getAttribute('data-route-name');
                 }
@@ -1247,6 +1367,7 @@
         function addDefectRow(container, prefill = null) {
             const row = document.createElement('div');
             row.className = 'defect-row';
+            row.dataset.images = "[]"; // Initialize the empty image array memory
 
             const compSelect = document.createElement('select');
             compSelect.className = 'component-select';
@@ -1306,8 +1427,8 @@
             cameraLabel.className = 'camera-btn';
             cameraLabel.innerHTML = '📷 PHOTO';
 
-            const photoName = document.createElement('div');
-            photoName.className = 'photo-name';
+            const badgeContainer = document.createElement('div');
+            badgeContainer.className = 'status-badge-container';
 
             const delBtn = document.createElement('button');
             delBtn.className = 'delete-btn';
@@ -1330,25 +1451,26 @@
                             canvas.width = width; canvas.height = height;
                             const ctx = canvas.getContext('2d');
                             ctx.drawImage(img, 0, 0, width, height);
-                            row.dataset.base64Image = canvas.toDataURL('image/jpeg', 0.8); 
-                            row.dataset.imgWidth = width;
-                            row.dataset.imgHeight = height;
                             
-                            cameraLabel.style.backgroundColor = 'var(--success)';
-                            cameraLabel.style.borderColor = 'var(--success)';
-                            cameraLabel.innerHTML = '✅ OK';
-                            photoName.textContent = "IMG ATTACHED";
+                            // Save new image into the row array memory
+                            const newImgObj = { img: canvas.toDataURL('image/jpeg', 0.8), w: width, h: height };
+                            const currentImages = JSON.parse(row.dataset.images || "[]");
+                            currentImages.push(newImgObj);
+                            row.dataset.images = JSON.stringify(currentImages);
+                            
+                            updatePhotoUI(row, cameraLabel, badgeContainer);
                             checkSegmentData(row.closest('.segment-card'));
                         };
                         img.src = event.target.result;
                     };
                     reader.readAsDataURL(file);
                 }
+                this.value = ''; // Reset input so same file can be selected again if needed
             });
 
             photoWrapper.appendChild(cameraLabel);
             photoWrapper.appendChild(fileInput);
-            photoWrapper.appendChild(photoName);
+            photoWrapper.appendChild(badgeContainer);
             photoWrapper.appendChild(delBtn); 
             
             row.appendChild(compSelect);
@@ -1361,14 +1483,9 @@
                     compSelect.value = prefill.comp;
                     updateDefects(prefill.comp, prefill.def);
                 }
-                if (prefill.photoBase64) {
-                    row.dataset.base64Image = prefill.photoBase64;
-                    row.dataset.imgWidth = prefill.imgW;
-                    row.dataset.imgHeight = prefill.imgH;
-                    cameraLabel.style.backgroundColor = 'var(--success)';
-                    cameraLabel.style.borderColor = 'var(--success)';
-                    cameraLabel.innerHTML = '✅ OK';
-                    photoName.textContent = "IMG ATTACHED";
+                if (prefill.images && prefill.images.length > 0) {
+                    row.dataset.images = JSON.stringify(prefill.images);
+                    updatePhotoUI(row, cameraLabel, badgeContainer);
                 }
             }
         }
@@ -1394,9 +1511,7 @@
                     segData.defects.push({
                         comp: row.querySelector('.component-select').value,
                         def: row.querySelector('.defect-select').value,
-                        photoBase64: row.dataset.base64Image || null,
-                        imgW: row.dataset.imgWidth || null,
-                        imgH: row.dataset.imgHeight || null
+                        images: JSON.parse(row.dataset.images || "[]") // Extract image array
                     });
                 });
                 projectData.push(segData);
@@ -1451,8 +1566,17 @@
                         const defectList = card.querySelector('.defect-list');
                         defectList.innerHTML = '';
                         
-                        if (segData.defects.length === 0) { addDefectRow(defectList); } 
-                        else { segData.defects.forEach(defData => { addDefectRow(defectList, defData); }); }
+                        if (segData.defects.length === 0) { 
+                            addDefectRow(defectList); 
+                        } else { 
+                            segData.defects.forEach(defData => { 
+                                // V1 to V2 Save File Migration logic
+                                if (defData.photoBase64 && (!defData.images || defData.images.length === 0)) {
+                                    defData.images = [{ img: defData.photoBase64, w: defData.imgW, h: defData.imgH }];
+                                }
+                                addDefectRow(defectList, defData); 
+                            }); 
+                        }
 
                         container.appendChild(card);
                         scrollObserver.observe(card);
@@ -1526,9 +1650,7 @@
                 ];
                 worksheet.getRow(1).font = { bold: true };
 
-                // NEW MULTI-PAGE BUNDLING LOGIC
-                let groupedPdfJobs = {};
-                let totalPdfs = 0;
+                let pdfJobs = [];
 
                 cards.forEach(card => {
                     const segmentNum = card.getAttribute('data-segment');
@@ -1540,34 +1662,21 @@
                     
                     let hasDefects = false;
 
-                    rows.forEach((row) => {
+                    rows.forEach((row, index) => {
                         const comp = row.querySelector('.component-select').value;
                         const def = row.querySelector('.defect-select').value;
-                        const photo = row.dataset.base64Image;
+                        const images = JSON.parse(row.dataset.images || "[]");
                         
-                        if (comp || def || photo) {
+                        if (comp || def || images.length > 0) {
                             hasDefects = true;
                             worksheet.addRow({ line: areaName, route: routeName, segment: tsId, notes: notes, component: comp, defect: def });
                         }
 
-                        if (photo) {
-                            // Creates a unique ID to group photos: "TS-4366_Rail Pad_Broken Rail Pad"
-                            let groupKey = `${tsId}_${comp || 'NA'}_${def || 'NA'}`;
-                            
-                            // If this group doesn't exist yet, create it
-                            if (!groupedPdfJobs[groupKey]) {
-                                groupedPdfJobs[groupKey] = {
-                                    tsId: tsId, routeName: routeName, lineName: areaName, notes: notes, comp: comp || "N/A", def: def || "N/A",
-                                    images: []
-                                };
-                                totalPdfs++; // Count how many actual files we will generate
-                            }
-                            
-                            // Push the photo into the group's array
-                            groupedPdfJobs[groupKey].images.push({
-                                img: photo, 
-                                imgW: parseFloat(row.dataset.imgWidth), 
-                                imgH: parseFloat(row.dataset.imgHeight)
+                        if (images.length > 0) {
+                            // Queue one multi-page PDF generation per defect row
+                            pdfJobs.push({
+                                lineName: areaName, routeName: routeName, tsId: tsId, notes: notes, comp: comp || "N/A", def: def || "N/A",
+                                images: images, defectID: index + 1
                             });
                         }
                     });
@@ -1591,14 +1700,10 @@
                     showSystemAlert("No filled track sections found to export to Excel.", "EXPORT NOTICE");
                 }
 
-                // Call the new generator function for each BUNDLE of photos
-                if (totalPdfs > 0) {
-                    exportBtn.innerHTML = `⏳ BUILDING ${totalPdfs} PDFs...`;
+                if (pdfJobs.length > 0) {
+                    exportBtn.innerHTML = `⏳ BUILDING ${pdfJobs.length} PDFs...`;
                     await delay(800); 
-                    for (let key in groupedPdfJobs) { 
-                        generateGroupedPDF(groupedPdfJobs[key]); 
-                        await delay(800); 
-                    }
+                    for (let job of pdfJobs) { generatePDF(job); await delay(800); }
                 }
 
             } catch (error) {
@@ -1610,23 +1715,21 @@
             }
         }
 
-        // NEW GENERATOR THAT HANDLES MULTIPLE PAGES
-        function generateGroupedPDF(data) {
+        // NEW MULTI-PAGE PDF ENGINE
+        function generatePDF(data) {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
             
             const pageWidth = 297;
             const pageHeight = 210;
-            const footerHeight = 25; 
-            const footerY = pageHeight - footerHeight;
 
+            // Loop through all images inside this specific defect row
             data.images.forEach((imgObj, index) => {
-                // If it is not the first image, add a new blank page to the PDF
                 if (index > 0) {
-                    doc.addPage();
+                    doc.addPage(); // Add a new page for every photo after the first one
                 }
 
-                const imgRatio = imgObj.imgW / imgObj.imgH;
+                const imgRatio = imgObj.w / imgObj.h;
                 const pageRatio = pageWidth / pageHeight;
                 
                 let finalW, finalH, finalX, finalY;
@@ -1643,10 +1746,12 @@
                     finalY = 0;
                 }
 
-                // Stamp Image
                 doc.addImage(imgObj.img, 'JPEG', finalX, finalY, finalW, finalH);
 
-                // Draw Footer Background
+                // Re-draw footer for EVERY page
+                const footerHeight = 25; 
+                const footerY = pageHeight - footerHeight;
+                
                 doc.setFillColor(255, 255, 255);
                 doc.rect(0, footerY, pageWidth, footerHeight, 'F');
                 
@@ -1654,7 +1759,6 @@
                 doc.setLineWidth(0.5);
                 doc.line(0, footerY, pageWidth, footerY);
 
-                // Add Text
                 const leftMargin = 10;
                 let currentY = footerY + 8; 
                 
@@ -1673,9 +1777,7 @@
                 const todayDate = new Date().toLocaleDateString();
                 doc.setFont("helvetica", "italic");
                 doc.setFontSize(10);
-                
-                // Add the Page X of Y tracker to the bottom left
-                doc.text(`DATE LOGGED: ${todayDate}  |  PAGE ${index + 1} OF ${data.images.length}`, leftMargin, currentY);
+                doc.text(`DATE LOGGED: ${todayDate}`, leftMargin, currentY);
 
                 const rightMargin = pageWidth - 10;
                 const notes = data.notes && data.notes.trim() !== "" ? data.notes : "NO ADDITIONAL COMMENTS.";
@@ -1685,9 +1787,12 @@
                 
                 const splitNotes = doc.splitTextToSize(notes, 140); 
                 doc.text(splitNotes, rightMargin, footerY + 8, { align: "right" });
+
+                // PAGE COUNTER
+                doc.setFont("helvetica", "bold");
+                doc.text(`PAGE ${index + 1} OF ${data.images.length}`, rightMargin, footerY + 22, { align: "right" });
             });
 
-            // Save the multi-page file
             doc.save(`${data.tsId}_${data.comp.replace(/[^a-z0-9]/gi, '_')}_DEFECT.pdf`);
         }
     </script>
