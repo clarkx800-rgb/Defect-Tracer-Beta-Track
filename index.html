@@ -345,6 +345,7 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
+        /* NEW DOUBLE FLASH OUTLINE ANIMATION */
         @keyframes searchFlash {
             0%   { box-shadow: var(--hud-glow); border-color: var(--border-color); }
             20%  { box-shadow: 0 0 20px 4px var(--primary); border-color: var(--primary); }
@@ -465,6 +466,7 @@
         }
         .quick-add-modal h4 { margin: 0 0 5px 0; color: var(--text-color); font-size: var(--base-font); letter-spacing: 1px; border-bottom: 1px solid var(--border-color); padding-bottom: 8px;}
         
+        /* CUSTOM TACTICAL ALERT MODAL */
         .system-modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0, 0, 0, 0.7);
@@ -498,6 +500,7 @@
         }
         .system-modal-btn-group { display: flex; gap: 10px; }
 
+        /* MULTI-PHOTO VIEWER GALLERY MODAL */
         .gallery-modal {
             background: var(--bg-color);
             border: 1px solid var(--primary);
@@ -709,6 +712,7 @@
         let isAutoScrolling = false;
         let currentRowForGallery = null; 
 
+        // --- CUSTOM MODAL ENGINE ---
         let confirmResolve = null;
 
         function showSystemAlert(message, title = "SYSTEM NOTICE", isDanger = false) {
@@ -733,7 +737,7 @@
                 
                 document.getElementById('systemModalBtnGroup').innerHTML = `
                     <button class="btn-danger" style="flex: 1;" onclick="resolveSystemConfirm(true)">PROCEED</button>
-                    <button class="btn-outline" style="flex: 1;" onclick="resolveSystemConfirm(false)">ABORT</button>
+                    <button class="btn-outline" style="flex: 1;" onclick="resolveSystemConfirm(false)">CANCEL</button>
                 `;
                 
                 confirmResolve = resolve;
@@ -749,6 +753,34 @@
         function closeSystemModal() {
             document.getElementById('systemModalOverlay').style.display = 'none';
         }
+
+        // 1. DESKTOP & REFRESH TRAP
+        window.addEventListener('beforeunload', function (e) {
+            const cards = document.querySelectorAll('.segment-card');
+            if (cards.length > 0) {
+                e.preventDefault();
+                e.returnValue = 'Data loss imminent. Are you sure you want to abort?';
+            }
+        });
+
+        // 2. MOBILE SYSTEM BACK BUTTON TRAP
+        window.history.pushState({ isAppOpen: true }, "", "");
+
+        window.addEventListener('popstate', function(event) {
+            const cards = document.querySelectorAll('.segment-card');
+            
+            if (cards.length > 0) {
+                window.history.pushState({ isAppOpen: true }, "", "");
+                
+                showSystemConfirm("WARNING: Using the system back button will exit the app and delete unsaved data.\n\nAre you sure you want to exit?", "DATA LOSS IMMINENT").then(proceed => {
+                    if (proceed) {
+                        window.history.go(-2); 
+                    }
+                });
+            } else {
+                window.history.back();
+            }
+        });
 
         function updatePhotoUI(row, cameraBtn, badgeContainer) {
             const images = JSON.parse(row.dataset.images || "[]");
@@ -837,6 +869,7 @@
             const fabModal = document.getElementById('quickAddModal');
             const stsMenu = document.getElementById('stsShortcutMenu');
             const searchContainer = document.getElementById('searchContainer');
+            const sysModal = document.getElementById('systemModalOverlay');
             
             const menuBtn = document.getElementById('menuBtn');
             const fabBtn = document.getElementById('quickAddBtn');
@@ -854,39 +887,6 @@
             }
             if (searchContainer && searchBtn && !searchContainer.contains(e.target) && !searchBtn.contains(e.target) && searchContainer.style.display === 'flex') {
                 searchContainer.style.display = 'none';
-            }
-        });
-
-        // 1. DESKTOP & REFRESH TRAP
-        window.addEventListener('beforeunload', function (e) {
-            const cards = document.querySelectorAll('.segment-card');
-            if (cards.length > 0) {
-                e.preventDefault();
-                e.returnValue = 'Data loss imminent. Are you sure you want to abort?';
-            }
-        });
-
-        // 2. MOBILE SYSTEM BACK BUTTON TRAP
-        // Push a dummy state to trick the phone into thinking there is a previous page
-        window.history.pushState({ isAppOpen: true }, "", "");
-
-        window.addEventListener('popstate', function(event) {
-            const cards = document.querySelectorAll('.segment-card');
-            
-            if (cards.length > 0) {
-                // Immediately push the dummy state back to physically trap them in the app
-                window.history.pushState({ isAppOpen: true }, "", "");
-                
-                // Trigger the tactical HUD warning
-                showSystemConfirm("WARNING: Using the system back button will exit the app and delete unsaved data.\n\nAre you sure you want to abort?", "DATA LOSS IMMINENT").then(proceed => {
-                    if (proceed) {
-                        // User confirmed they want to leave. We jump back 2 steps in history to bypass our trap.
-                        window.history.go(-2); 
-                    }
-                });
-            } else {
-                // No unsaved data exists, allow them to exit normally
-                window.history.back();
             }
         });
 
@@ -932,7 +932,6 @@
             if (targetCard) {
                 isAutoScrolling = true;
                 
-                // 1. Start the scroll
                 scrollToCard(targetCard);
                 
                 const targetMapItem = document.querySelector(`.map-item[data-map-segment="${tsNumber}"]`);
@@ -949,7 +948,6 @@
                 document.getElementById('searchContainer').style.display = 'none';
                 input.value = '';
                 
-                // 2. Wait for smooth scroll to finish (approx 500ms), THEN flash
                 setTimeout(() => {
                     targetCard.classList.add('search-highlight');
                     setTimeout(() => { targetCard.classList.remove('search-highlight'); }, 1200);
