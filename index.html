@@ -13,7 +13,9 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-status-bar-style" content="black-translucent">
 
-    <script src="database.js"></script>
+    <script src="db_expo.js"></script>
+    <script src="db_millennium.js"></script>
+    <script src="db_evergreen.js"></script>
     <script src="themes.js"></script> 
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
@@ -528,7 +530,6 @@
         }
         .gallery-item img { width: 100%; height: auto; display: block; }
         
-        /* NEW REMOVE PICTURE BUTTON STYLE */
         .remove-img-btn {
             position: absolute; top: 10px; left: 50%; transform: translateX(-50%);
             background: var(--danger); color: #fff; border: 2px solid #fff;
@@ -1298,6 +1299,7 @@
             const segNum = card.getAttribute('data-segment');
             let hasData = false;
             
+            // Only consider it "having data" if there are notes, OR if a dropdown/custom field actually has a value, OR if there's a photo
             if (card.querySelector('.segment-notes').value.trim() !== '') hasData = true;
             
             card.querySelectorAll('.defect-row').forEach(row => {
@@ -1571,22 +1573,30 @@
                 </div>
                 <textarea class="segment-notes" placeholder="INPUT SECTION LOG..."></textarea>
                 <div class="defect-list"></div>
-                <button class="add-defect-btn" onclick="addDefectRow(this.previousElementSibling)">+ ADD DEFECT ROW</button>
+                <button class="add-defect-btn" onclick="addDefectRow(this.previousElementSibling, null, '${areaName}')">+ ADD DEFECT ROW</button>
             `;
-            addDefectRow(card.querySelector('.defect-list'));
+            addDefectRow(card.querySelector('.defect-list'), null, areaName);
             return card;
         }
 
-        function addDefectRow(container, prefill = null) {
+        // NEW DYNAMIC DEFECT ROW GENERATOR
+        function addDefectRow(container, prefill = null, areaName = '') {
             const row = document.createElement('div');
             row.className = 'defect-row';
             row.dataset.images = "[]"; 
             row.dataset.isCustom = "false"; 
 
+            // Get exactly the right map for this line, or fallback to an empty object
+            const specificDefectMap = window.globalDefectMaps[areaName] || {};
+            // Extract the component names
+            const lineComponents = Object.keys(specificDefectMap);
+
             const compSelect = document.createElement('select');
             compSelect.className = 'component-select';
             
-            const extendedComponents = [...components, 'CUSTOM ENTRY...'];
+            // Build the dropdown: Default + Dynamic Parts + Custom
+            const extendedComponents = ['Select Component', ...lineComponents, 'CUSTOM ENTRY...'];
+            
             extendedComponents.forEach(c => {
                 let opt = document.createElement('option');
                 opt.value = c === 'Select Component' ? '' : c;
@@ -1634,13 +1644,13 @@
 
             function updateDefects(selectedComp, selectedDefect = '') {
                 defSelect.innerHTML = '';
-                if (selectedComp && defectMap[selectedComp]) {
+                if (selectedComp && specificDefectMap[selectedComp]) {
                     defSelect.disabled = false;
                     let defDefault = document.createElement('option');
                     defDefault.value = '';
                     defDefault.textContent = 'SELECT DEFECT';
                     defSelect.appendChild(defDefault);
-                    defectMap[selectedComp].forEach(d => {
+                    specificDefectMap[selectedComp].forEach(d => {
                         let opt = document.createElement('option');
                         opt.value = d;
                         opt.textContent = d.toUpperCase();
@@ -1743,7 +1753,7 @@
             container.appendChild(row);
 
             if (prefill) {
-                if (prefill.isCustom || (prefill.comp && prefill.comp !== '' && !defectMap[prefill.comp])) {
+                if (prefill.isCustom || (prefill.comp && prefill.comp !== '' && !specificDefectMap[prefill.comp])) {
                     row.dataset.isCustom = "true";
                     compSelect.style.display = 'none';
                     defSelect.style.display = 'none';
@@ -1842,13 +1852,13 @@
                         defectList.innerHTML = '';
                         
                         if (segData.defects.length === 0) { 
-                            addDefectRow(defectList); 
+                            addDefectRow(defectList, null, safeAreaName); 
                         } else { 
                             segData.defects.forEach(defData => { 
                                 if (defData.photoBase64 && (!defData.images || defData.images.length === 0)) {
                                     defData.images = [{ img: defData.photoBase64, w: defData.imgW, h: defData.imgH }];
                                 }
-                                addDefectRow(defectList, defData); 
+                                addDefectRow(defectList, defData, safeAreaName); 
                             }); 
                         }
 
