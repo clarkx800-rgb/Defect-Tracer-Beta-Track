@@ -181,6 +181,7 @@
         }
         .sts-menu-item:active { background: var(--primary-dark); border-color: var(--primary); color: #fff;}
 
+        /* TACTICAL SEARCH MENU SYSTEM */
         .search-container {
             display: none;
             gap: 8px;
@@ -203,7 +204,7 @@
             font-size: var(--base-font);
             letter-spacing: 1px;
         }
-        #tsSearchInput {
+        #tsSearchInput, #quickTsSearchInput {
             background: transparent !important;
             border: none !important;
             color: var(--text-color) !important;
@@ -328,11 +329,9 @@
             color: var(--text-muted);
             cursor: pointer;
             transition: all 0.2s ease;
-            will-change: transform, background-color;
-            /* CRITICAL: Prevent text selection/copy menus during long press */
-            -webkit-user-select: none;
             user-select: none;
-            -webkit-touch-callout: none; 
+            will-change: transform, background-color;
+            touch-action: pan-y; /* Prevent touch delay warnings */
         }
         
         .map-item:active { transform: scale(0.9); }
@@ -395,6 +394,7 @@
 
         select { flex: 1 1 40%; min-width: 120px; }
 
+        /* MULTI-PHOTO UI REWORK */
         .photo-wrapper { display: flex; align-items: stretch; gap: 8px; flex: 1 1 100%; justify-content: space-between; background: var(--card-bg); padding: 5px; border: 1px solid var(--border-color); }
         .file-input { display: none; }
         .camera-btn { background-color: var(--border-color); color: var(--text-color); padding: 10px 12px; font-size: var(--base-font); font-weight: bold; cursor: pointer; text-align: center; border: 1px solid var(--border-color); flex: 0 1 auto; transition: background-color 0.2s; display: flex; align-items: center; justify-content: center;}
@@ -453,7 +453,7 @@
             position: fixed;
             bottom: 85px;
             left: 20px;
-            width: 260px;
+            width: 280px;
             background-color: var(--bg-color);
             border: 1px solid var(--primary);
             box-shadow: 0 10px 25px rgba(0,0,0,0.9), var(--hud-glow);
@@ -664,7 +664,7 @@
     </button>
     
     <div class="quick-add-modal" id="quickAddModal">
-        <h4><span id="quick-add-title" style="color: var(--text-color);"></span></h4>
+        <h4>ADD ROUTE TO: <span id="quick-add-title" style="color: var(--primary);"></span></h4>
         <select id="quick-add-select" style="width: 100%; margin-bottom: 5px;">
             <option value="">AWAITING INPUT...</option>
         </select>
@@ -674,6 +674,33 @@
         </div>
         <div style="display: flex; gap: 8px; margin-top: 5px;">
             <button class="btn-danger" style="flex: 1; padding: 10px;" onclick="undoLastLoad()">↺ UNDO LAST</button>
+        </div>
+        
+        <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 15px 0 10px 0;">
+        
+        <h4>FIND TRACK SECTION</h4>
+        <div class="search-input-wrapper">
+            <span class="search-prefix">TS-</span>
+            <input type="tel" id="quickTsSearchInput" placeholder="NUMBER..." onkeypress="if(event.key === 'Enter') searchTSFromQuick()">
+        </div>
+        <button class="btn-primary" onclick="searchTSFromQuick()" style="width: 100%; margin-top: 5px; padding: 10px;">FIND</button>
+    </div>
+
+    <div class="quick-add-modal" id="insertModal">
+        <h4>INSERT AFTER TS-<span id="insert-target-ts" style="color: var(--primary);"></span></h4>
+        
+        <select id="insert-area-select" style="width: 100%; margin-bottom: 5px;" onchange="updateInsertDropdown()"></select>
+        <select id="insert-dir-select" style="width: 100%; margin-bottom: 5px;" onchange="updateInsertDropdown()">
+            <option value="Inbound Track">INBOUND (IB)</option>
+            <option value="Outbound Track">OUTBOUND (OB)</option>
+        </select>
+        <select id="insert-route-select" style="width: 100%; margin-bottom: 5px;">
+            <option value="">AWAITING INPUT...</option>
+        </select>
+        
+        <div style="display: flex; gap: 8px; margin-top: 10px;">
+            <button class="btn-primary" style="flex: 1; padding: 10px;" onclick="executeInsert()">INSERT</button>
+            <button class="btn-outline" style="flex: 1; padding: 10px;" onclick="closeInsertModal()">CANCEL</button>
         </div>
     </div>
 
@@ -707,15 +734,11 @@
         let routeLoadHistory = []; 
         let currentActiveArea = "";
         let currentActiveDirection = "";
-        
         let isAutoScrolling = false;
         let currentRowForGallery = null; 
+        let currentInsertTargetTS = null;
 
-        // LONG PRESS MEMORY ENGINE
-        let pressTimer;
-        let isLongPress = false;
-        let insertTargetTS = null;
-
+        // --- CUSTOM MODAL ENGINE ---
         let confirmResolve = null;
 
         function showSystemAlert(message, title = "SYSTEM NOTICE", isDanger = false) {
@@ -757,21 +780,28 @@
             document.getElementById('systemModalOverlay').style.display = 'none';
         }
 
+        // 1. DESKTOP & REFRESH TRAP
         window.addEventListener('beforeunload', function (e) {
             const cards = document.querySelectorAll('.segment-card');
             if (cards.length > 0) {
                 e.preventDefault();
-                e.returnValue = 'Data loss imminent. Are you sure you want to abort?';
+                e.returnValue = 'Data loss imminent. Are you sure you want to cancel?';
             }
         });
 
+        // 2. MOBILE SYSTEM BACK BUTTON TRAP
         window.history.pushState({ isAppOpen: true }, "", "");
+
         window.addEventListener('popstate', function(event) {
             const cards = document.querySelectorAll('.segment-card');
+            
             if (cards.length > 0) {
                 window.history.pushState({ isAppOpen: true }, "", "");
+                
                 showSystemConfirm("WARNING: Using the system back button will exit the app and delete unsaved data.\n\nAre you sure you want to exit?", "DATA LOSS IMMINENT").then(proceed => {
-                    if (proceed) { window.history.go(-2); }
+                    if (proceed) {
+                        window.history.go(-2); 
+                    }
                 });
             } else {
                 window.history.back();
@@ -855,9 +885,26 @@
             applySavedSettings(); 
         }
 
+        // INITIALIZE APP DATA ON LOAD
         document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('theme-selector').value = localStorage.getItem('appTheme') || 'tactical';
             document.getElementById('font-selector').value = localStorage.getItem('appFontSize') || 'small';
+            
+            // Populate Area Selects
+            const areaSelect = document.getElementById('general-area');
+            const insertAreaSelect = document.getElementById('insert-area-select');
+            
+            for (let area in globalDatabase) {
+                let opt = document.createElement('option');
+                opt.value = area;
+                opt.textContent = area;
+                areaSelect.appendChild(opt);
+                
+                let opt2 = document.createElement('option');
+                opt2.value = area;
+                opt2.textContent = area;
+                insertAreaSelect.appendChild(opt2);
+            }
         });
 
         document.addEventListener('click', (e) => {
@@ -865,7 +912,7 @@
             const fabModal = document.getElementById('quickAddModal');
             const stsMenu = document.getElementById('stsShortcutMenu');
             const searchContainer = document.getElementById('searchContainer');
-            const sysModal = document.getElementById('systemModalOverlay');
+            const insertModal = document.getElementById('insertModal');
             
             const menuBtn = document.getElementById('menuBtn');
             const fabBtn = document.getElementById('quickAddBtn');
@@ -883,6 +930,9 @@
             }
             if (searchContainer && searchBtn && !searchContainer.contains(e.target) && !searchBtn.contains(e.target) && searchContainer.style.display === 'flex') {
                 searchContainer.style.display = 'none';
+            }
+            if (insertModal && !insertModal.contains(e.target) && !e.target.closest('.map-item') && insertModal.style.display === 'flex') {
+                closeInsertModal();
             }
         });
 
@@ -915,6 +965,18 @@
                 toggleMenu(true);
                 toggleQuickAddModal(false);
                 document.getElementById('stsShortcutMenu').style.display = 'none';
+            }
+        }
+
+        function searchTSFromQuick() {
+            const input = document.getElementById('quickTsSearchInput');
+            const tsNumber = input.value.trim();
+            if(tsNumber) {
+                const mainInput = document.getElementById('tsSearchInput');
+                mainInput.value = tsNumber;
+                searchTS(); 
+                input.value = ''; 
+                toggleQuickAddModal(false); 
             }
         }
 
@@ -1021,6 +1083,145 @@
             setTimeout(() => { isAutoScrolling = false; }, 800); 
         }
 
+        // --- SPLICE / INSERT MODAL CONTROLS ---
+        function openInsertModal(tsNumber) {
+            currentInsertTargetTS = tsNumber;
+            document.getElementById('insert-target-ts').textContent = tsNumber;
+            
+            document.getElementById('insert-area-select').value = currentActiveArea || Object.keys(globalDatabase)[0];
+            document.getElementById('insert-dir-select').value = currentActiveDirection || 'Inbound Track';
+            updateInsertDropdown();
+            
+            document.getElementById('insertModal').style.display = 'flex';
+            
+            toggleMenu(true);
+            toggleQuickAddModal(false);
+            document.getElementById('stsShortcutMenu').style.display = 'none';
+            document.getElementById('searchContainer').style.display = 'none';
+        }
+
+        function closeInsertModal() {
+            document.getElementById('insertModal').style.display = 'none';
+            currentInsertTargetTS = null;
+        }
+
+        function updateInsertDropdown() {
+            const area = document.getElementById('insert-area-select').value;
+            const direction = document.getElementById('insert-dir-select').value;
+            const dropdown = document.getElementById('insert-route-select');
+            
+            dropdown.innerHTML = '<option value="">AWAITING INPUT...</option>';
+            
+            if (area && direction && globalDatabase[area] && globalDatabase[area][direction]) {
+                const routes = globalDatabase[area][direction];
+                let hasOptions = false;
+                for (let routeKey in routes) {
+                    if (!loadedRoutes.has(routeKey)) {
+                        let opt = document.createElement('option');
+                        opt.value = routeKey;
+                        opt.textContent = routes[routeKey].name;
+                        dropdown.appendChild(opt);
+                        hasOptions = true;
+                    }
+                }
+                if (!hasOptions) {
+                    dropdown.innerHTML = '<option value="">ALL SECTIONS LOADED</option>';
+                }
+            }
+        }
+
+        function executeInsert() {
+            if (!currentInsertTargetTS) return;
+            
+            const area = document.getElementById('insert-area-select').value;
+            const direction = document.getElementById('insert-dir-select').value;
+            const routeKey = document.getElementById('insert-route-select').value;
+            
+            if (!area || !routeKey) { 
+                showSystemAlert('Invalid Selection. Ensure Area and Route are selected.', 'SELECTION ERROR', true); 
+                return; 
+            }
+            if (loadedRoutes.has(routeKey)) {
+                showSystemAlert('This section is already loaded in the workspace.', 'DUPLICATE LOAD');
+                return;
+            }
+
+            const selectedRouteData = globalDatabase[area][direction][routeKey];
+            const container = document.getElementById('segments-container');
+            const mapContainer = document.getElementById('miniMap');
+
+            const newCards = []; 
+            selectedRouteData.segments.forEach(range => {
+                const blockColor = range.color || 'var(--primary)'; 
+                if (range.start <= range.end) { 
+                    for (let i = range.start; i <= range.end; i++) newCards.push({ num: i, color: blockColor }); 
+                } else { 
+                    for (let i = range.start; i >= range.end; i--) newCards.push({ num: i, color: blockColor }); 
+                }
+            });
+
+            // Find exact DOM nodes to Insert After
+            const targetCard = document.querySelector(`.segment-card[data-segment="${currentInsertTargetTS}"]`);
+            const targetMap = document.querySelector(`.map-item[data-map-segment="${currentInsertTargetTS}"]`);
+            
+            const refCard = targetCard ? targetCard.nextSibling : null;
+            const refMap = targetMap ? targetMap.nextSibling : null;
+
+            newCards.forEach((item, index) => {
+                const card = createSegmentCard(item.num, routeKey, selectedRouteData.name, direction, item.color, area);
+                card.style.animationDelay = `${index * 0.05}s`;
+                container.insertBefore(card, refCard);
+                scrollObserver.observe(card);
+
+                const mapBtn = document.createElement('div');
+                mapBtn.className = 'map-item';
+                mapBtn.setAttribute('data-map-segment', item.num);
+                mapBtn.setAttribute('data-route-key', routeKey); 
+                mapBtn.textContent = `TS-${item.num}`;
+                mapBtn.style.borderLeft = `4px solid ${item.color}`;
+                
+                attachMapItemListeners(mapBtn, card, item.num);
+                
+                mapContainer.insertBefore(mapBtn, refMap);
+            });
+
+            loadedRoutes.add(routeKey);
+            routeLoadHistory.push(routeKey);
+            
+            closeInsertModal();
+            updateRouteDropdown(); 
+            
+            const firstNewCard = document.querySelector(`.segment-card[data-route-key="${routeKey}"]`);
+            if(firstNewCard) {
+                isAutoScrolling = true;
+                scrollToCard(firstNewCard);
+                firstNewCard.classList.add('search-highlight');
+                setTimeout(() => { firstNewCard.classList.remove('search-highlight'); isAutoScrolling = false; }, 1200);
+            }
+        }
+
+        // Centralized Map Button Listeners (Click + LongPress/RightClick)
+        function attachMapItemListeners(mapBtn, card, itemNum) {
+            mapBtn.onclick = () => {
+                isAutoScrolling = true; 
+                scrollToCard(card);
+                setTimeout(() => { isAutoScrolling = false; }, 800);
+            };
+            
+            let pressTimer;
+            mapBtn.addEventListener('touchstart', (e) => {
+                pressTimer = setTimeout(() => openInsertModal(itemNum), 600);
+            }, {passive: true});
+            mapBtn.addEventListener('touchend', () => clearTimeout(pressTimer));
+            mapBtn.addEventListener('touchmove', () => clearTimeout(pressTimer));
+            
+            // Desktop Right-Click (Also triggers naturally on some mobile long-presses)
+            mapBtn.addEventListener('contextmenu', (e) => {
+                e.preventDefault();
+                openInsertModal(itemNum);
+            });
+        }
+
         function getLineColors(lineName) {
             const activeTheme = localStorage.getItem('appTheme') || 'tactical';
             const isLightMode = activeTheme !== 'tactical';
@@ -1039,16 +1240,6 @@
             }
             return { bg: isLightMode ? '#e5e5e5' : '#222', text: isLightMode ? '#000' : '#aaa', border: '#555' };
         }
-
-        document.addEventListener("DOMContentLoaded", () => {
-            const areaSelect = document.getElementById('general-area');
-            for (let area in globalDatabase) {
-                let opt = document.createElement('option');
-                opt.value = area;
-                opt.textContent = area;
-                areaSelect.appendChild(opt);
-            }
-        });
 
         function updateRouteDropdown() {
             const area = document.getElementById('general-area').value;
@@ -1097,48 +1288,11 @@
             }
         }
 
-        // TACTICAL LONG PRESS INJECTION ENGINE
-        function handleMapItemTouchStart(e, tsNumber) {
-            isLongPress = false;
-            pressTimer = setTimeout(() => {
-                isLongPress = true;
-                if (navigator.vibrate) navigator.vibrate(50); // Haptic feedback confirm
-                triggerInsertModal(tsNumber);
-            }, 600); // 0.6 seconds hold to trigger
-        }
-
-        function handleMapItemTouchEnd() {
-            clearTimeout(pressTimer);
-        }
-
-        function triggerInsertModal(tsNumber) {
-            insertTargetTS = tsNumber; // Store memory of where to slice the DOM
-            
-            const refCard = document.querySelector(`.segment-card[data-segment="${tsNumber}"]`);
-            if (refCard) {
-                currentActiveArea = refCard.getAttribute('data-area-name');
-                currentActiveDirection = refCard.getAttribute('data-direction');
-            }
-
-            const modal = document.getElementById('quickAddModal');
-            const dirCode = currentActiveDirection === "Inbound Track" ? "IB" : "OB";
-            
-            // Update Title to show they are INSERTING
-            document.getElementById('quick-add-title').innerHTML = `INSERT BELOW TS-${tsNumber} <br><span style="font-size:11px; color:var(--primary);">${currentActiveArea} [${dirCode}]</span>`;
-            
-            updateQuickAddDropdown();
-            modal.style.display = 'flex';
-            toggleMenu(true); 
-            document.getElementById('stsShortcutMenu').style.display = 'none'; 
-            document.getElementById('searchContainer').style.display = 'none';
-        }
-
         function toggleQuickAddModal(show) {
             const modal = document.getElementById('quickAddModal');
             if (show) {
-                insertTargetTS = null; // Standard append mode
                 const dirCode = currentActiveDirection === "Inbound Track" ? "IB" : "OB";
-                document.getElementById('quick-add-title').innerHTML = `APPEND TO: <br><span style="font-size:11px; color:var(--primary);">${currentActiveArea} [${dirCode}]</span>`;
+                document.getElementById('quick-add-title').textContent = `${currentActiveArea} [${dirCode}]`;
                 updateQuickAddDropdown();
                 modal.style.display = 'flex';
                 toggleMenu(true); 
@@ -1146,7 +1300,6 @@
                 document.getElementById('searchContainer').style.display = 'none';
             } else {
                 modal.style.display = 'none';
-                insertTargetTS = null;
             }
         }
 
@@ -1269,17 +1422,11 @@
                 }
             });
             
-            // Check if we are slicing the DOM via Long Press
-            let refCard = null;
-            let refMapItem = null;
-            if (isQuickAdd && insertTargetTS) {
-                refCard = document.querySelector(`.segment-card[data-segment="${insertTargetTS}"]`);
-                refMapItem = document.querySelector(`.map-item[data-map-segment="${insertTargetTS}"]`);
-            }
-            
             newCards.forEach((item, index) => {
                 const card = createSegmentCard(item.num, selectedRouteKey, selectedRouteData.name, direction, item.color, area);
                 card.style.animationDelay = `${index * 0.05}s`;
+                container.appendChild(card);
+                scrollObserver.observe(card);
 
                 const mapBtn = document.createElement('div');
                 mapBtn.className = 'map-item';
@@ -1288,37 +1435,11 @@
                 mapBtn.textContent = `TS-${item.num}`;
                 mapBtn.style.borderLeft = `4px solid ${item.color}`;
                 
-                // LONG PRESS EVENT BINDINGS
-                mapBtn.addEventListener('touchstart', (e) => handleMapItemTouchStart(e, item.num), {passive: true});
-                mapBtn.addEventListener('mousedown', (e) => handleMapItemTouchStart(e, item.num));
-                mapBtn.addEventListener('touchend', handleMapItemTouchEnd);
-                mapBtn.addEventListener('mouseup', handleMapItemTouchEnd);
-                mapBtn.addEventListener('mouseleave', handleMapItemTouchEnd);
-                mapBtn.addEventListener('touchcancel', handleMapItemTouchEnd);
-
-                mapBtn.onclick = () => {
-                    if (isLongPress) return; // Ignore click if they were holding to insert
-                    isAutoScrolling = true; 
-                    scrollToCard(card);
-                    setTimeout(() => { isAutoScrolling = false; }, 800);
-                };
+                attachMapItemListeners(mapBtn, card, item.num);
                 
-                if (refCard && refMapItem) {
-                    // Surgical injection into the DOM right after the target node
-                    refCard.parentNode.insertBefore(card, refCard.nextSibling);
-                    refMapItem.parentNode.insertBefore(mapBtn, refMapItem.nextSibling);
-                    refCard = card;       // Update memory so the next card drops in under this one
-                    refMapItem = mapBtn;
-                } else {
-                    // Standard append to the absolute bottom
-                    container.appendChild(card);
-                    mapContainer.appendChild(mapBtn);
-                }
-                
-                scrollObserver.observe(card);
+                mapContainer.appendChild(mapBtn);
             });
             
-            insertTargetTS = null; // Clear injection memory
             loadedRoutes.add(selectedRouteKey);
             routeLoadHistory.push(selectedRouteKey);
             currentActiveArea = area;
@@ -1368,7 +1489,7 @@
             });
 
             if (hasData) {
-                const proceed = await showSystemConfirm(`TS-${conflictTS} has data.\n\nUndoing this will erase the "${conflictRoute}" and details.\n\nAre you sure you want to undo?`);
+                const proceed = await showSystemConfirm(`TS-${conflictTS} has data.\n\nUndoing this will erase the "${conflictRoute}" and details.\n\nAre you sure you want to cancel?`);
                 if (!proceed) return; 
             }
             
@@ -1679,19 +1800,8 @@
                         mapBtn.textContent = `TS-${segData.segmentNum}`;
                         mapBtn.style.borderLeft = `4px solid ${segData.color || '#ccc'}`;
                         
-                        mapBtn.addEventListener('touchstart', (e) => handleMapItemTouchStart(e, segData.segmentNum), {passive: true});
-                        mapBtn.addEventListener('mousedown', (e) => handleMapItemTouchStart(e, segData.segmentNum));
-                        mapBtn.addEventListener('touchend', handleMapItemTouchEnd);
-                        mapBtn.addEventListener('mouseup', handleMapItemTouchEnd);
-                        mapBtn.addEventListener('mouseleave', handleMapItemTouchEnd);
-                        mapBtn.addEventListener('touchcancel', handleMapItemTouchEnd);
+                        attachMapItemListeners(mapBtn, card, segData.segmentNum);
                         
-                        mapBtn.onclick = () => {
-                            if (isLongPress) return;
-                            isAutoScrolling = true;
-                            scrollToCard(card);
-                            setTimeout(() => { isAutoScrolling = false; }, 800);
-                        };
                         mapContainer.appendChild(mapBtn);
                         
                         checkSegmentData(card);
