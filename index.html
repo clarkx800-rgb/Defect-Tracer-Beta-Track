@@ -181,7 +181,6 @@
         }
         .sts-menu-item:active { background: var(--primary-dark); border-color: var(--primary); color: #fff;}
 
-        /* TACTICAL SEARCH MENU SYSTEM */
         .search-container {
             display: none;
             gap: 8px;
@@ -386,7 +385,6 @@
 
         select { flex: 1 1 40%; min-width: 120px; }
 
-        /* MULTI-PHOTO UI REWORK */
         .photo-wrapper { display: flex; align-items: stretch; gap: 8px; flex: 1 1 100%; justify-content: space-between; background: var(--card-bg); padding: 5px; border: 1px solid var(--border-color); }
         .file-input { display: none; }
         .camera-btn { background-color: var(--border-color); color: var(--text-color); padding: 10px 12px; font-size: var(--base-font); font-weight: bold; cursor: pointer; text-align: center; border: 1px solid var(--border-color); flex: 0 1 auto; transition: background-color 0.2s; display: flex; align-items: center; justify-content: center;}
@@ -458,7 +456,7 @@
         }
         .quick-add-modal h4 { margin: 0 0 5px 0; color: var(--text-color); font-size: var(--base-font); letter-spacing: 1px; border-bottom: 1px solid var(--border-color); padding-bottom: 8px;}
         
-        /* CUSTOM TACTICAL ALERT MODAL */
+        /* CUSTOM SYSTEM & GALLERY MODALS */
         .system-modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0, 0, 0, 0.7);
@@ -492,7 +490,6 @@
         }
         .system-modal-btn-group { display: flex; gap: 10px; }
 
-        /* MULTI-PHOTO VIEWER GALLERY MODAL */
         .gallery-modal {
             background: var(--bg-color);
             border: 1px solid var(--primary);
@@ -509,7 +506,7 @@
         .gallery-header h3 { margin: 0; color: var(--primary); font-size: var(--header-font); letter-spacing: 1px;}
         .gallery-grid {
             padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 20px; flex: 1;
-            background: #000; /* Dark contrast for photos */
+            background: #000; 
         }
         .gallery-item {
             position: relative; border: 1px solid var(--border-color); background: var(--card-bg); padding: 5px;
@@ -701,7 +698,7 @@
         let currentActiveArea = "";
         let currentActiveDirection = "";
         let isAutoScrolling = false;
-        let currentRowForGallery = null; // Memory for photo manager
+        let currentRowForGallery = null; 
 
         // --- CUSTOM MODAL ENGINE ---
         let confirmResolve = null;
@@ -753,7 +750,7 @@
                 cameraBtn.innerHTML = '📷 PHOTO';
                 cameraBtn.style.backgroundColor = 'var(--border-color)';
                 cameraBtn.style.color = 'var(--text-color)';
-                badgeContainer.innerHTML = ''; // Empty out the badge
+                badgeContainer.innerHTML = ''; 
             } else {
                 cameraBtn.innerHTML = '➕ ADD';
                 cameraBtn.style.backgroundColor = 'var(--success)';
@@ -766,7 +763,7 @@
             currentRowForGallery = row;
             const images = JSON.parse(row.dataset.images || "[]");
             const grid = document.getElementById('galleryGrid');
-            grid.innerHTML = ''; // Clear old
+            grid.innerHTML = ''; 
 
             images.forEach((imgObj, index) => {
                 const item = document.createElement('div');
@@ -792,17 +789,15 @@
             if (!currentRowForGallery) return;
             
             let images = JSON.parse(currentRowForGallery.dataset.images || "[]");
-            images.splice(indexToRemove, 1); // Remove target image
-            currentRowForGallery.dataset.images = JSON.stringify(images); // Save back to row memory
+            images.splice(indexToRemove, 1); 
+            currentRowForGallery.dataset.images = JSON.stringify(images); 
             
-            // Update the main UI badge immediately
             const wrapper = currentRowForGallery.querySelector('.photo-wrapper');
             const cameraBtn = wrapper.querySelector('.camera-btn');
             const badgeContainer = wrapper.querySelector('.status-badge-container');
             updatePhotoUI(currentRowForGallery, cameraBtn, badgeContainer);
             checkSegmentData(currentRowForGallery.closest('.segment-card'));
 
-            // If empty, auto close. Else, re-render gallery to fix indexes
             if (images.length === 0) {
                 closeGallery();
             } else {
@@ -1367,7 +1362,7 @@
         function addDefectRow(container, prefill = null) {
             const row = document.createElement('div');
             row.className = 'defect-row';
-            row.dataset.images = "[]"; // Initialize the empty image array memory
+            row.dataset.images = "[]"; 
 
             const compSelect = document.createElement('select');
             compSelect.className = 'component-select';
@@ -1452,7 +1447,6 @@
                             const ctx = canvas.getContext('2d');
                             ctx.drawImage(img, 0, 0, width, height);
                             
-                            // Save new image into the row array memory
                             const newImgObj = { img: canvas.toDataURL('image/jpeg', 0.8), w: width, h: height };
                             const currentImages = JSON.parse(row.dataset.images || "[]");
                             currentImages.push(newImgObj);
@@ -1465,7 +1459,7 @@
                     };
                     reader.readAsDataURL(file);
                 }
-                this.value = ''; // Reset input so same file can be selected again if needed
+                this.value = ''; 
             });
 
             photoWrapper.appendChild(cameraLabel);
@@ -1511,7 +1505,7 @@
                     segData.defects.push({
                         comp: row.querySelector('.component-select').value,
                         def: row.querySelector('.defect-select').value,
-                        images: JSON.parse(row.dataset.images || "[]") // Extract image array
+                        images: JSON.parse(row.dataset.images || "[]") 
                     });
                 });
                 projectData.push(segData);
@@ -1570,7 +1564,6 @@
                             addDefectRow(defectList); 
                         } else { 
                             segData.defects.forEach(defData => { 
-                                // V1 to V2 Save File Migration logic
                                 if (defData.photoBase64 && (!defData.images || defData.images.length === 0)) {
                                     defData.images = [{ img: defData.photoBase64, w: defData.imgW, h: defData.imgH }];
                                 }
@@ -1673,7 +1666,6 @@
                         }
 
                         if (images.length > 0) {
-                            // Queue one multi-page PDF generation per defect row
                             pdfJobs.push({
                                 lineName: areaName, routeName: routeName, tsId: tsId, notes: notes, comp: comp || "N/A", def: def || "N/A",
                                 images: images, defectID: index + 1
@@ -1715,82 +1707,105 @@
             }
         }
 
-        // NEW MULTI-PAGE PDF ENGINE
+        // UPGRADED PDF ENGINE: MARGINS, BORDERS, & MULTI-PAGE
         function generatePDF(data) {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
             
             const pageWidth = 297;
             const pageHeight = 210;
+            const isLightMode = localStorage.getItem('appTheme') === 'windows11';
 
-            // Loop through all images inside this specific defect row
             data.images.forEach((imgObj, index) => {
                 if (index > 0) {
-                    doc.addPage(); // Add a new page for every photo after the first one
+                    doc.addPage();
                 }
 
+                // 1. DRAW THEME-AWARE PAPER BORDER
+                const margin = 8; 
+                doc.setFillColor(255, 255, 255);
+                doc.rect(0, 0, pageWidth, pageHeight, 'F'); 
+                
+                doc.setLineWidth(0.5);
+                if (isLightMode) {
+                    doc.setDrawColor(100, 100, 100); 
+                    doc.roundedRect(margin, margin, pageWidth - margin * 2, pageHeight - margin * 2, 3, 3, 'S');
+                } else {
+                    doc.setDrawColor(0, 0, 0); 
+                    doc.rect(margin, margin, pageWidth - margin * 2, pageHeight - margin * 2, 'S');
+                }
+
+                // 2. CALCULATE IMAGE SAFE-ZONE MARGINS
+                const footerHeight = 45; 
+                const imgMargin = 12; 
+                
+                const maxImgW = pageWidth - (imgMargin * 2);
+                const maxImgH = pageHeight - footerHeight - (imgMargin * 2);
+
                 const imgRatio = imgObj.w / imgObj.h;
-                const pageRatio = pageWidth / pageHeight;
+                const boxRatio = maxImgW / maxImgH;
                 
                 let finalW, finalH, finalX, finalY;
                 
-                if (imgRatio > pageRatio) {
-                    finalW = pageWidth;
-                    finalH = pageWidth / imgRatio;
-                    finalX = 0;
-                    finalY = (pageHeight - finalH) / 2;
+                if (imgRatio > boxRatio) {
+                    finalW = maxImgW;
+                    finalH = maxImgW / imgRatio;
                 } else {
-                    finalH = pageHeight;
-                    finalW = pageHeight * imgRatio;
-                    finalX = (pageWidth - finalW) / 2;
-                    finalY = 0;
+                    finalH = maxImgH;
+                    finalW = maxImgH * imgRatio;
                 }
+                
+                finalX = imgMargin + (maxImgW - finalW) / 2;
+                finalY = imgMargin + (maxImgH - finalH) / 2;
 
                 doc.addImage(imgObj.img, 'JPEG', finalX, finalY, finalW, finalH);
 
-                // Re-draw footer for EVERY page
-                const footerHeight = 25; 
+                // 3. DRAW FOOTER SEPARATOR
                 const footerY = pageHeight - footerHeight;
-                
-                doc.setFillColor(255, 255, 255);
-                doc.rect(0, footerY, pageWidth, footerHeight, 'F');
-                
-                doc.setDrawColor(200, 200, 200);
-                doc.setLineWidth(0.5);
-                doc.line(0, footerY, pageWidth, footerY);
+                doc.setDrawColor(150, 150, 150);
+                doc.setLineWidth(0.3);
+                doc.line(margin, footerY, pageWidth - margin, footerY);
 
-                const leftMargin = 10;
+                // 4. PRINT FORMATTED DETAILS
+                const textMarginLeft = margin + 4;
                 let currentY = footerY + 8; 
                 
                 doc.setFont("helvetica", "bold");
                 doc.setFontSize(12);
+                const defectText = data.def && data.def !== "N/A" ? data.def : "";
+                const compText = data.comp && data.comp !== "N/A" ? data.comp : "";
+                const hyphen = (defectText && compText) ? " - " : "";
+                doc.text(`${data.tsId} | ${defectText}${hyphen}${compText}`, textMarginLeft, currentY);
                 
-                const lineLabel = data.lineName ? `${data.lineName} | ` : '';
-                doc.text(`${lineLabel}${data.tsId} - ${data.routeName}`, leftMargin, currentY);
-                
-                currentY += 6;
+                currentY += 7;
                 doc.setFont("helvetica", "normal");
                 doc.setFontSize(11);
-                doc.text(`${data.comp} - ${data.def}`, leftMargin, currentY);
+                const safeLineName = data.lineName ? data.lineName : "";
+                const safeRouteName = data.routeName ? data.routeName : "";
+                const locHyphen = (safeRouteName && safeLineName) ? " - " : "";
+                doc.text(`Location: ${safeRouteName}${locHyphen}${safeLineName}`, textMarginLeft, currentY);
                 
-                currentY += 6;
+                currentY += 7;
                 const todayDate = new Date().toLocaleDateString();
-                doc.setFont("helvetica", "italic");
-                doc.setFontSize(10);
-                doc.text(`DATE LOGGED: ${todayDate}`, leftMargin, currentY);
+                doc.text(`Date taken: ${todayDate}`, textMarginLeft, currentY);
 
-                const rightMargin = pageWidth - 10;
-                const notes = data.notes && data.notes.trim() !== "" ? data.notes : "NO ADDITIONAL COMMENTS.";
-                
-                doc.setFont("helvetica", "normal");
-                doc.setFontSize(10);
-                
-                const splitNotes = doc.splitTextToSize(notes, 140); 
-                doc.text(splitNotes, rightMargin, footerY + 8, { align: "right" });
-
-                // PAGE COUNTER
+                currentY += 8;
                 doc.setFont("helvetica", "bold");
-                doc.text(`PAGE ${index + 1} OF ${data.images.length}`, rightMargin, footerY + 22, { align: "right" });
+                doc.setFontSize(10);
+                doc.text("Comments: ", textMarginLeft, currentY);
+                
+                // Calculates width of "Comments: " so the actual notes indent nicely next to it
+                const commentsLabelWidth = doc.getTextWidth("Comments: ");
+                doc.setFont("helvetica", "normal");
+                const notes = data.notes && data.notes.trim() !== "" ? data.notes : "NONE";
+                const splitNotes = doc.splitTextToSize(notes, pageWidth - (margin * 2) - 8 - commentsLabelWidth); 
+                doc.text(splitNotes, textMarginLeft + commentsLabelWidth, currentY);
+
+                // 5. PRINT PAGE COUNTER
+                const rightMargin = pageWidth - margin - 4;
+                doc.setFont("helvetica", "bold");
+                doc.setFontSize(10);
+                doc.text(`PAGE ${index + 1} OF ${data.images.length}`, rightMargin, pageHeight - margin - 4, { align: "right" });
             });
 
             doc.save(`${data.tsId}_${data.comp.replace(/[^a-z0-9]/gi, '_')}_DEFECT.pdf`);
