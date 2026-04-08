@@ -181,7 +181,6 @@
         }
         .sts-menu-item:active { background: var(--primary-dark); border-color: var(--primary); color: #fff;}
 
-        /* TACTICAL SEARCH MENU SYSTEM */
         .search-container {
             display: none;
             gap: 8px;
@@ -334,9 +333,9 @@
         }
         
         .map-item:active { transform: scale(0.9); }
-        .map-item.has-data { background-color: #3e2700; color: var(--warning); border-color: var(--warning); }
+        .map-item.has-data { background-color: var(--primary-dark); color: #fff; border-color: var(--primary-dark); }
         .map-item.active-map { background: var(--primary); color: #fff; border-color: var(--primary-dark) !important; box-shadow: var(--hud-glow);}
-        .map-item.active-map.has-data { background-color: var(--warning); color: #fff; border-color: var(--danger) !important;}
+        .map-item.active-map.has-data { background-color: var(--warning); color: #000; border-color: var(--danger) !important;}
 
         #segments-container { flex: 1; display: flex; flex-direction: column; gap: 15px; min-width: 0; padding-bottom: 90px; }
 
@@ -345,7 +344,6 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* NEW DOUBLE FLASH OUTLINE ANIMATION */
         @keyframes searchFlash {
             0%   { box-shadow: var(--hud-glow); border-color: var(--border-color); }
             20%  { box-shadow: 0 0 20px 4px var(--primary); border-color: var(--primary); }
@@ -356,7 +354,6 @@
         }
         .search-highlight {
             animation: searchFlash 1.2s ease-in-out !important;
-            /* Ensures it physically cannot disappear during animation swap */
             opacity: 1 !important; 
             transform: translateY(0) !important;
         }
@@ -366,7 +363,6 @@
             border: 1px solid var(--border-color);
             padding: 15px;
             position: relative;
-            /* Added Explicit Base Styles to prevent disappearing glitch */
             opacity: 1; 
             transform: translateY(0);
             animation: cascadingFadeIn 0.3s ease-out; 
@@ -396,7 +392,6 @@
 
         select { flex: 1 1 40%; min-width: 120px; }
 
-        /* MULTI-PHOTO UI REWORK */
         .photo-wrapper { display: flex; align-items: stretch; gap: 8px; flex: 1 1 100%; justify-content: space-between; background: var(--card-bg); padding: 5px; border: 1px solid var(--border-color); }
         .file-input { display: none; }
         .camera-btn { background-color: var(--border-color); color: var(--text-color); padding: 10px 12px; font-size: var(--base-font); font-weight: bold; cursor: pointer; text-align: center; border: 1px solid var(--border-color); flex: 0 1 auto; transition: background-color 0.2s; display: flex; align-items: center; justify-content: center;}
@@ -468,7 +463,6 @@
         }
         .quick-add-modal h4 { margin: 0 0 5px 0; color: var(--text-color); font-size: var(--base-font); letter-spacing: 1px; border-bottom: 1px solid var(--border-color); padding-bottom: 8px;}
         
-        /* CUSTOM TACTICAL ALERT MODAL */
         .system-modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0, 0, 0, 0.7);
@@ -478,7 +472,7 @@
         .system-modal {
             background: var(--card-bg);
             border: 1px solid var(--primary);
-            box-shadow: 0 0 20px rgba(139, 195, 74, 0.3);
+            box-shadow: 0 0 20px rgba(0,0,0, 0.3);
             width: 85%; max-width: 320px;
             padding: 20px;
             text-align: center;
@@ -502,7 +496,6 @@
         }
         .system-modal-btn-group { display: flex; gap: 10px; }
 
-        /* MULTI-PHOTO VIEWER GALLERY MODAL */
         .gallery-modal {
             background: var(--bg-color);
             border: 1px solid var(--primary);
@@ -578,6 +571,7 @@
                         <select id="theme-selector" onchange="changeTheme(this.value)">
                             <option value="tactical">TACTICAL (DARK)</option>
                             <option value="windows11">WINDOWS 11 (LIGHT)</option>
+                            <option value="pokemongo">FIELD TRAINER (GAME)</option>
                         </select>
                     </div>
                     <div style="flex: 1;">
@@ -713,7 +707,6 @@
         let isAutoScrolling = false;
         let currentRowForGallery = null; 
 
-        // --- CUSTOM MODAL ENGINE ---
         let confirmResolve = null;
 
         function showSystemAlert(message, title = "SYSTEM NOTICE", isDanger = false) {
@@ -755,7 +748,6 @@
             document.getElementById('systemModalOverlay').style.display = 'none';
         }
 
-        // --- MULTI-PHOTO GALLERY ENGINE ---
         function updatePhotoUI(row, cameraBtn, badgeContainer) {
             const images = JSON.parse(row.dataset.images || "[]");
             
@@ -823,7 +815,6 @@
             currentRowForGallery = null;
         }
 
-        // --- THEME CONTROLLERS ---
         function changeTheme(themeName) {
             localStorage.setItem('appTheme', themeName);
             applySavedSettings(); 
@@ -839,13 +830,11 @@
             document.getElementById('font-selector').value = localStorage.getItem('appFontSize') || 'small';
         });
 
-        // GLOBAL CLICK LISTENER
         document.addEventListener('click', (e) => {
             const menu = document.getElementById('collapsible-menu');
             const fabModal = document.getElementById('quickAddModal');
             const stsMenu = document.getElementById('stsShortcutMenu');
             const searchContainer = document.getElementById('searchContainer');
-            const sysModal = document.getElementById('systemModalOverlay');
             
             const menuBtn = document.getElementById('menuBtn');
             const fabBtn = document.getElementById('quickAddBtn');
@@ -891,7 +880,6 @@
             }
         }
 
-        // TACTICAL SEARCH ENGINE
         function toggleSearch(e) {
             if (e) e.stopPropagation();
             const searchContainer = document.getElementById('searchContainer');
@@ -936,7 +924,7 @@
                 input.value = '';
                 setTimeout(() => { isAutoScrolling = false; }, 800);
             } else {
-                showSystemAlert(`Could not find TS-${tsNumber}.\nSub to sub section may have not been loaded.`, "TARGET NOT FOUND", true);
+                showSystemAlert(`Could not find TS-${tsNumber}.\nSub to sub section may have not been loaded.`, "TS MISSING", true);
             }
         }
 
@@ -1007,7 +995,8 @@
         }
 
         function getLineColors(lineName) {
-            const isLightMode = localStorage.getItem('appTheme') === 'windows11';
+            const activeTheme = localStorage.getItem('appTheme') || 'tactical';
+            const isLightMode = activeTheme !== 'tactical';
             
             if (!lineName) return { bg: 'transparent', text: 'var(--text-color)', border: 'var(--border-color)' };
             const name = lineName.toUpperCase();
@@ -1721,7 +1710,6 @@
             }
         }
 
-        // NEW MULTI-PAGE PDF ENGINE
         function generatePDF(data) {
             const { jsPDF } = window.jspdf;
             
@@ -1730,7 +1718,7 @@
             
             const doc = new jsPDF({ orientation: firstOrientation, unit: 'mm', format: 'a4' });
             
-            const isLightMode = localStorage.getItem('appTheme') === 'windows11';
+            const activeTheme = localStorage.getItem('appTheme') || 'tactical';
             const todayDate = new Date().toLocaleDateString();
 
             data.images.forEach((imgObj, index) => {
@@ -1747,10 +1735,18 @@
                 const borderW = pageWidth - (margin * 2);
                 const borderH = pageHeight - (margin * 2);
 
-                if (isLightMode) {
+                if (activeTheme === 'windows11') {
                     doc.setDrawColor(0, 120, 212); 
                     doc.setLineWidth(0.5);
                     doc.roundedRect(margin, margin, borderW, borderH, 3, 3, 'S');
+                } else if (activeTheme === 'pokemongo') {
+                    // Trainer Pokedex Gamified Border
+                    doc.setDrawColor(227, 53, 13); // Pokeball Red outer
+                    doc.setLineWidth(1.0);
+                    doc.roundedRect(margin, margin, borderW, borderH, 5, 5, 'S');
+                    doc.setDrawColor(40, 172, 168); // Teal inner line
+                    doc.setLineWidth(0.3);
+                    doc.roundedRect(margin + 1, margin + 1, borderW - 2, borderH - 2, 4, 4, 'S');
                 } else {
                     doc.setDrawColor(30, 30, 30);
                     doc.setLineWidth(1.0);
@@ -1794,7 +1790,7 @@
                 
                 doc.setFont("helvetica", "bold");
                 doc.setFontSize(11);
-                doc.text(`${data.tsId} | ${data.def} - ${data.comp}`, textStartX, textStartY);
+                doc.text(`${data.tsId} | ${data.def}  ${data.comp}`, textStartX, textStartY);
                 
                 textStartY += 5;
                 doc.setFont("helvetica", "normal");
