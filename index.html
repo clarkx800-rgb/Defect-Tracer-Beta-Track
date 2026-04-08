@@ -181,6 +181,7 @@
         }
         .sts-menu-item:active { background: var(--primary-dark); border-color: var(--primary); color: #fff;}
 
+        /* TACTICAL SEARCH MENU SYSTEM */
         .search-container {
             display: none;
             gap: 8px;
@@ -385,6 +386,7 @@
 
         select { flex: 1 1 40%; min-width: 120px; }
 
+        /* MULTI-PHOTO UI REWORK */
         .photo-wrapper { display: flex; align-items: stretch; gap: 8px; flex: 1 1 100%; justify-content: space-between; background: var(--card-bg); padding: 5px; border: 1px solid var(--border-color); }
         .file-input { display: none; }
         .camera-btn { background-color: var(--border-color); color: var(--text-color); padding: 10px 12px; font-size: var(--base-font); font-weight: bold; cursor: pointer; text-align: center; border: 1px solid var(--border-color); flex: 0 1 auto; transition: background-color 0.2s; display: flex; align-items: center; justify-content: center;}
@@ -456,7 +458,7 @@
         }
         .quick-add-modal h4 { margin: 0 0 5px 0; color: var(--text-color); font-size: var(--base-font); letter-spacing: 1px; border-bottom: 1px solid var(--border-color); padding-bottom: 8px;}
         
-        /* CUSTOM SYSTEM & GALLERY MODALS */
+        /* CUSTOM TACTICAL ALERT MODAL */
         .system-modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0, 0, 0, 0.7);
@@ -490,6 +492,7 @@
         }
         .system-modal-btn-group { display: flex; gap: 10px; }
 
+        /* MULTI-PHOTO VIEWER GALLERY MODAL */
         .gallery-modal {
             background: var(--bg-color);
             border: 1px solid var(--primary);
@@ -832,6 +835,7 @@
             const fabModal = document.getElementById('quickAddModal');
             const stsMenu = document.getElementById('stsShortcutMenu');
             const searchContainer = document.getElementById('searchContainer');
+            const sysModal = document.getElementById('systemModalOverlay');
             
             const menuBtn = document.getElementById('menuBtn');
             const fabBtn = document.getElementById('quickAddBtn');
@@ -1707,108 +1711,111 @@
             }
         }
 
-        // UPGRADED PDF ENGINE: MARGINS, BORDERS, & MULTI-PAGE
+        // NEW MULTI-PAGE PDF ENGINE
         function generatePDF(data) {
             const { jsPDF } = window.jspdf;
-            const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
             
-            const pageWidth = 297;
-            const pageHeight = 210;
+            // Determine orientation of the very first image to initialize the document
+            const firstImg = data.images[0];
+            let firstOrientation = (firstImg.w > firstImg.h) ? 'landscape' : 'portrait';
+            
+            const doc = new jsPDF({ orientation: firstOrientation, unit: 'mm', format: 'a4' });
+            
             const isLightMode = localStorage.getItem('appTheme') === 'windows11';
+            const todayDate = new Date().toLocaleDateString();
 
+            // Loop through all images inside this specific defect row
             data.images.forEach((imgObj, index) => {
+                let orientation = (imgObj.w > imgObj.h) ? 'landscape' : 'portrait';
+                
                 if (index > 0) {
-                    doc.addPage();
+                    doc.addPage('a4', orientation);
                 }
 
-                // 1. DRAW THEME-AWARE PAPER BORDER
-                const margin = 8; 
-                doc.setFillColor(255, 255, 255);
-                doc.rect(0, 0, pageWidth, pageHeight, 'F'); 
-                
-                doc.setLineWidth(0.5);
+                // A4 dimensions based on orientation
+                const pageWidth = orientation === 'landscape' ? 297 : 210;
+                const pageHeight = orientation === 'landscape' ? 210 : 297;
+
+                // 1. Draw Themed Border
+                const margin = 10;
+                const borderW = pageWidth - (margin * 2);
+                const borderH = pageHeight - (margin * 2);
+
                 if (isLightMode) {
-                    doc.setDrawColor(100, 100, 100); 
-                    doc.roundedRect(margin, margin, pageWidth - margin * 2, pageHeight - margin * 2, 3, 3, 'S');
+                    // Windows 11 style: Blue, rounded corners
+                    doc.setDrawColor(0, 120, 212); // Microsoft Blue
+                    doc.setLineWidth(0.5);
+                    doc.roundedRect(margin, margin, borderW, borderH, 3, 3, 'S');
                 } else {
-                    doc.setDrawColor(0, 0, 0); 
-                    doc.rect(margin, margin, pageWidth - margin * 2, pageHeight - margin * 2, 'S');
+                    // Tactical style: Dark, sharp corners, double line
+                    doc.setDrawColor(30, 30, 30);
+                    doc.setLineWidth(1.0);
+                    doc.rect(margin, margin, borderW, borderH, 'S');
+                    doc.setLineWidth(0.3);
+                    doc.rect(margin + 1.5, margin + 1.5, borderW - 3, borderH - 3, 'S');
                 }
 
-                // 2. CALCULATE IMAGE SAFE-ZONE MARGINS
-                const footerHeight = 45; 
-                const imgMargin = 12; 
-                
-                const maxImgW = pageWidth - (imgMargin * 2);
-                const maxImgH = pageHeight - footerHeight - (imgMargin * 2);
+                // 2. Define Footer & Image Safe Zone
+                const footerHeight = 22; // Reserved space at the bottom for text
+                const safeZoneX = margin + 2;
+                const safeZoneY = margin + 2;
+                const safeZoneW = borderW - 4;
+                const safeZoneH = borderH - footerHeight - 4; // Prevent image from touching footer
 
+                // 3. Fit Image inside Safe Zone
                 const imgRatio = imgObj.w / imgObj.h;
-                const boxRatio = maxImgW / maxImgH;
+                const safeRatio = safeZoneW / safeZoneH;
                 
                 let finalW, finalH, finalX, finalY;
                 
-                if (imgRatio > boxRatio) {
-                    finalW = maxImgW;
-                    finalH = maxImgW / imgRatio;
+                if (imgRatio > safeRatio) {
+                    finalW = safeZoneW;
+                    finalH = safeZoneW / imgRatio;
                 } else {
-                    finalH = maxImgH;
-                    finalW = maxImgH * imgRatio;
+                    finalH = safeZoneH;
+                    finalW = safeZoneH * imgRatio;
                 }
                 
-                finalX = imgMargin + (maxImgW - finalW) / 2;
-                finalY = imgMargin + (maxImgH - finalH) / 2;
+                finalX = safeZoneX + ((safeZoneW - finalW) / 2);
+                finalY = safeZoneY + ((safeZoneH - finalH) / 2);
 
                 doc.addImage(imgObj.img, 'JPEG', finalX, finalY, finalW, finalH);
 
-                // 3. DRAW FOOTER SEPARATOR
-                const footerY = pageHeight - footerHeight;
-                doc.setDrawColor(150, 150, 150);
+                // 4. Draw Footer Separator
+                doc.setDrawColor(200, 200, 200);
                 doc.setLineWidth(0.3);
-                doc.line(margin, footerY, pageWidth - margin, footerY);
+                doc.line(margin, pageHeight - margin - footerHeight, pageWidth - margin, pageHeight - margin - footerHeight);
 
-                // 4. PRINT FORMATTED DETAILS
-                const textMarginLeft = margin + 4;
-                let currentY = footerY + 8; 
+                // 5. Draw Footer Text (Bottom Left, as low as possible)
+                const textStartX = margin + 4;
+                let textStartY = pageHeight - margin - 14; 
+                
+                doc.setTextColor(0, 0, 0); // Always pure black for printer friendly
                 
                 doc.setFont("helvetica", "bold");
-                doc.setFontSize(12);
-                const defectText = data.def && data.def !== "N/A" ? data.def : "";
-                const compText = data.comp && data.comp !== "N/A" ? data.comp : "";
-                const hyphen = (defectText && compText) ? " - " : "";
-                doc.text(`${data.tsId} | ${defectText}${hyphen}${compText}`, textMarginLeft, currentY);
-                
-                currentY += 7;
-                doc.setFont("helvetica", "normal");
                 doc.setFontSize(11);
-                const safeLineName = data.lineName ? data.lineName : "";
-                const safeRouteName = data.routeName ? data.routeName : "";
-                const locHyphen = (safeRouteName && safeLineName) ? " - " : "";
-                doc.text(`Location: ${safeRouteName}${locHyphen}${safeLineName}`, textMarginLeft, currentY);
+                doc.text(`${data.tsId} | ${data.def} - ${data.comp}`, textStartX, textStartY);
                 
-                currentY += 7;
-                const todayDate = new Date().toLocaleDateString();
-                doc.text(`Date taken: ${todayDate}`, textMarginLeft, currentY);
-
-                currentY += 8;
-                doc.setFont("helvetica", "bold");
-                doc.setFontSize(10);
-                doc.text("Comments: ", textMarginLeft, currentY);
-                
-                // Calculates width of "Comments: " so the actual notes indent nicely next to it
-                const commentsLabelWidth = doc.getTextWidth("Comments: ");
+                textStartY += 5;
                 doc.setFont("helvetica", "normal");
-                const notes = data.notes && data.notes.trim() !== "" ? data.notes : "NONE";
-                const splitNotes = doc.splitTextToSize(notes, pageWidth - (margin * 2) - 8 - commentsLabelWidth); 
-                doc.text(splitNotes, textMarginLeft + commentsLabelWidth, currentY);
-
-                // 5. PRINT PAGE COUNTER
-                const rightMargin = pageWidth - margin - 4;
-                doc.setFont("helvetica", "bold");
                 doc.setFontSize(10);
-                doc.text(`PAGE ${index + 1} OF ${data.images.length}`, rightMargin, pageHeight - margin - 4, { align: "right" });
+                // Strip the word "Line" to cleanly print "EXPO" or "MILLENNIUM"
+                const cleanLineName = data.lineName ? data.lineName.replace(/ Line/i, '').trim().toUpperCase() : '';
+                doc.text(`Location: ${data.routeName} - ${cleanLineName}`, textStartX, textStartY);
+                
+                textStartY += 5;
+                doc.text(`Date taken: ${todayDate}`, textStartX, textStartY);
+
+                // 6. Page Counter (Bottom Right)
+                const rightAlignX = pageWidth - margin - 4;
+                doc.setFont("helvetica", "bold");
+                doc.setFontSize(9);
+                doc.text(`PAGE ${index + 1} OF ${data.images.length}`, rightAlignX, textStartY, { align: "right" });
             });
 
-            doc.save(`${data.tsId}_${data.comp.replace(/[^a-z0-9]/gi, '_')}_DEFECT.pdf`);
+            // Clean special characters out of file name
+            const cleanComp = data.comp ? data.comp.replace(/[^a-z0-9]/gi, '_') : 'UNKNOWN';
+            doc.save(`${data.tsId}_${cleanComp}_DEFECT.pdf`);
         }
     </script>
 </body>
