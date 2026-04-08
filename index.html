@@ -857,11 +857,36 @@
             }
         });
 
+        // 1. DESKTOP & REFRESH TRAP
         window.addEventListener('beforeunload', function (e) {
             const cards = document.querySelectorAll('.segment-card');
             if (cards.length > 0) {
                 e.preventDefault();
                 e.returnValue = 'Data loss imminent. Are you sure you want to abort?';
+            }
+        });
+
+        // 2. MOBILE SYSTEM BACK BUTTON TRAP
+        // Push a dummy state to trick the phone into thinking there is a previous page
+        window.history.pushState({ isAppOpen: true }, "", "");
+
+        window.addEventListener('popstate', function(event) {
+            const cards = document.querySelectorAll('.segment-card');
+            
+            if (cards.length > 0) {
+                // Immediately push the dummy state back to physically trap them in the app
+                window.history.pushState({ isAppOpen: true }, "", "");
+                
+                // Trigger the tactical HUD warning
+                showSystemConfirm("WARNING: Using the system back button will exit the app and delete unsaved data.\n\nAre you sure you want to abort?", "DATA LOSS IMMINENT").then(proceed => {
+                    if (proceed) {
+                        // User confirmed they want to leave. We jump back 2 steps in history to bypass our trap.
+                        window.history.go(-2); 
+                    }
+                });
+            } else {
+                // No unsaved data exists, allow them to exit normally
+                window.history.back();
             }
         });
 
