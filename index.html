@@ -187,7 +187,7 @@
             gap: 8px;
             margin-top: 15px;
             align-items: center;
-            animation: cascadingFadeIn 0.2s ease-out both;
+            animation: cascadingFadeIn 0.2s ease-out;
         }
         .search-input-wrapper {
             display: flex;
@@ -345,13 +345,20 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        @keyframes tacticalPulse {
-            0% { box-shadow: 0 0 0 0 var(--primary); background-color: var(--primary-dark); }
-            70% { box-shadow: 0 0 0 15px rgba(139, 195, 74, 0); background-color: var(--card-bg); }
-            100% { box-shadow: 0 0 0 0 rgba(139, 195, 74, 0); background-color: var(--card-bg); }
+        /* NEW DOUBLE FLASH OUTLINE ANIMATION */
+        @keyframes searchFlash {
+            0%   { box-shadow: var(--hud-glow); border-color: var(--border-color); }
+            20%  { box-shadow: 0 0 20px 4px var(--primary); border-color: var(--primary); }
+            40%  { box-shadow: var(--hud-glow); border-color: var(--border-color); }
+            60%  { box-shadow: 0 0 20px 4px var(--primary); border-color: var(--primary); }
+            80%  { box-shadow: var(--hud-glow); border-color: var(--border-color); }
+            100% { box-shadow: var(--hud-glow); border-color: var(--border-color); }
         }
         .search-highlight {
-            animation: tacticalPulse 1.5s ease-out !important;
+            animation: searchFlash 1.2s ease-in-out !important;
+            /* Ensures it physically cannot disappear during animation swap */
+            opacity: 1 !important; 
+            transform: translateY(0) !important;
         }
 
         .segment-card {
@@ -359,9 +366,12 @@
             border: 1px solid var(--border-color);
             padding: 15px;
             position: relative;
-            animation: cascadingFadeIn 0.3s ease-out both;
+            /* Added Explicit Base Styles to prevent disappearing glitch */
+            opacity: 1; 
+            transform: translateY(0);
+            animation: cascadingFadeIn 0.3s ease-out; 
             scroll-margin-top: 150px; 
-            will-change: opacity, transform;
+            will-change: opacity, transform, border-color, box-shadow;
             transition: background-color 0.3s ease;
             box-shadow: var(--hud-glow);
         }
@@ -909,7 +919,7 @@
                 scrollToCard(targetCard);
                 
                 targetCard.classList.add('search-highlight');
-                setTimeout(() => { targetCard.classList.remove('search-highlight'); }, 1500);
+                setTimeout(() => { targetCard.classList.remove('search-highlight'); }, 1200);
 
                 const targetMapItem = document.querySelector(`.map-item[data-map-segment="${tsNumber}"]`);
                 if (targetMapItem) {
@@ -1715,7 +1725,6 @@
         function generatePDF(data) {
             const { jsPDF } = window.jspdf;
             
-            // Determine orientation of the very first image to initialize the document
             const firstImg = data.images[0];
             let firstOrientation = (firstImg.w > firstImg.h) ? 'landscape' : 'portrait';
             
@@ -1724,7 +1733,6 @@
             const isLightMode = localStorage.getItem('appTheme') === 'windows11';
             const todayDate = new Date().toLocaleDateString();
 
-            // Loop through all images inside this specific defect row
             data.images.forEach((imgObj, index) => {
                 let orientation = (imgObj.w > imgObj.h) ? 'landscape' : 'portrait';
                 
@@ -1732,22 +1740,18 @@
                     doc.addPage('a4', orientation);
                 }
 
-                // A4 dimensions based on orientation
                 const pageWidth = orientation === 'landscape' ? 297 : 210;
                 const pageHeight = orientation === 'landscape' ? 210 : 297;
 
-                // 1. Draw Themed Border
                 const margin = 10;
                 const borderW = pageWidth - (margin * 2);
                 const borderH = pageHeight - (margin * 2);
 
                 if (isLightMode) {
-                    // Windows 11 style: Blue, rounded corners
-                    doc.setDrawColor(0, 120, 212); // Microsoft Blue
+                    doc.setDrawColor(0, 120, 212); 
                     doc.setLineWidth(0.5);
                     doc.roundedRect(margin, margin, borderW, borderH, 3, 3, 'S');
                 } else {
-                    // Tactical style: Dark, sharp corners, double line
                     doc.setDrawColor(30, 30, 30);
                     doc.setLineWidth(1.0);
                     doc.rect(margin, margin, borderW, borderH, 'S');
@@ -1755,14 +1759,12 @@
                     doc.rect(margin + 1.5, margin + 1.5, borderW - 3, borderH - 3, 'S');
                 }
 
-                // 2. Define Footer & Image Safe Zone
-                const footerHeight = 22; // Reserved space at the bottom for text
+                const footerHeight = 22; 
                 const safeZoneX = margin + 2;
                 const safeZoneY = margin + 2;
                 const safeZoneW = borderW - 4;
-                const safeZoneH = borderH - footerHeight - 4; // Prevent image from touching footer
+                const safeZoneH = borderH - footerHeight - 4; 
 
-                // 3. Fit Image inside Safe Zone
                 const imgRatio = imgObj.w / imgObj.h;
                 const safeRatio = safeZoneW / safeZoneH;
                 
@@ -1781,16 +1783,14 @@
 
                 doc.addImage(imgObj.img, 'JPEG', finalX, finalY, finalW, finalH);
 
-                // 4. Draw Footer Separator
                 doc.setDrawColor(200, 200, 200);
                 doc.setLineWidth(0.3);
                 doc.line(margin, pageHeight - margin - footerHeight, pageWidth - margin, pageHeight - margin - footerHeight);
 
-                // 5. Draw Footer Text (Bottom Left, as low as possible)
                 const textStartX = margin + 4;
                 let textStartY = pageHeight - margin - 14; 
                 
-                doc.setTextColor(0, 0, 0); // Always pure black for printer friendly
+                doc.setTextColor(0, 0, 0); 
                 
                 doc.setFont("helvetica", "bold");
                 doc.setFontSize(11);
@@ -1799,21 +1799,18 @@
                 textStartY += 5;
                 doc.setFont("helvetica", "normal");
                 doc.setFontSize(10);
-                // Strip the word "Line" to cleanly print "EXPO" or "MILLENNIUM"
                 const cleanLineName = data.lineName ? data.lineName.replace(/ Line/i, '').trim().toUpperCase() : '';
                 doc.text(`Location: ${data.routeName} - ${cleanLineName}`, textStartX, textStartY);
                 
                 textStartY += 5;
                 doc.text(`Date taken: ${todayDate}`, textStartX, textStartY);
 
-                // 6. Page Counter (Bottom Right)
                 const rightAlignX = pageWidth - margin - 4;
                 doc.setFont("helvetica", "bold");
                 doc.setFontSize(9);
                 doc.text(`PAGE ${index + 1} OF ${data.images.length}`, rightAlignX, textStartY, { align: "right" });
             });
 
-            // Clean special characters out of file name
             const cleanComp = data.comp ? data.comp.replace(/[^a-z0-9]/gi, '_') : 'UNKNOWN';
             doc.save(`${data.tsId}_${cleanComp}_DEFECT.pdf`);
         }
