@@ -639,7 +639,7 @@
             <div class="system-modal-title" id="systemModalTitle">SYSTEM ALERT</div>
             <div class="system-modal-message" id="systemModalMessage">Message goes here</div>
             <div class="system-modal-btn-group" id="systemModalBtnGroup">
-                <button class="btn-primary" style="width: 100%;" onclick="closeSystemModal()">ACKNOWLEDGE</button>
+                <button class="btn-primary" style="width: 100%;" onclick="closeSystemModal()">BACK TO PAGE</button>
             </div>
         </div>
     </div>
@@ -664,7 +664,7 @@
             document.getElementById('systemModalMessage').textContent = message;
             
             document.getElementById('systemModalBtnGroup').innerHTML = `
-                <button class="btn-primary" style="width: 100%;" onclick="closeSystemModal()">ACKNOWLEDGE</button>
+                <button class="btn-primary" style="width: 100%;" onclick="closeSystemModal()">BACK TO PAGE</button>
             `;
             
             document.getElementById('systemModalOverlay').style.display = 'flex';
