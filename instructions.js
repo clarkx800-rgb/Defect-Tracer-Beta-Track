@@ -1,34 +1,30 @@
 const systemInstructions = `
-    <div class="instruction-hero">
-        <div class="instruction-header">
-            <h3>HOW TO USE</h3>
-        </div>
-        <div class="instruction-content">
-            <div class="instruction-step">
-                <h4>STEP 1: ESTABLISH ROUTE</h4>
-                <ul>
-                    <li>Open the top right menu.</li>
-                    <li>Select <b>1. LINE</b>, <b>2. DIRECTION</b>, and <b>3. SUB-TO-SUB BLOCK</b>.</li>
-                    <li>Tap <b>LOAD AREA</b> to generate your track blocks.</li>
-                    <li><i>PRO TIP: Long-press any TS on the mini-map to instantly splice in switches or cross-overs.</i></li>
-                </ul>
-            </div>
-            <div class="instruction-step">
-                <h4>STEP 2: LOG DEFECTS</h4>
-                <ul>
-                    <li>Scroll to current Track Section (TS).</li>
-                    <li>Select <b>COMPONENT</b> and <b>DEFECT</b> from dropdowns.</li>
-                    <li>Tap <b>📷 PHOTO</b> to attach one or multiple visual evidence shots.</li>
-                    <li>Encounter an unknown issue? Select <b>CUSTOM ENTRY...</b></li>
-                </ul>
-            </div>
-            <div class="instruction-step">
-                <h4 style="color: var(--warning);">STEP 3: SAVE DATA ⚠️</h4>
-                <ul>
-                    <li>System does not auto-save. Open menu and tap <b>💾 SAVE DATA</b> frequently.</li>
-                    <li>If your phone crashes or browser refreshes, tap <b>📂 LOAD DATA</b> to resume your work.</li>
-                </ul>
-            </div>
-        </div>
+    <div style="font-size: var(--base-font); line-height: 1.6; color: var(--text-muted); text-transform: none;">
+        <p style="color: var(--text-color); font-weight: bold; text-transform: uppercase;">STEP 1: ESTABLISH ROUTE</p>
+        <ul style="margin-top: 5px; padding-left: 20px; margin-bottom: 20px;">
+            <li>Open the top right menu (✖/⚙).</li>
+            <li>Select <b>1. LINE</b>, <b>2. DIRECTION</b> (IB or OB), and <b>3. SUB-TO-SUB AREA</b>.</li>
+            <li>Tap <b>LOAD AREA</b> to generate your inspection route.</li>
+        </ul>
+
+        <p style="color: var(--text-color); font-weight: bold; text-transform: uppercase;">STEP 2: LOG DEFECTS</p>
+        <ul style="margin-top: 5px; padding-left: 20px; margin-bottom: 20px;">
+            <li>Scroll to current Track Section (TS) or use the Search (🔍) tool.</li>
+            <li>Select <b>COMPONENT</b> and <b>DEFECT</b> from dropdowns.</li>
+            <li>Use <b>CUSTOM ENTRY...</b> for unlisted anomalies.</li>
+            <li>Tap <b>📷 PHOTO</b> to attach visual evidence (Multiple allowed).</li>
+        </ul>
+
+        <p style="color: var(--text-color); font-weight: bold; text-transform: uppercase;">STEP 3: TACTICAL TOOLS</p>
+        <ul style="margin-top: 5px; padding-left: 20px; margin-bottom: 20px;">
+            <li><b>LONG PRESS</b> any TS on the mini-map to Splice/Insert a switch.</li>
+            <li>Tap the <b>Floating + Button</b> to quick-add continuous routes.</li>
+        </ul>
+
+        <p style="color: var(--warning); font-weight: bold; text-transform: uppercase;">STEP 4: SAVE DATA ⚠️</p>
+        <ul style="margin-top: 5px; padding-left: 20px;">
+            <li>System does not auto-save. Open menu and tap <b style="color: var(--warning)">💾 SAVE DATA</b> frequently.</li>
+            <li>Tap <b style="color: var(--success)">📊 EXPORT REPORT</b> when the shift is complete to generate your Excel & PDF files.</li>
+        </ul>
     </div>
 `;
