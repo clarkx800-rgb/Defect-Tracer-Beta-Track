@@ -331,7 +331,7 @@
             transition: all 0.2s ease;
             user-select: none;
             will-change: transform, background-color;
-            touch-action: pan-y; /* Prevent touch delay warnings */
+            touch-action: pan-y; /* Fixes touch delay on mobile */
         }
         
         .map-item:active { transform: scale(0.9); }
@@ -687,17 +687,10 @@
     </div>
 
     <div class="quick-add-modal" id="insertModal">
-        <h4>INSERT AFTER TS-<span id="insert-target-ts" style="color: var(--primary);"></span></h4>
-        
-        <select id="insert-area-select" style="width: 100%; margin-bottom: 5px;" onchange="updateInsertDropdown()"></select>
-        <select id="insert-dir-select" style="width: 100%; margin-bottom: 5px;" onchange="updateInsertDropdown()">
-            <option value="Inbound Track">INBOUND (IB)</option>
-            <option value="Outbound Track">OUTBOUND (OB)</option>
-        </select>
+        <h4>SPLICE SWITCH AFTER TS-<span id="insert-target-ts" style="color: var(--primary);"></span></h4>
         <select id="insert-route-select" style="width: 100%; margin-bottom: 5px;">
             <option value="">AWAITING INPUT...</option>
         </select>
-        
         <div style="display: flex; gap: 8px; margin-top: 10px;">
             <button class="btn-primary" style="flex: 1; padding: 10px;" onclick="executeInsert()">INSERT</button>
             <button class="btn-outline" style="flex: 1; padding: 10px;" onclick="closeInsertModal()">CANCEL</button>
@@ -885,25 +878,16 @@
             applySavedSettings(); 
         }
 
-        // INITIALIZE APP DATA ON LOAD
         document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('theme-selector').value = localStorage.getItem('appTheme') || 'tactical';
             document.getElementById('font-selector').value = localStorage.getItem('appFontSize') || 'small';
             
-            // Populate Area Selects
             const areaSelect = document.getElementById('general-area');
-            const insertAreaSelect = document.getElementById('insert-area-select');
-            
             for (let area in globalDatabase) {
                 let opt = document.createElement('option');
                 opt.value = area;
                 opt.textContent = area;
                 areaSelect.appendChild(opt);
-                
-                let opt2 = document.createElement('option');
-                opt2.value = area;
-                opt2.textContent = area;
-                insertAreaSelect.appendChild(opt2);
             }
         });
 
@@ -1084,13 +1068,11 @@
         }
 
         // --- SPLICE / INSERT MODAL CONTROLS ---
-        function openInsertModal(tsNumber) {
+        function openInsertModal(tsNumber, baseRouteKey) {
             currentInsertTargetTS = tsNumber;
             document.getElementById('insert-target-ts').textContent = tsNumber;
             
-            document.getElementById('insert-area-select').value = currentActiveArea || Object.keys(globalDatabase)[0];
-            document.getElementById('insert-dir-select').value = currentActiveDirection || 'Inbound Track';
-            updateInsertDropdown();
+            updateInsertDropdown(baseRouteKey);
             
             document.getElementById('insertModal').style.display = 'flex';
             
@@ -1105,40 +1087,39 @@
             currentInsertTargetTS = null;
         }
 
-        function updateInsertDropdown() {
-            const area = document.getElementById('insert-area-select').value;
-            const direction = document.getElementById('insert-dir-select').value;
+        function updateInsertDropdown(baseRouteKey) {
             const dropdown = document.getElementById('insert-route-select');
-            
             dropdown.innerHTML = '<option value="">AWAITING INPUT...</option>';
             
-            if (area && direction && globalDatabase[area] && globalDatabase[area][direction]) {
-                const routes = globalDatabase[area][direction];
+            if (currentActiveArea && currentActiveDirection && globalDatabase[currentActiveArea] && globalDatabase[currentActiveArea][currentActiveDirection]) {
+                const routes = globalDatabase[currentActiveArea][currentActiveDirection];
                 let hasOptions = false;
-                for (let routeKey in routes) {
-                    if (!loadedRoutes.has(routeKey)) {
+                for (let key in routes) {
+                    if (!loadedRoutes.has(key) && (key.includes('-X') || key.includes('-ST') || key.includes('Pocket') || key.includes('Cross'))) {
                         let opt = document.createElement('option');
-                        opt.value = routeKey;
-                        opt.textContent = routes[routeKey].name;
+                        opt.value = key;
+                        opt.textContent = routes[key].name;
                         dropdown.appendChild(opt);
                         hasOptions = true;
                     }
                 }
                 if (!hasOptions) {
-                    dropdown.innerHTML = '<option value="">ALL SECTIONS LOADED</option>';
+                    dropdown.innerHTML = '<option value="">ALL SWITCHES LOADED</option>';
                 }
+            } else {
+                dropdown.innerHTML = '<option value="">NO AREA LOADED</option>';
             }
         }
 
         function executeInsert() {
             if (!currentInsertTargetTS) return;
             
-            const area = document.getElementById('insert-area-select').value;
-            const direction = document.getElementById('insert-dir-select').value;
+            const area = currentActiveArea;
+            const direction = currentActiveDirection;
             const routeKey = document.getElementById('insert-route-select').value;
             
             if (!area || !routeKey) { 
-                showSystemAlert('Invalid Selection. Ensure Area and Route are selected.', 'SELECTION ERROR', true); 
+                showSystemAlert('Invalid Selection. Ensure Route is selected.', 'SELECTION ERROR', true); 
                 return; 
             }
             if (loadedRoutes.has(routeKey)) {
@@ -1160,7 +1141,6 @@
                 }
             });
 
-            // Find exact DOM nodes to Insert After
             const targetCard = document.querySelector(`.segment-card[data-segment="${currentInsertTargetTS}"]`);
             const targetMap = document.querySelector(`.map-item[data-map-segment="${currentInsertTargetTS}"]`);
             
@@ -1180,7 +1160,7 @@
                 mapBtn.textContent = `TS-${item.num}`;
                 mapBtn.style.borderLeft = `4px solid ${item.color}`;
                 
-                attachMapItemListeners(mapBtn, card, item.num);
+                attachMapItemListeners(mapBtn, card, item.num, routeKey);
                 
                 mapContainer.insertBefore(mapBtn, refMap);
             });
@@ -1201,7 +1181,7 @@
         }
 
         // Centralized Map Button Listeners (Click + LongPress/RightClick)
-        function attachMapItemListeners(mapBtn, card, itemNum) {
+        function attachMapItemListeners(mapBtn, card, itemNum, routeKey) {
             mapBtn.onclick = () => {
                 isAutoScrolling = true; 
                 scrollToCard(card);
@@ -1209,16 +1189,23 @@
             };
             
             let pressTimer;
-            mapBtn.addEventListener('touchstart', (e) => {
-                pressTimer = setTimeout(() => openInsertModal(itemNum), 600);
-            }, {passive: true});
-            mapBtn.addEventListener('touchend', () => clearTimeout(pressTimer));
-            mapBtn.addEventListener('touchmove', () => clearTimeout(pressTimer));
+            const startPress = (e) => {
+                if (e.type === 'mousedown' && e.button !== 0) return; 
+                pressTimer = setTimeout(() => openInsertModal(itemNum, routeKey), 600);
+            };
+            const cancelPress = () => clearTimeout(pressTimer);
             
-            // Desktop Right-Click (Also triggers naturally on some mobile long-presses)
+            mapBtn.addEventListener('touchstart', startPress, {passive: true});
+            mapBtn.addEventListener('touchend', cancelPress);
+            mapBtn.addEventListener('touchmove', cancelPress);
+            
+            mapBtn.addEventListener('mousedown', startPress);
+            mapBtn.addEventListener('mouseup', cancelPress);
+            mapBtn.addEventListener('mouseleave', cancelPress);
+            
             mapBtn.addEventListener('contextmenu', (e) => {
                 e.preventDefault();
-                openInsertModal(itemNum);
+                openInsertModal(itemNum, routeKey);
             });
         }
 
@@ -1435,7 +1422,7 @@
                 mapBtn.textContent = `TS-${item.num}`;
                 mapBtn.style.borderLeft = `4px solid ${item.color}`;
                 
-                attachMapItemListeners(mapBtn, card, item.num);
+                attachMapItemListeners(mapBtn, card, item.num, selectedRouteKey);
                 
                 mapContainer.appendChild(mapBtn);
             });
@@ -1800,7 +1787,7 @@
                         mapBtn.textContent = `TS-${segData.segmentNum}`;
                         mapBtn.style.borderLeft = `4px solid ${segData.color || '#ccc'}`;
                         
-                        attachMapItemListeners(mapBtn, card, segData.segmentNum);
+                        attachMapItemListeners(mapBtn, card, segData.segmentNum, activeKey);
                         
                         mapContainer.appendChild(mapBtn);
                         
