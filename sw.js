@@ -8,6 +8,7 @@ const ASSETS_TO_CACHE = [
   './db_millennium.js',   // <-- NEW
   './db_evergreen.js',    // <-- NEW
   './themes.js',
+  './instructions.js',
   './manifest.json',
   './icon.png',
   './exceljs.min.js',
