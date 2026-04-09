@@ -17,19 +17,19 @@ const systemThemes = {
         "--theme-color-meta": "#1a1a1a"
     },
     "windows11": {
-        "--primary": "#0078D4",      
+        "--primary": "#0078D4",      // Microsoft Blue
         "--primary-dark": "#005A9E",
         "--danger": "#D13438", 
         "--success": "#107C10",
         "--warning": "#D83B01", 
-        "--bg-color": "#F3F3F3",     
-        "--card-bg": "#FFFFFF",      
+        "--bg-color": "#F3F3F3",     // Light gray background
+        "--card-bg": "#FFFFFF",      // Pure white cards
         "--input-bg": "#FFFFFF",
-        "--text-color": "#202020",   
+        "--text-color": "#202020",   // Dark gray text
         "--text-muted": "#605E5C",
-        "--border-color": "#E1DFDD", 
-        "--hud-glow": "0 4px 12px rgba(0,0,0,0.08)", 
-        "--border-radius": "8px",     
+        "--border-color": "#E1DFDD", // Soft borders
+        "--hud-glow": "0 4px 12px rgba(0,0,0,0.08)", // Soft drop shadow
+        "--border-radius": "8px",     // Windows 11 rounded corners
         "--theme-color-meta": "#F3F3F3"
     },
     "pokemongo": {
@@ -47,6 +47,22 @@ const systemThemes = {
         "--hud-glow": "0 6px 16px rgba(0,0,0,0.12)", // Bouncy drop shadow
         "--border-radius": "16px",   // Highly rounded, game-like corners
         "--theme-color-meta": "#E1F5FE"
+    },
+    "macosdark": {
+        "--primary": "#0A84FF",      // Apple Blue
+        "--primary-dark": "#0066D6",
+        "--danger": "#FF453A",       // Apple Red
+        "--success": "#32D74B",      // Apple Green
+        "--warning": "#FF9F0A",      // Apple Orange
+        "--bg-color": "#1C1C1E",     // macOS Dark Background
+        "--card-bg": "#2C2C2E",      // macOS Dark Container
+        "--input-bg": "#1C1C1E",     // Darker inputs
+        "--text-color": "#FFFFFF",   // Pure white text
+        "--text-muted": "#98989D",   // Secondary text
+        "--border-color": "#38383A", // Subtle borders
+        "--hud-glow": "0 4px 14px rgba(0,0,0,0.4)", // Soft cinematic shadow
+        "--border-radius": "10px",   // Smooth Apple corners
+        "--theme-color-meta": "#1C1C1E"
     }
 };
 
