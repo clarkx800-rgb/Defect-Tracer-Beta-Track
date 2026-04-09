@@ -246,6 +246,7 @@
         .control-panel label { font-size: var(--base-font); letter-spacing: 1px; color: var(--text-muted); margin-top: 5px; }
         .input-group { display: flex; gap: 8px; }
         
+        /* SHARED INPUT STYLES */
         select, .segment-notes, .custom-comp, .custom-def {
             flex: 1;
             padding: 12px;
@@ -416,9 +417,7 @@
         .add-defect-btn { background-color: transparent; color: var(--text-muted); border: 1px dashed var(--text-muted); margin-top: 10px; width: 100%; transition: all 0.2s;}
         .add-defect-btn:active { border-color: var(--primary); color: var(--primary); }
 
-        /* =========================================================
-           NEW TACTICAL SHEATH COMMAND BAR
-           ========================================================= */
+        /* NEW TUCKED COMMAND BAR (SHEATH) */
         .command-bar {
             position: fixed;
             bottom: 20px;
@@ -427,36 +426,20 @@
             align-items: center;
             background-color: var(--card-bg);
             border: 2px solid var(--primary);
-            border-radius: 28px; /* Smooth pill shape */
+            border-radius: 28px; /* Perfectly round pill */
             height: 56px; 
-            box-shadow: 0 4px 15px rgba(0,0,0,0.9), var(--hud-glow);
-            z-index: 980; /* BELOW HELP OVERLAY (995) */
+            box-shadow: 0 4px 10px rgba(0,0,0,0.8), var(--hud-glow);
+            z-index: 980; /* Stays below Help Overlay */
             overflow: hidden;
-            transition: max-width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            max-width: 56px; /* Tucked State Width */
+            transition: max-width 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            max-width: 300px; /* Expanded state width */
             white-space: nowrap;
         }
         
-        /* When expanded, it grows to fit the internal buttons */
-        .command-bar.expanded {
-            max-width: 320px; 
+        .command-bar.collapsed {
+            max-width: 56px; /* Shrinks to just the toggle button */
         }
-
-        .cmd-actions {
-            display: flex;
-            align-items: center;
-            height: 100%;
-            opacity: 0;
-            transition: opacity 0.2s ease;
-            pointer-events: none; 
-        }
-
-        .command-bar.expanded .cmd-actions {
-            opacity: 1;
-            pointer-events: auto;
-            transition: opacity 0.3s ease 0.1s; /* Fades in smoothly after expanding */
-        }
-
+        
         .command-btn {
             background: transparent;
             border: none;
@@ -470,21 +453,10 @@
             transition: background-color 0.2s ease, transform 0.1s ease;
             padding: 0;
             border-radius: 0 !important;
-            flex-shrink: 0;
+            flex-shrink: 0; /* Prevents button squishing during transition */
         }
+        .command-btn:active { background-color: var(--border-color); transform: scale(0.9); }
         
-        .command-btn:active { 
-            background-color: var(--border-color); 
-        }
-        
-        /* The SVG toggle icon rotation */
-        .toggle-icon {
-            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .command-bar.expanded .toggle-icon {
-            transform: rotate(180deg);
-        }
-
         .command-divider {
             width: 2px;
             height: 60%;
@@ -492,8 +464,29 @@
             flex-shrink: 0;
         }
 
-        /* ========================================================= */
+        .command-items {
+            display: flex;
+            align-items: center;
+            height: 100%;
+            opacity: 1;
+            transition: opacity 0.2s ease 0.1s;
+        }
+        
+        .command-bar.collapsed .command-items {
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.1s ease;
+        }
+        
+        #cmdToggleIcon {
+            transition: transform 0.3s ease;
+            pointer-events: none;
+        }
+        .command-bar:not(.collapsed) #cmdToggleIcon {
+            transform: rotate(180deg); /* Flips arrow inwards when open */
+        }
 
+        /* MODALS */
         .quick-add-modal {
             position: fixed;
             bottom: 85px;
@@ -502,7 +495,7 @@
             background-color: var(--bg-color);
             border: 1px solid var(--primary);
             box-shadow: 0 10px 25px rgba(0,0,0,0.9), var(--hud-glow);
-            z-index: 1001; /* ABOVE EVERYTHING */
+            z-index: 985; /* Sits exactly between Command Bar and Help Overlay */
             padding: 15px;
             display: none; 
             flex-direction: column;
@@ -551,6 +544,7 @@
             width: 90%; max-width: 500px; max-height: 85vh;
             display: flex; flex-direction: column;
             animation: cascadingFadeIn 0.2s ease-out;
+            z-index: 9999;
         }
         .gallery-header {
             display: flex; justify-content: space-between; align-items: center;
@@ -575,13 +569,13 @@
         }
         .remove-img-btn:active { transform: translateX(-50%) scale(0.9); }
 
-        /* PERFECTLY CENTERED HOW TO USE OVERLAY */
+        /* RE-LAYERED HOW TO USE OVERLAY */
         .help-overlay {
             position: fixed;
             left: 0; width: 100%;
             background: rgba(0, 0, 0, 0.85); 
             backdrop-filter: blur(4px);
-            z-index: 995; /* Sits above Command Bar (980), Below Header (1000) */
+            z-index: 990; /* PERFECT LAYER: Stays below Top Bar, but sits entirely over the Command Bar */
             display: flex;
             align-items: center; 
             justify-content: center;
@@ -714,13 +708,13 @@
 
     <div class="command-bar collapsed" id="mainCommandBar">
         
-        <button class="command-btn toggle-btn" onclick="toggleCommandBar(event)" title="Menu">
-            <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" class="toggle-icon">
+        <button class="command-btn" onclick="toggleCommandBar(event)" id="cmdToggleBtn" title="Menu">
+            <svg id="cmdToggleIcon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="9 18 15 12 9 6"></polyline>
             </svg>
         </button>
         
-        <div class="cmd-actions" id="cmdActions">
+        <div class="command-items" id="cmdItems">
             <div class="command-divider"></div>
             
             <div id="quickAddGroup" style="display: none; height: 100%; align-items: center;">
@@ -734,7 +728,7 @@
                 </button>
             <div class="command-divider"></div>
             
-            <button class="command-btn" onclick="toggleHelp(); toggleCommandBar(event, false);" title="Help">
+            <button class="command-btn" onclick="toggleHelp()" title="Help">
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="pointer-events: none;">
                     <circle cx="12" cy="12" r="10"></circle>
                     <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
@@ -814,17 +808,14 @@
         const iconLoad = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="pointer-events: none;"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>`;
         const iconSave = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="pointer-events: none;"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>`;
 
-        // SHEATH COMMAND BAR EXPANSION LOGIC
-        function toggleCommandBar(e, forceState = null) {
+        // NEW TOGGLE COMMAND BAR 
+        function toggleCommandBar(e) {
             if (e) e.stopPropagation();
             const bar = document.getElementById('mainCommandBar');
-            const isExpanded = bar.classList.contains('expanded');
-            const shouldExpand = forceState !== null ? forceState : !isExpanded;
-            
-            if (shouldExpand) {
-                bar.classList.add('expanded');
+            if (bar.classList.contains('collapsed')) {
+                bar.classList.remove('collapsed');
             } else {
-                bar.classList.remove('expanded');
+                bar.classList.add('collapsed');
                 toggleQuickAddModal(false); 
             }
         }
@@ -833,10 +824,13 @@
             const btn = document.getElementById('dynamicSaveLoadBtn');
             if (loadedRoutes.size === 0) {
                 btn.innerHTML = iconLoad;
-                btn.onclick = () => { document.getElementById('importFile').click(); toggleCommandBar(null, false); };
+                btn.onclick = () => {
+                    document.getElementById('importFile').click();
+                    toggleCommandBar(); // Auto hide after clicking
+                };
             } else {
                 btn.innerHTML = iconSave;
-                btn.onclick = () => { saveProject(); toggleCommandBar(null, false); };
+                btn.onclick = () => saveProject();
             }
         }
 
@@ -856,6 +850,8 @@
                 if (document.getElementById('collapsible-menu').classList.contains('expanded')) {
                     toggleMenu(true);
                 }
+                document.getElementById('mainCommandBar').classList.add('collapsed');
+                toggleQuickAddModal(false);
             } else {
                 overlay.style.display = 'none';
             }
@@ -1006,6 +1002,7 @@
             updateCommandBar(); 
         });
 
+        // GLOBAL CLICK DETECTOR (AUTO HIDE ENGINE)
         document.addEventListener('click', (e) => {
             const menu = document.getElementById('collapsible-menu');
             const fabModal = document.getElementById('quickAddModal');
@@ -1019,13 +1016,12 @@
             if (!menu.contains(e.target) && !menuBtn.contains(e.target) && menu.classList.contains('expanded')) toggleMenu(true);
             if (stsMenu && stsBtn && !stsMenu.contains(e.target) && !stsBtn.contains(e.target) && stsMenu.style.display === 'flex') stsMenu.style.display = 'none';
             if (insertModal && !insertModal.contains(e.target) && !e.target.closest('.map-item') && insertModal.style.display === 'flex') closeInsertModal();
+            if (helpOverlay.style.display === 'flex' && e.target === helpOverlay) toggleHelp(false);
             
-            // Auto hide help overlay
-            if (helpOverlay.style.display === 'flex' && e.target === helpOverlay && !cmdBar.contains(e.target)) toggleHelp(false);
-            
-            // Auto-hide tactical sheath command bar and quick add menu
-            if (cmdBar && cmdBar.classList.contains('expanded') && !cmdBar.contains(e.target) && !fabModal.contains(e.target)) {
-                toggleCommandBar(null, false);
+            // COMMAND BAR OUTSIDE CLICK AUTO-HIDE
+            if (cmdBar && !cmdBar.classList.contains('collapsed') && !cmdBar.contains(e.target) && (!fabModal || !fabModal.contains(e.target))) {
+                cmdBar.classList.add('collapsed');
+                toggleQuickAddModal(false);
             }
         });
 
@@ -1051,7 +1047,7 @@
                 searchTS(tsNumber); 
                 input.value = ''; 
                 toggleQuickAddModal(false); 
-                toggleCommandBar(null, false);
+                document.getElementById('mainCommandBar').classList.add('collapsed');
             }
         }
 
@@ -1091,7 +1087,7 @@
                 menu.style.display = 'flex';
                 toggleMenu(true); 
                 toggleQuickAddModal(false); 
-                toggleCommandBar(null, false);
+                document.getElementById('mainCommandBar').classList.add('collapsed');
             }
         }
 
@@ -1140,8 +1136,8 @@
             document.getElementById('insertModal').style.display = 'flex';
             toggleMenu(true);
             toggleQuickAddModal(false);
-            toggleCommandBar(null, false);
             document.getElementById('stsShortcutMenu').style.display = 'none';
+            document.getElementById('mainCommandBar').classList.add('collapsed');
         }
 
         function closeInsertModal() {
@@ -1444,14 +1440,14 @@
             currentActiveArea = area;
             currentActiveDirection = direction;
             
-            // SHOW THE + BUTTON IN THE COMMAND PILL
             document.getElementById('quickAddGroup').style.display = 'flex';
             
             routeSelect.value = '';
-            if (isQuickAdd) { toggleQuickAddModal(false); updateRouteDropdown(); toggleCommandBar(null, false); } 
+            if (isQuickAdd) { toggleQuickAddModal(false); updateRouteDropdown(); } 
             else { updateRouteDropdown(); toggleMenu(true); }
             
             updateCommandBar();
+            document.getElementById('mainCommandBar').classList.add('collapsed');
         }
 
         async function undoLastLoad() {
@@ -1497,6 +1493,7 @@
             toggleQuickAddModal(false);
             updateRouteDropdown();
             updateCommandBar();
+            document.getElementById('mainCommandBar').classList.add('collapsed');
         }
 
         function flipOrder() {
@@ -1884,6 +1881,7 @@
                 }
             }
             toggleMenu(true);
+            document.getElementById('mainCommandBar').classList.add('collapsed');
         }
 
         async function exportData() {
