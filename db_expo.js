@@ -438,8 +438,19 @@ window.globalDatabase["Expo Line"] = {
 };
 
 window.globalDefectMaps["Expo Line"] = {
-    'Expo Running Rail': ['Broken', 'Wear', 'Corrugation', 'Spall'],
-    'Expo Rail Pad': ['Missing Pandrol', 'Broken Pad Washer', 'Shims out'],
-    'Expo Lim Rail': ['Black Marks', 'Broken Cap Bolt(s)', 'Broken Studs']
-    // Add all EXPO specific parts here...
+    'Inboard Running Rail': ['Broken', 'Wear', 'Corrugation', 'Spall', 'Missing Clips', 'Flow', 'Joint-bar'],
+    'Outboard Running Rail': ['Broken', 'Wear', 'Corrugation', 'Spall', 'Missing Clips', 'Flow', 'Joint-bar'],
+    'Rail Pads': ['Missing Pandrol', 'Broken Lord-bolt Washer', 'Broken Rail Pad', 'Pandrol-Shoulder', 'Shims out', 'Delaminated'],
+    'Lim Rail': ['Black Marks', 'Broken Cap Bolt(s)', 'Scuff Marks', 'Cracked Top Cap', 'Broken/missing Continuity', 'High Lim'],
+    'Lim Rail (I-beam)': ['Broken stud(s)', 'Corroded Studs'],
+    'Lim Rail (Sleepers)': ['Broken stud(s)', 'Corroded Studs'],
+    '(+) Pwr Rail': ['Arc Burns', 'Ramp Corrugation', 'Steel Cap Wear', 'Pull-apart', 'Broken Post', 'Calcification', 'Coverboards'],
+    '(-) Pwr Rail': ['Arc Burns', 'Ramp Corrugation', 'Steel Cap Wear', 'Pull-apart', 'Broken Post', 'Calcification', 'Coverboards'],
+    '(+) Pwr Rail Exp': ['Siezed', 'Arc Burns At Tapered Cut', 'Gap closed/wide'],
+    '(-) Pwr Rail Exp': ['Siezed', 'Arc Burns At Tapered Cut', 'Gap closed/wide'],
+    'Drain': ['Plugged', 'Debris Around Drain', 'Flooding'],
+    'Structure': ['Leaking', 'Cracked', 'Weed/Tree Sticking', 'Hanging Wire'],
+    'Fence': ['Cut open', 'Need Patching', 'Repair Needed'],
+    'Walk-way Panel': ['Missing Hardware', 'Panel Sticking Up', 'Missing Panel'],
+    'Track': ['Blue Light','Need Cleaning with RBE', 'Weed Trimming', 'Tree Trimming'],
 };
