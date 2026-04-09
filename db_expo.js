@@ -452,5 +452,5 @@ window.globalDefectMaps["Expo Line"] = {
     'Structure': ['Leaking', 'Cracked', 'Weed/Tree Sticking', 'Hanging Wire'],
     'Fence': ['Cut open', 'Need Patching', 'Repair Needed'],
     'Walk-way Panel': ['Missing Hardware', 'Panel Sticking Up', 'Missing Panel'],
-    'Track': ['Blue Light','Need Cleaning with RBE', 'Weed Trimming', 'Tree Trimming'],
+    'Track': ['Blue Light Not Working','Need Cleaning with RBE', 'Weed Trimming', 'Tree Trimming'],
 };
