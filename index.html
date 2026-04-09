@@ -23,8 +23,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
     <script>
-        const APP_VERSION = "2.0.91"; // CHANGE THIS NUMBER TO AUTO-UPDATE THE ENTIRE APP UI
-
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('sw.js').catch(err => console.log('SW fail:', err));
@@ -250,7 +248,6 @@
         .control-panel label { font-size: var(--base-font); letter-spacing: 1px; color: var(--text-muted); margin-top: 5px; }
         .input-group { display: flex; gap: 8px; }
         
-        /* SHARED INPUT STYLES */
         select, .segment-notes, .custom-comp, .custom-def {
             flex: 1;
             padding: 12px;
@@ -272,7 +269,6 @@
         
         .custom-comp, .custom-def { flex: 1 1 35%; min-width: 100px; }
 
-        /* MULTI-SELECT CHECKBOX STYLES */
         .checkbox-list {
             display: flex;
             flex-direction: column;
@@ -439,7 +435,6 @@
         }
         .photo-status-badge:active { background: var(--primary); }
         
-        /* CLONE ENGINE BUTTON */
         .clone-btn {
             background-color: transparent; 
             color: #0A84FF; 
@@ -473,7 +468,7 @@
         .add-defect-btn { background-color: transparent; color: var(--text-muted); border: 1px dashed var(--text-muted); margin-top: 10px; width: 100%; transition: all 0.2s;}
         .add-defect-btn:active { border-color: var(--primary); color: var(--primary); }
 
-        /* UNIFIED COMMAND BAR SHEATH */
+        /* GLIDING COMMAND BAR SHEATH */
         .command-bar {
             position: fixed;
             bottom: 20px;
@@ -496,8 +491,8 @@
         
         .command-bar.collapsed {
             width: 56px; 
-            left: 20px; /* Tucks back to the left edge */
-            transform: translateX(0); /* Removes centering offset */
+            left: 20px; /* Parks on left edge */
+            transform: translateX(0); /* Kills centering */
         }
         
         .command-btn {
@@ -652,15 +647,18 @@
             max-height: 100%; 
             display: flex;
             flex-direction: column;
+            overflow: hidden;
         }
         .help-header {
             display: flex; justify-content: space-between; align-items: center;
-            border-bottom: 2px solid var(--border-color); padding: 15px 20px;
+            border-bottom: 2px solid var(--border-color); padding: 10px 20px;
         }
-        .help-header h3 { color: var(--primary); font-size: var(--header-font); margin: 0; letter-spacing: 2px; display: flex; align-items: baseline; gap: 8px;}
+        .help-header h3 { color: var(--primary); font-size: var(--header-font); margin: 0; letter-spacing: 2px;}
         #helpBodyContent {
             overflow-y: auto;
             padding: 20px;
+            /* Support for CSS zoom scaling */
+            transition: zoom 0.2s ease, transform 0.2s ease;
         }
 
         @media (max-width: 600px) { select { flex: 1 1 100%; } }
@@ -752,10 +750,15 @@
     <div id="helpOverlay" class="help-overlay" style="display: none;">
         <div class="help-modal">
             <div class="help-header">
-                <h3>HOW TO USE <span id="app-version-display" style="font-size: 12px; color: var(--text-muted); letter-spacing: 0;"></span></h3>
-                <button class="menu-toggle-btn" onclick="toggleHelp(false)" style="width: 32px; height: 32px; border-color: transparent;">
-                    <span class="menu-toggle-icon" style="font-size: 14px;">✖</span>
-                </button>
+                <h3>HOW TO USE</h3>
+                <div style="display: flex; gap: 8px; align-items: center;">
+                    <button class="menu-toggle-btn" onclick="zoomHelpModal(0.2)" style="width: 32px; height: 32px; border-color: var(--border-color); font-size:16px;">🔍+</button>
+                    <button class="menu-toggle-btn" onclick="zoomHelpModal(-0.2)" style="width: 32px; height: 32px; border-color: var(--border-color); font-size:16px;">🔍-</button>
+                    <div style="width: 1px; height: 20px; background: var(--border-color); margin: 0 4px;"></div>
+                    <button class="menu-toggle-btn" onclick="toggleHelp(false)" style="width: 32px; height: 32px; border-color: transparent;">
+                        <span class="menu-toggle-icon" style="font-size: 14px;">✖</span>
+                    </button>
+                </div>
             </div>
             <div id="helpBodyContent">
                 </div>
@@ -894,6 +897,63 @@
         const iconLoad = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="pointer-events: none;"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>`;
         const iconSave = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="pointer-events: none;"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>`;
 
+        // DEDICATED INSTRUCTION ZOOM ENGINE
+        let currentHelpZoom = 1;
+        function zoomHelpModal(step) {
+            currentHelpZoom += step;
+            if(currentHelpZoom < 0.8) currentHelpZoom = 0.8;
+            if(currentHelpZoom > 3.0) currentHelpZoom = 3.0;
+            
+            const helpBody = document.getElementById('helpBodyContent');
+            if ('zoom' in helpBody.style) {
+                helpBody.style.zoom = currentHelpZoom;
+            } else {
+                // Fallback for Firefox/older browsers
+                helpBody.style.transform = `scale(${currentHelpZoom})`;
+                helpBody.style.transformOrigin = 'top left';
+                helpBody.style.width = `${100 / currentHelpZoom}%`;
+            }
+        }
+
+        // DEDICATED PINCH-TO-ZOOM FOR INSTRUCTIONS
+        let initialPinchDistance = null;
+        let initialZoomState = 1;
+        const helpBodyContent = document.getElementById('helpBodyContent');
+
+        helpBodyContent.addEventListener('touchstart', (e) => {
+            if (e.touches.length === 2) {
+                initialPinchDistance = Math.hypot(
+                    e.touches[0].pageX - e.touches[1].pageX,
+                    e.touches[0].pageY - e.touches[1].pageY
+                );
+                initialZoomState = currentHelpZoom;
+            }
+        }, {passive: true});
+
+        helpBodyContent.addEventListener('touchmove', (e) => {
+            if (e.touches.length === 2 && initialPinchDistance) {
+                const currentDistance = Math.hypot(
+                    e.touches[0].pageX - e.touches[1].pageX,
+                    e.touches[0].pageY - e.touches[1].pageY
+                );
+                const scale = currentDistance / initialPinchDistance;
+                currentHelpZoom = Math.min(Math.max(initialZoomState * scale, 0.8), 3);
+                
+                if ('zoom' in helpBodyContent.style) {
+                    helpBodyContent.style.zoom = currentHelpZoom;
+                } else {
+                    helpBodyContent.style.transform = `scale(${currentHelpZoom})`;
+                    helpBodyContent.style.transformOrigin = 'top left';
+                    helpBodyContent.style.width = `${100 / currentHelpZoom}%`;
+                }
+            }
+        }, {passive: true});
+
+        helpBodyContent.addEventListener('touchend', (e) => {
+            if (e.touches.length < 2) initialPinchDistance = null;
+        });
+
+        // TACTICAL SCROLL ENGINE
         let isPageScrolling = false;
         function togglePageScroll() {
             const btnIcon = document.getElementById('scrollToggleIcon');
@@ -964,7 +1024,29 @@
                 const headerHeight = header.offsetHeight;
                 overlay.style.top = `${headerHeight}px`;
                 overlay.style.height = `calc(100vh - ${headerHeight}px - 85px)`; 
-                document.getElementById('helpBodyContent').innerHTML = systemInstructions;
+                
+                // INJECT INSTRUCTIONS + DYNAMIC VERSION LOADER
+                document.getElementById('helpBodyContent').innerHTML = systemInstructions + `<div id="sw-version-fetcher" style="text-align:center; padding-top:20px; color:var(--text-muted); font-weight:bold; font-size:14px; letter-spacing:1px;">Checking App Version...</div>`;
+                
+                fetch('sw.js')
+                    .then(r => r.text())
+                    .then(text => {
+                        const match = text.match(/v?\d+\.\d+\.\d+/);
+                        const vDiv = document.getElementById('sw-version-fetcher');
+                        if (match && vDiv) {
+                            let v = match[0];
+                            if (!v.startsWith('v')) v = 'v' + v;
+                            vDiv.textContent = 'TRACER ' + v;
+                            vDiv.style.color = 'var(--primary)';
+                        } else if (vDiv) {
+                            vDiv.textContent = 'VERSION UNKNOWN';
+                        }
+                    })
+                    .catch(() => {
+                        const vDiv = document.getElementById('sw-version-fetcher');
+                        if (vDiv) vDiv.textContent = 'TRACER (OFFLINE CACHE)';
+                    });
+
                 overlay.style.display = 'flex';
                 if (document.getElementById('collapsible-menu').classList.contains('expanded')) toggleMenu(true);
                 document.getElementById('mainCommandBar').classList.add('collapsed');
@@ -1166,9 +1248,6 @@
             document.getElementById('theme-selector').value = localStorage.getItem('appTheme') || 'tactical';
             document.getElementById('font-selector').value = localStorage.getItem('appFontSize') || 'small';
             
-            const versionSpan = document.getElementById('app-version-display');
-            if(versionSpan) versionSpan.textContent = `TRACER v${APP_VERSION}`;
-            
             const areaSelect = document.getElementById('general-area');
             for (let area in window.globalDatabase) {
                 let opt = document.createElement('option');
@@ -1196,6 +1275,8 @@
             if (stsMenu && stsBtn && !stsMenu.contains(e.target) && !stsBtn.contains(e.target) && stsMenu.style.display === 'flex') stsMenu.style.display = 'none';
             if (insertModal && !insertModal.contains(e.target) && !e.target.closest('.map-item') && insertModal.style.display === 'flex') closeInsertModal();
             if (cloneModal && !cloneModal.contains(e.target) && !e.target.closest('.clone-btn') && cloneModal.style.display === 'flex') closeCloneModal();
+            
+            // Allow clicks inside help content (for zooming) without closing it
             if (helpOverlay.style.display === 'flex' && e.target === helpOverlay) toggleHelp(false);
             
             if (cmdBar && !cmdBar.classList.contains('collapsed') && !cmdBar.contains(e.target) && (!fabModal || !fabModal.contains(e.target))) {
@@ -1932,7 +2013,7 @@
                             row.dataset.images = JSON.stringify(currentImages);
                             updatePhotoUI(row, cameraLabel, badgeContainer);
                             checkSegmentData(row.closest('.segment-card'));
-                            fileInput.value = ''; 
+                            fileInput.value = ''; // SAFE CLEAR AFTER PROCESSING
                         };
                         img.src = event.target.result;
                     };
@@ -2061,12 +2142,13 @@
                     console.error(err);
                 }
                 
+                // SAFE CACHE WIPE AFTER PROCESSING IS FULLY COMPLETE
                 fileInput.value = ''; 
             };
             
             reader.onerror = function() {
                 showSystemAlert('Could not read file from device.', 'FILE ERROR', true);
-                fileInput.value = ''; 
+                fileInput.value = ''; // Wipe on error as well
             };
 
             reader.readAsText(file);
