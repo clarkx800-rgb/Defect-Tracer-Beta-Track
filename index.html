@@ -435,10 +435,11 @@
         .add-defect-btn { background-color: transparent; color: var(--text-muted); border: 1px dashed var(--text-muted); margin-top: 10px; width: 100%; transition: all 0.2s;}
         .add-defect-btn:active { border-color: var(--primary); color: var(--primary); }
 
-        /* COMMAND BAR SHEATH (BOTTOM LEFT) */
+        /* COMMAND BAR SHEATH (GLIDING EXPANSION) */
         .command-bar {
             position: fixed;
             bottom: 20px;
+            /* Expanded State: Dead Center */
             left: 50%;
             transform: translateX(-50%); 
             display: flex;
@@ -450,7 +451,8 @@
             box-shadow: 0 4px 10px rgba(0,0,0,0.8), var(--hud-glow);
             z-index: 980; 
             overflow: hidden;
-            transition: width 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            /* Animate all properties so it glides smoothly from left to center while expanding */
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
             width: 440px; 
             max-width: 95vw; 
             white-space: nowrap;
@@ -458,6 +460,9 @@
         
         .command-bar.collapsed {
             width: 56px; 
+            /* Collapsed State: Tucked in the bottom left corner */
+            left: 20px;
+            transform: translateX(0);
         }
         
         .command-btn {
@@ -1643,7 +1648,6 @@
                 currentActiveDirection = "";
                 document.getElementById('active-area-display').style.display = 'none';
                 document.getElementById('stsDropdownBtn').style.display = 'none';
-                document.getElementById('active-route-display').innerHTML = 'AWAITING...';
                 toggleHelp(true);
             }
             toggleQuickAddModal(false);
