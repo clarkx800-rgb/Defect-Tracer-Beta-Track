@@ -131,6 +131,18 @@ window.globalDatabase["Evergreen Line"] = {
 };
 
 window.globalDefectMaps["Evergreen Line"] = {
-    'EV Concrete Slab': ['Cracked', 'Spalling', 'Water Ingress'],
-    'EV Switch Motor': ['Faulty', 'Jammed', 'Needs Lube']
+    'Inboard Running Rail': ['Broken', 'Wear', 'Corrugation', 'Spall', 'Missing Clips', 'Flow', 'Joint-bar'],
+    'Outboard Running Rail': ['Broken', 'Wear', 'Corrugation', 'Spall', 'Missing Clips', 'Flow', 'Joint-bar'],
+    'Rail Pads': ['Missing Pandrol', 'Broken Delkor Washer', 'Broken Delkor Pad', 'Shims out (Delkor)', 'Delaminated Delkor Pad'],
+    'Lim Rail': ['Black Marks', 'Broken Cap Bolt(s)', 'Scuff Marks', 'Cracked Top Cap', 'Broken/missing Continuity', 'High Lim'],
+    'Lim Rail (I-beam)': ['Broken stud(s)', 'Corroded Studs'],
+    '(+) Pwr Rail PH5': ['Broken Anchor', 'Iso Arc Burns', 'Ramp Corrugation', 'Steel Cap Wear/burn', 'Pull-apart', 'Broken/Damaged Post', 'Calcification', 'Coverboards'],
+    '(-) Pwr Rail PH5': ['Broken Anchor', 'Iso Arc Burns', 'Ramp Corrugation', 'Steel Cap Wear/burn', 'Pull-apart', 'Broken/Damaged Post', 'Calcification', 'Coverboards'],
+    'EV (+) Pwr Rail Exp': ['Siezed', 'Arc Burns', 'Gap closed/wide'],
+    'EV (-) Pwr Rail Exp': ['Siezed', 'Arc Burns', 'Gap closed/wide'],
+    'Drain': ['Plugged', 'Debris Around Drain', 'Flooding'],
+    'Structure': ['Leaking', 'Cracked', 'Weed/Tree Sticking', 'Hanging Wire'],
+    'Fence': ['Cut open', 'Need Patching', 'Repair Needed'],
+    'Walk-way Panel': ['Missing Hardware', 'Panel Sticking Up', 'Missing Panel'],
+    'Track': ['Blue Light Not Working','Need Cleaning with RBE', 'Weed Trimming', 'Tree Trimming'],
 };
