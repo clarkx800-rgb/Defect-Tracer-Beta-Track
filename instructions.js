@@ -4,7 +4,7 @@ const systemInstructions = `
         <ul style="margin-top: 5px; padding-left: 20px; margin-bottom: 20px;">
             <li>Open the top right menu (✖/⚙).</li>
             <li>Select <b>1. LINE (EX, MI, EV)</b>, <b>2. DIRECTION</b> (IB or OB), and <b>3. SUB-TO-SUB AREA</b>.</li>
-            <li>Tap <b>LOAD AREA</b> to generate your inspection route. This is needed on the first run.</li>
+            <li>Tap <b>LOAD AREA</b> to generate your inspection route. This is needed on the first run. After this, a <b>+</b> sign will spawn for quick add.</li>
                 <b>TIP:</b> Load all needed sub to sub areas in normal order <b>before flipping direction</b> if the start of inpsection is on the opposite end.
         </ul>
 
