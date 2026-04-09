@@ -293,7 +293,6 @@
         .revert-btn { border: 1px solid var(--warning); color: var(--warning); flex: 0 1 auto;}
         .revert-btn:active { background-color: var(--warning); color: #000; }
 
-        /* MAIN LAYOUT */
         .app-layout { display: flex; align-items: flex-start; gap: 10px; padding: 15px 15px 30px 10px; }
 
         .mini-map-container {
@@ -440,50 +439,42 @@
         }
         .quick-add-fab:active { transform: scale(0.9); background-color: var(--primary-dark); color: #fff; }
 
-        /* UNIFIED ACTION BAR (BOTTOM RIGHT) */
-        .unified-action-bar {
+        /* NEW UNIFIED COMMAND BAR (BOTTOM RIGHT) */
+        .command-bar {
             position: fixed;
             bottom: 20px;
             right: 20px;
-            background-color: var(--card-bg);
-            border: 2px solid var(--primary);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.8), var(--hud-glow);
-            z-index: 1000;
             display: flex;
             align-items: center;
+            background-color: var(--card-bg);
+            border: 2px solid var(--primary);
+            border-radius: 16px; /* Smooth rounded rectangle */
+            height: 56px; /* Matches the FAB height */
+            box-shadow: 0 4px 10px rgba(0,0,0,0.8), var(--hud-glow);
+            z-index: 1000;
             overflow: hidden;
-            /* Make sure it's a unified rounded rect */
-            border-radius: 10px !important;
         }
-
-        .action-bar-seg {
+        
+        .command-btn {
             background: transparent;
-            color: #fff; /* Icons are White by default (Tactical/MacDark) */
             border: none;
-            padding: 0;
-            margin: 0;
-            height: 56px;
-            width: 60px;
-            font-size: 24px;
+            color: var(--text-color); /* Automatically adapts to Light/Dark theme */
+            width: 56px;
+            height: 100%;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
             transition: background-color 0.2s ease;
+            padding: 0;
+            border-radius: 0 !important;
         }
-
-        /* Adjust icon colors based on theme if needed (Black on Light, White on Dark) */
-        :root[style*="--bg-color: #f3f2f1"] .action-bar-seg { color: #000; } /* Windows11 Light */
-        :root[style*="--bg-color: #f7f7f7"] .action-bar-seg { color: #000; } /* PokeGO Light */
-
-        .action-bar-seg:active { background-color: rgba(139, 195, 74, 0.2); } /* Primary tint on press */
-
-        .action-bar-splitter {
-            width: 1px;
-            height: 36px;
-            background-color: var(--primary);
-            opacity: 0.8;
-            flex-shrink: 0;
+        .command-btn:active { background-color: var(--border-color); }
+        
+        .command-divider {
+            width: 2px;
+            height: 60%;
+            background-color: var(--border-color);
         }
 
         .quick-add-modal {
@@ -707,13 +698,16 @@
         <span style="transform: translateY(-2px); pointer-events: none;">+</span>
     </button>
     
-    <div class="unified-action-bar" id="unifiedActionBar">
-        <button class="action-bar-seg" onclick="saveProject()" title="Save Data">
-            💾
-        </button>
-        <div class="action-bar-splitter"></div>
-        <button class="action-bar-seg" id="helpFabBtn" onclick="toggleHelp()" title="How To Use">
-            ?
+    <div class="command-bar">
+        <button class="command-btn" id="dynamicSaveLoadBtn" title="Command Action">
+            </button>
+        <div class="command-divider"></div>
+        <button class="command-btn" onclick="toggleHelp()" title="Help">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+            </svg>
         </button>
     </div>
 
@@ -735,9 +729,9 @@
         <h4>FIND TRACK SECTION</h4>
         <div class="search-input-wrapper">
             <span class="search-prefix">TS-</span>
-            <input type="tel" id="quickTsSearchInput" placeholder="NUMBER..." onkeypress="if(event.key === 'Enter') searchTS()">
+            <input type="tel" id="quickTsSearchInput" placeholder="NUMBER..." onkeypress="if(event.key === 'Enter') searchTSFromQuick()">
         </div>
-        <button class="btn-primary" onclick="searchTS()" style="width: 100%; margin-top: 5px; padding: 10px;">FIND</button>
+        <button class="btn-primary" onclick="searchTSFromQuick()" style="width: 100%; margin-top: 5px; padding: 10px;">FIND</button>
     </div>
 
     <div class="quick-add-modal" id="insertModal">
@@ -783,6 +777,22 @@
         let currentRowForGallery = null; 
         let currentInsertTargetTS = null;
         let confirmResolve = null;
+
+        // COMMAND BAR ICONS (Scalable Vectors)
+        const iconLoad = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>`;
+        const iconSave = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>`;
+
+        // COMMAND BAR LOGIC
+        function updateCommandBar() {
+            const btn = document.getElementById('dynamicSaveLoadBtn');
+            if (loadedRoutes.size === 0) {
+                btn.innerHTML = iconLoad;
+                btn.onclick = () => document.getElementById('importFile').click();
+            } else {
+                btn.innerHTML = iconSave;
+                btn.onclick = () => saveProject();
+            }
+        }
 
         function toggleHelp(forceShow = null) {
             const overlay = document.getElementById('helpOverlay');
@@ -945,7 +955,9 @@
                 opt.textContent = area;
                 areaSelect.appendChild(opt);
             }
+            
             if (loadedRoutes.size === 0) toggleHelp(true);
+            updateCommandBar(); // Init the button state
         });
 
         document.addEventListener('click', (e) => {
@@ -957,12 +969,12 @@
             const fabBtn = document.getElementById('quickAddBtn');
             const stsBtn = document.getElementById('stsDropdownBtn');
             const helpOverlay = document.getElementById('helpOverlay');
-            const actionBar = document.getElementById('unifiedActionBar');
+            const cmdBar = document.querySelector('.command-bar');
 
             if (!menu.contains(e.target) && !menuBtn.contains(e.target) && menu.classList.contains('expanded')) toggleMenu(true);
             if (stsMenu && stsBtn && !stsMenu.contains(e.target) && !stsBtn.contains(e.target) && stsMenu.style.display === 'flex') stsMenu.style.display = 'none';
             if (insertModal && !insertModal.contains(e.target) && !e.target.closest('.map-item') && insertModal.style.display === 'flex') closeInsertModal();
-            if (helpOverlay.style.display === 'flex' && e.target === helpOverlay && !actionBar.contains(e.target)) toggleHelp(false);
+            if (helpOverlay.style.display === 'flex' && e.target === helpOverlay && !cmdBar.contains(e.target)) toggleHelp(false);
             if (!fabModal.contains(e.target) && !fabBtn.contains(e.target) && fabModal.style.display === 'flex') toggleQuickAddModal(false);
         });
 
@@ -981,10 +993,18 @@
             }
         }
 
-        // UNIFIED SEARCH ENGINE
-        function searchTS() {
+        function searchTSFromQuick() {
             const input = document.getElementById('quickTsSearchInput');
             const tsNumber = input.value.trim();
+            if(tsNumber) {
+                searchTS(tsNumber); 
+                input.value = ''; 
+                toggleQuickAddModal(false); 
+            }
+        }
+
+        function searchTS(passedTs = null) {
+            const tsNumber = passedTs;
             if (!tsNumber) return;
 
             const targetCard = document.querySelector(`.segment-card[data-segment="${tsNumber}"]`);
@@ -998,9 +1018,6 @@
                     const itemRect = targetMapItem.getBoundingClientRect();
                     mapContainer.scrollTo({ top: mapContainer.scrollTop + (itemRect.top - containerRect.top) - (containerRect.height / 2) + (itemRect.height / 2), behavior: 'smooth' });
                 }
-                
-                input.value = '';
-                toggleQuickAddModal(false); // Auto-close FAB
                 
                 setTimeout(() => {
                     targetCard.classList.add('search-highlight');
@@ -1377,6 +1394,8 @@
             
             if (isQuickAdd) { toggleQuickAddModal(false); updateRouteDropdown(); } 
             else { updateRouteDropdown(); toggleMenu(true); }
+            
+            updateCommandBar();
         }
 
         async function undoLastLoad() {
@@ -1421,6 +1440,7 @@
             }
             toggleQuickAddModal(false);
             updateRouteDropdown();
+            updateCommandBar();
         }
 
         function flipOrder() {
@@ -1719,6 +1739,92 @@
             toggleMenu(true);
         }
 
+        function loadProject(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            currentFileName = file.name;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const projectData = JSON.parse(e.target.result);
+                    const container = document.getElementById('segments-container');
+                    const mapContainer = document.getElementById('miniMap');
+                    container.innerHTML = '';
+                    mapContainer.innerHTML = '';
+                    
+                    loadedRoutes.clear(); 
+                    routeLoadHistory = [];
+
+                    toggleHelp(false);
+
+                    projectData.forEach((segData, index) => {
+                        const safeAreaName = segData.areaName || '';
+                        const activeKey = segData.routeKey || segData.routeName; 
+                        
+                        const card = createSegmentCard(segData.segmentNum, activeKey, segData.routeName, segData.direction, segData.color, safeAreaName);
+                        card.style.animationDelay = `${index * 0.05}s`;
+                        
+                        card.querySelector('.segment-notes').value = segData.notes;
+                        const defectList = card.querySelector('.defect-list');
+                        defectList.innerHTML = '';
+                        
+                        if (segData.defects.length === 0) { 
+                            addDefectRow(defectList, null, safeAreaName); 
+                        } else { 
+                            segData.defects.forEach(defData => { 
+                                if (defData.photoBase64 && (!defData.images || defData.images.length === 0)) {
+                                    defData.images = [{ img: defData.photoBase64, w: defData.imgW, h: defData.imgH }];
+                                }
+                                addDefectRow(defectList, defData, safeAreaName); 
+                            }); 
+                        }
+
+                        container.appendChild(card);
+                        scrollObserver.observe(card);
+
+                        const mapBtn = document.createElement('div');
+                        mapBtn.className = 'map-item';
+                        mapBtn.setAttribute('data-map-segment', segData.segmentNum);
+                        mapBtn.setAttribute('data-route-key', activeKey);
+                        mapBtn.textContent = `TS-${segData.segmentNum}`;
+                        mapBtn.style.borderLeft = `4px solid ${segData.color || '#ccc'}`;
+                        
+                        attachMapItemListeners(mapBtn, card, segData.segmentNum, activeKey);
+                        
+                        mapContainer.appendChild(mapBtn);
+                        
+                        checkSegmentData(card);
+
+                        if (activeKey && !loadedRoutes.has(activeKey)) {
+                            loadedRoutes.add(activeKey);
+                            routeLoadHistory.push(activeKey);
+                        }
+                        currentActiveArea = safeAreaName;
+                        currentActiveDirection = segData.direction;
+                    });
+
+                    if (loadedRoutes.size > 0) {
+                        document.getElementById('quickAddBtn').style.display = 'flex';
+                        updateRouteDropdown(); 
+                    }
+
+                    showSystemAlert('Backup file imported successfully.', 'DATA LOADED');
+                    toggleMenu(true);
+                    updateCommandBar();
+
+                } catch (err) {
+                    showSystemAlert('Corrupt or invalid JSON file.', 'SYSTEM ERROR', true);
+                    console.error(err);
+                }
+                document.getElementById('importFile').value = '';
+            };
+            reader.readAsText(file);
+        }
+
+        const delay = ms => new Promise(res => setTimeout(res, ms));
+
         async function exportData() {
             if (typeof ExcelJS === 'undefined' || typeof window.jspdf === 'undefined') {
                 showSystemAlert("Libraries offline. Requires network connection for initial boot.", "EXPORT ERROR", true);
@@ -1855,7 +1961,7 @@
                 showSystemAlert("File compiling failed.", "EXPORT ERROR", true);
             } finally {
                 exportBtn.disabled = false;
-                exportBtn.innerHTML = '📊 EXPORT REPORT (Excel & PDF)';
+                exportBtn.innerHTML = '📊 EXPORT FINAL REPORT';
             }
         }
 
