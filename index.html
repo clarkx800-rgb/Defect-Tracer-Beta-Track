@@ -236,7 +236,6 @@
             padding: 0;
             transition: background-color 0.2s ease;
         }
-        
         .menu-toggle-btn:active { background-color: var(--border-color); }
         .menu-toggle-icon { font-size: 20px; font-family: sans-serif; line-height: 1; pointer-events: none; }
 
@@ -262,7 +261,6 @@
         .control-panel label { font-size: var(--base-font); letter-spacing: 1px; color: var(--text-muted); margin-top: 5px; }
         .input-group { display: flex; gap: 8px; }
         
-        /* SHARED INPUT STYLES */
         select, .segment-notes, .custom-comp, .custom-def {
             flex: 1;
             padding: 12px;
@@ -434,7 +432,6 @@
         .add-defect-btn { background-color: transparent; color: var(--text-muted); border: 1px dashed var(--text-muted); margin-top: 10px; width: 100%; transition: all 0.2s;}
         .add-defect-btn:active { border-color: var(--primary); color: var(--primary); }
 
-        /* QUICK ADD FAB (BOTTOM LEFT) */
         .quick-add-fab {
             position: fixed;
             bottom: 20px;
@@ -457,7 +454,6 @@
         }
         .quick-add-fab:active { transform: scale(0.9); background-color: var(--primary-dark); color: #fff; }
 
-        /* HELP FLOATING BUTTON (BOTTOM RIGHT) */
         .help-fab {
             position: fixed;
             bottom: 20px;
@@ -561,7 +557,6 @@
         }
         .remove-img-btn:active { transform: translateX(-50%) scale(0.9); }
 
-        /* PERFECTLY CENTERED HOW TO USE OVERLAY */
         .help-overlay {
             position: fixed;
             left: 0; width: 100%;
@@ -708,8 +703,7 @@
 
     <div class="app-layout">
         <div class="mini-map-container" id="miniMap"></div>
-        <div id="segments-container">
-            </div>
+        <div id="segments-container"></div>
     </div>
 
     <button class="quick-add-fab" id="quickAddBtn" onclick="toggleQuickAddModal(event)">
@@ -772,14 +766,12 @@
                     <span class="menu-toggle-icon" style="font-size: 14px;">✖</span>
                 </button>
             </div>
-            <div class="gallery-grid" id="galleryGrid">
-                </div>
+            <div class="gallery-grid" id="galleryGrid"></div>
         </div>
     </div>
 
     <script>
         let currentFileName = null;
-        
         let loadedRoutes = new Set();
         let routeLoadHistory = []; 
         let currentActiveArea = "";
@@ -787,10 +779,8 @@
         let isAutoScrolling = false;
         let currentRowForGallery = null; 
         let currentInsertTargetTS = null;
-
         let confirmResolve = null;
 
-        // --- NEW HELP ENGINE ---
         function toggleHelp(forceShow = null) {
             const overlay = document.getElementById('helpOverlay');
             const header = document.getElementById('stickyHeader');
@@ -804,7 +794,6 @@
                 document.getElementById('helpBodyContent').innerHTML = systemInstructions;
                 overlay.style.display = 'flex';
                 
-                // If they open instructions, ensure menu gets out of the way
                 if (document.getElementById('collapsible-menu').classList.contains('expanded')) {
                     toggleMenu(true);
                 }
@@ -864,14 +853,10 @@
 
         window.addEventListener('popstate', function(event) {
             const cards = document.querySelectorAll('.segment-card');
-            
             if (cards.length > 0) {
                 window.history.pushState({ isAppOpen: true }, "", "");
-                
                 showSystemConfirm("WARNING: Using the system back button will exit the app and delete unsaved data.\n\nAre you sure you want to exit?", "DATA LOSS IMMINENT").then(proceed => {
-                    if (proceed) {
-                        window.history.go(-2); 
-                    }
+                    if (proceed) window.history.go(-2); 
                 });
             } else {
                 window.history.back();
@@ -880,7 +865,6 @@
 
         function updatePhotoUI(row, cameraBtn, badgeContainer) {
             const images = JSON.parse(row.dataset.images || "[]");
-            
             if (images.length === 0) {
                 cameraBtn.innerHTML = '📷 PHOTO';
                 cameraBtn.style.backgroundColor = 'var(--border-color)';
@@ -903,15 +887,12 @@
             images.forEach((imgObj, index) => {
                 const item = document.createElement('div');
                 item.className = 'gallery-item';
-                
                 const img = document.createElement('img');
                 img.src = imgObj.img;
-                
                 const delBtn = document.createElement('button');
                 delBtn.className = 'remove-img-btn';
                 delBtn.innerHTML = 'REMOVE PIC';
                 delBtn.onclick = () => removeImageFromGallery(index);
-                
                 item.appendChild(img);
                 item.appendChild(delBtn);
                 grid.appendChild(item);
@@ -922,22 +903,17 @@
 
         function removeImageFromGallery(indexToRemove) {
             if (!currentRowForGallery) return;
-            
             let images = JSON.parse(currentRowForGallery.dataset.images || "[]");
             images.splice(indexToRemove, 1); 
             currentRowForGallery.dataset.images = JSON.stringify(images); 
-            
             const wrapper = currentRowForGallery.querySelector('.photo-wrapper');
             const cameraBtn = wrapper.querySelector('.camera-btn');
             const badgeContainer = wrapper.querySelector('.status-badge-container');
             updatePhotoUI(currentRowForGallery, cameraBtn, badgeContainer);
             checkSegmentData(currentRowForGallery.closest('.segment-card'));
 
-            if (images.length === 0) {
-                closeGallery();
-            } else {
-                openGallery(currentRowForGallery); 
-            }
+            if (images.length === 0) closeGallery();
+            else openGallery(currentRowForGallery); 
         }
 
         function closeGallery() {
@@ -966,11 +942,7 @@
                 opt.textContent = area;
                 areaSelect.appendChild(opt);
             }
-
-            // AUTO-SHOW HOW TO USE IF EMPTY ON LAUNCH
-            if (loadedRoutes.size === 0) {
-                toggleHelp(true);
-            }
+            if (loadedRoutes.size === 0) toggleHelp(true);
         });
 
         document.addEventListener('click', (e) => {
@@ -979,7 +951,6 @@
             const stsMenu = document.getElementById('stsShortcutMenu');
             const searchContainer = document.getElementById('searchContainer');
             const insertModal = document.getElementById('insertModal');
-            
             const menuBtn = document.getElementById('menuBtn');
             const fabBtn = document.getElementById('quickAddBtn');
             const stsBtn = document.getElementById('stsDropdownBtn');
@@ -987,26 +958,12 @@
             const helpFab = document.getElementById('helpFabBtn');
             const helpOverlay = document.getElementById('helpOverlay');
 
-            if (!menu.contains(e.target) && !menuBtn.contains(e.target) && menu.classList.contains('expanded')) {
-                toggleMenu(true);
-            }
-            if (stsMenu && stsBtn && !stsMenu.contains(e.target) && !stsBtn.contains(e.target) && stsMenu.style.display === 'flex') {
-                stsMenu.style.display = 'none';
-            }
-            if (searchContainer && searchBtn && !searchContainer.contains(e.target) && !searchBtn.contains(e.target) && searchContainer.style.display === 'flex') {
-                searchContainer.style.display = 'none';
-            }
-            if (insertModal && !insertModal.contains(e.target) && !e.target.closest('.map-item') && insertModal.style.display === 'flex') {
-                closeInsertModal();
-            }
-            // Auto close help if clicked outside the content modal box
-            if (helpOverlay.style.display === 'flex' && e.target === helpOverlay && !helpFab.contains(e.target)) {
-                toggleHelp(false);
-            }
-            // Auto close + Menu if clicked outside
-            if (!fabModal.contains(e.target) && !fabBtn.contains(e.target) && fabModal.style.display === 'flex') {
-                toggleQuickAddModal(false);
-            }
+            if (!menu.contains(e.target) && !menuBtn.contains(e.target) && menu.classList.contains('expanded')) toggleMenu(true);
+            if (stsMenu && stsBtn && !stsMenu.contains(e.target) && !stsBtn.contains(e.target) && stsMenu.style.display === 'flex') stsMenu.style.display = 'none';
+            if (searchContainer && searchBtn && !searchContainer.contains(e.target) && !searchBtn.contains(e.target) && searchContainer.style.display === 'flex') searchContainer.style.display = 'none';
+            if (insertModal && !insertModal.contains(e.target) && !e.target.closest('.map-item') && insertModal.style.display === 'flex') closeInsertModal();
+            if (helpOverlay.style.display === 'flex' && e.target === helpOverlay && !helpFab.contains(e.target)) toggleHelp(false);
+            if (!fabModal.contains(e.target) && !fabBtn.contains(e.target) && fabModal.style.display === 'flex') toggleQuickAddModal(false);
         });
 
         function toggleMenu(forceClose = false) {
@@ -1020,7 +977,6 @@
                 menu.classList.remove('collapsed');
                 menu.classList.add('expanded');
                 btn.innerHTML = '<span class="menu-toggle-icon">✖</span>';
-                
                 document.getElementById('searchContainer').style.display = 'none';
                 document.getElementById('stsShortcutMenu').style.display = 'none';
             }
@@ -1034,7 +990,6 @@
             } else {
                 searchContainer.style.display = 'flex';
                 document.getElementById('tsSearchInput').focus();
-                
                 toggleMenu(true);
                 toggleQuickAddModal(false);
                 document.getElementById('stsShortcutMenu').style.display = 'none';
@@ -1045,8 +1000,7 @@
             const input = document.getElementById('quickTsSearchInput');
             const tsNumber = input.value.trim();
             if(tsNumber) {
-                const mainInput = document.getElementById('tsSearchInput');
-                mainInput.value = tsNumber;
+                document.getElementById('tsSearchInput').value = tsNumber;
                 searchTS(); 
                 input.value = ''; 
                 toggleQuickAddModal(false); 
@@ -1059,31 +1013,22 @@
             if (!tsNumber) return;
 
             const targetCard = document.querySelector(`.segment-card[data-segment="${tsNumber}"]`);
-            
             if (targetCard) {
                 isAutoScrolling = true;
-                
                 scrollToCard(targetCard);
-                
                 const targetMapItem = document.querySelector(`.map-item[data-map-segment="${tsNumber}"]`);
                 if (targetMapItem) {
                     const mapContainer = document.getElementById('miniMap');
                     const containerRect = mapContainer.getBoundingClientRect();
                     const itemRect = targetMapItem.getBoundingClientRect();
-                    mapContainer.scrollTo({
-                        top: mapContainer.scrollTop + (itemRect.top - containerRect.top) - (containerRect.height / 2) + (itemRect.height / 2),
-                        behavior: 'smooth'
-                    });
+                    mapContainer.scrollTo({ top: mapContainer.scrollTop + (itemRect.top - containerRect.top) - (containerRect.height / 2) + (itemRect.height / 2), behavior: 'smooth' });
                 }
-
                 document.getElementById('searchContainer').style.display = 'none';
                 input.value = '';
-                
                 setTimeout(() => {
                     targetCard.classList.add('search-highlight');
                     setTimeout(() => { targetCard.classList.remove('search-highlight'); }, 1200);
                 }, 500);
-
                 setTimeout(() => { isAutoScrolling = false; }, 800);
             } else {
                 showSystemAlert(`Could not find TS-${tsNumber}.\nSub to sub section may have not been loaded.`, "TS MISSING", true);
@@ -1107,22 +1052,17 @@
         function populateStsMenu() {
             const menu = document.getElementById('stsShortcutMenu');
             menu.innerHTML = '';
-            
             const cards = document.querySelectorAll('.segment-card');
             if (cards.length === 0) {
                 menu.innerHTML = '<div style="padding:10px; color:var(--text-muted); font-size:var(--base-font);">NO SECTIONS LOADED</div>';
                 return;
             }
-
             const orderedRoutes = [];
             cards.forEach(card => {
                 const key = card.getAttribute('data-route-key');
                 const name = card.getAttribute('data-route-name');
-                if (!orderedRoutes.find(r => r.key === key)) {
-                    orderedRoutes.push({ key, name });
-                }
+                if (!orderedRoutes.find(r => r.key === key)) orderedRoutes.push({ key, name });
             });
-
             orderedRoutes.forEach((route, index) => {
                 const btn = document.createElement('button');
                 btn.className = 'sts-menu-item';
@@ -1134,24 +1074,15 @@
 
         function jumpToRoute(routeKey) {
             isAutoScrolling = true; 
-            
             const firstCard = document.querySelector(`.segment-card[data-route-key="${routeKey}"]`);
-            if (firstCard) {
-                scrollToCard(firstCard);
-            }
-
+            if (firstCard) scrollToCard(firstCard);
             const firstMapItem = document.querySelector(`.map-item[data-route-key="${routeKey}"]`);
             if (firstMapItem) {
                 const mapContainer = document.getElementById('miniMap');
                 const containerRect = mapContainer.getBoundingClientRect();
                 const itemRect = firstMapItem.getBoundingClientRect();
-                
-                mapContainer.scrollTo({
-                    top: mapContainer.scrollTop + (itemRect.top - containerRect.top) - (containerRect.height / 2) + (itemRect.height / 2),
-                    behavior: 'smooth'
-                });
+                mapContainer.scrollTo({ top: mapContainer.scrollTop + (itemRect.top - containerRect.top) - (containerRect.height / 2) + (itemRect.height / 2), behavior: 'smooth' });
             }
-            
             document.getElementById('stsShortcutMenu').style.display = 'none';
             setTimeout(() => { isAutoScrolling = false; }, 800); 
         }
@@ -1159,11 +1090,8 @@
         function openInsertModal(tsNumber, baseRouteKey) {
             currentInsertTargetTS = tsNumber;
             document.getElementById('insert-target-ts').textContent = tsNumber;
-            
             updateInsertDropdown(baseRouteKey);
-            
             document.getElementById('insertModal').style.display = 'flex';
-            
             toggleMenu(true);
             toggleQuickAddModal(false);
             document.getElementById('stsShortcutMenu').style.display = 'none';
@@ -1178,14 +1106,12 @@
         function updateInsertDropdown(baseRouteKey) {
             const dropdown = document.getElementById('insert-route-select');
             dropdown.innerHTML = '<option value="">AWAITING INPUT...</option>';
-            
             if (currentActiveArea && currentActiveDirection && window.globalDatabase[currentActiveArea] && window.globalDatabase[currentActiveArea][currentActiveDirection]) {
                 const routes = window.globalDatabase[currentActiveArea][currentActiveDirection];
                 let hasOptions = false;
                 for (let key in routes) {
                     const routeName = routes[key].name;
                     const isSwitchOrPocket = key.includes('-X') || key.endsWith('-ST') || routeName.includes('Pocket') || routeName.includes('Cross') || routeName.includes('Spur');
-                    
                     if (!loadedRoutes.has(key) && isSwitchOrPocket) {
                         let opt = document.createElement('option');
                         opt.value = key;
@@ -1194,9 +1120,7 @@
                         hasOptions = true;
                     }
                 }
-                if (!hasOptions) {
-                    dropdown.innerHTML = '<option value="">ALL SWITCHES LOADED</option>';
-                }
+                if (!hasOptions) dropdown.innerHTML = '<option value="">ALL SWITCHES LOADED</option>';
             } else {
                 dropdown.innerHTML = '<option value="">NO AREA LOADED</option>';
             }
@@ -1204,19 +1128,12 @@
 
         function executeInsert() {
             if (!currentInsertTargetTS) return;
-            
             const area = currentActiveArea;
             const direction = currentActiveDirection;
             const routeKey = document.getElementById('insert-route-select').value;
             
-            if (!area || !routeKey) { 
-                showSystemAlert('Invalid Selection. Ensure Route is selected.', 'SELECTION ERROR', true); 
-                return; 
-            }
-            if (loadedRoutes.has(routeKey)) {
-                showSystemAlert('This section is already loaded in the workspace.', 'DUPLICATE LOAD');
-                return;
-            }
+            if (!area || !routeKey) { showSystemAlert('Invalid Selection. Ensure Route is selected.', 'SELECTION ERROR', true); return; }
+            if (loadedRoutes.has(routeKey)) { showSystemAlert('This section is already loaded in the workspace.', 'DUPLICATE LOAD'); return; }
 
             const selectedRouteData = window.globalDatabase[area][direction][routeKey];
             const container = document.getElementById('segments-container');
@@ -1234,7 +1151,6 @@
 
             const targetCard = document.querySelector(`.segment-card[data-segment="${currentInsertTargetTS}"]`);
             const targetMap = document.querySelector(`.map-item[data-map-segment="${currentInsertTargetTS}"]`);
-            
             const refCard = targetCard ? targetCard.nextSibling : null;
             const refMap = targetMap ? targetMap.nextSibling : null;
 
@@ -1250,15 +1166,12 @@
                 mapBtn.setAttribute('data-route-key', routeKey); 
                 mapBtn.textContent = `TS-${item.num}`;
                 mapBtn.style.borderLeft = `4px solid ${item.color}`;
-                
                 attachMapItemListeners(mapBtn, card, item.num, routeKey);
-                
                 mapContainer.insertBefore(mapBtn, refMap);
             });
 
             loadedRoutes.add(routeKey);
             routeLoadHistory.push(routeKey);
-            
             closeInsertModal();
             updateRouteDropdown(); 
             
@@ -1277,45 +1190,29 @@
                 scrollToCard(card);
                 setTimeout(() => { isAutoScrolling = false; }, 800);
             };
-            
             let pressTimer;
             const startPress = (e) => {
                 if (e.type === 'mousedown' && e.button !== 0) return; 
                 pressTimer = setTimeout(() => openInsertModal(itemNum, routeKey), 600);
             };
             const cancelPress = () => clearTimeout(pressTimer);
-            
             mapBtn.addEventListener('touchstart', startPress, {passive: true});
             mapBtn.addEventListener('touchend', cancelPress);
             mapBtn.addEventListener('touchmove', cancelPress);
-            
             mapBtn.addEventListener('mousedown', startPress);
             mapBtn.addEventListener('mouseup', cancelPress);
             mapBtn.addEventListener('mouseleave', cancelPress);
-            
-            mapBtn.addEventListener('contextmenu', (e) => {
-                e.preventDefault();
-                openInsertModal(itemNum, routeKey);
-            });
+            mapBtn.addEventListener('contextmenu', (e) => { e.preventDefault(); openInsertModal(itemNum, routeKey); });
         }
 
         function getLineColors(lineName) {
             const activeTheme = localStorage.getItem('appTheme') || 'tactical';
-            // Any theme that isn't 'tactical' or 'macosdark' is treated as Light Mode
             const isLightMode = !['tactical', 'macosdark'].includes(activeTheme);
-            
             if (!lineName) return { bg: 'transparent', text: 'var(--text-color)', border: 'var(--border-color)' };
             const name = lineName.toUpperCase();
-            
-            if (name.includes("AREA 1") || name.includes("EXPO")) {
-                return { bg: isLightMode ? '#ffc107' : '#3e3000', text: isLightMode ? '#000' : '#ffc107', border: '#ffc107' };
-            }
-            else if (name.includes("AREA 2") || name.includes("MILLENIUM") || name.includes("MILLENNIUM")) {
-                return { bg: isLightMode ? '#3399ff' : '#00254d', text: isLightMode ? '#fff' : '#3399ff', border: '#3399ff' };
-            }
-            else if (name.includes("AREA 3") || name.includes("EVERGREEN")) {
-                return { bg: isLightMode ? '#4caf50' : '#0f3316', text: isLightMode ? '#fff' : '#4caf50', border: '#4caf50' };
-            }
+            if (name.includes("AREA 1") || name.includes("EXPO")) return { bg: isLightMode ? '#ffc107' : '#3e3000', text: isLightMode ? '#000' : '#ffc107', border: '#ffc107' };
+            if (name.includes("AREA 2") || name.includes("MILLENIUM") || name.includes("MILLENNIUM")) return { bg: isLightMode ? '#3399ff' : '#00254d', text: isLightMode ? '#fff' : '#3399ff', border: '#3399ff' };
+            if (name.includes("AREA 3") || name.includes("EVERGREEN")) return { bg: isLightMode ? '#4caf50' : '#0f3316', text: isLightMode ? '#fff' : '#4caf50', border: '#4caf50' };
             return { bg: isLightMode ? '#e5e5e5' : '#222', text: isLightMode ? '#000' : '#aaa', border: '#555' };
         }
 
@@ -1323,9 +1220,7 @@
             const area = document.getElementById('general-area').value;
             const direction = document.getElementById('page-direction').value;
             const dropdown = document.getElementById('global-section');
-            
             dropdown.innerHTML = '<option value="">AWAITING INPUT...</option>';
-            
             if (area && direction && window.globalDatabase[area] && window.globalDatabase[area][direction]) {
                 const routes = window.globalDatabase[area][direction];
                 let hasOptions = false;
@@ -1338,16 +1233,13 @@
                         hasOptions = true;
                     }
                 }
-                if (!hasOptions) {
-                    dropdown.innerHTML = '<option value="">ALL SECTIONS LOADED</option>';
-                }
+                if (!hasOptions) dropdown.innerHTML = '<option value="">ALL SECTIONS LOADED</option>';
             }
         }
 
         function updateQuickAddDropdown() {
             const dropdown = document.getElementById('quick-add-select');
             dropdown.innerHTML = '<option value="">AWAITING INPUT...</option>';
-            
             if (currentActiveArea && currentActiveDirection && window.globalDatabase[currentActiveArea] && window.globalDatabase[currentActiveArea][currentActiveDirection]) {
                 const routes = window.globalDatabase[currentActiveArea][currentActiveDirection];
                 let hasOptions = false;
@@ -1360,15 +1252,12 @@
                         hasOptions = true;
                     }
                 }
-                if (!hasOptions) {
-                    dropdown.innerHTML = '<option value="">ALL SECTIONS LOADED</option>';
-                }
+                if (!hasOptions) dropdown.innerHTML = '<option value="">ALL SECTIONS LOADED</option>';
             }
         }
 
         function toggleQuickAddModal(eventOrShow) {
             const modal = document.getElementById('quickAddModal');
-            
             let shouldShow;
             if (eventOrShow === true || eventOrShow === false) {
                 shouldShow = eventOrShow;
@@ -1398,17 +1287,12 @@
             let hasData = false;
             
             if (card.querySelector('.segment-notes').value.trim() !== '') hasData = true;
-            
             card.querySelectorAll('.defect-row').forEach(row => {
                 const images = JSON.parse(row.dataset.images || "[]");
-                
                 const isCustom = row.dataset.isCustom === "true";
                 const compVal = isCustom ? row.querySelector('.custom-comp').value : row.querySelector('.component-select').value;
                 const defVal = isCustom ? row.querySelector('.custom-def').value : row.querySelector('.defect-select').value;
-
-                if (compVal || defVal || images.length > 0) {
-                    hasData = true;
-                }
+                if (compVal || defVal || images.length > 0) hasData = true;
             });
             
             const mapItem = document.querySelector(`.map-item[data-map-segment="${segNum}"]`);
@@ -1430,7 +1314,6 @@
 
                     const routeDisplay = document.getElementById('active-route-display');
                     const areaDisplay = document.getElementById('active-area-display');
-
                     routeDisplay.textContent = routeName ? routeName : 'AWAITING...';
                     areaDisplay.textContent = areaName ? areaName : '';
 
@@ -1443,20 +1326,14 @@
 
                     document.querySelectorAll('.map-item').forEach(item => item.classList.remove('active-map'));
                     const activeMapItem = document.querySelector(`.map-item[data-map-segment="${segNum}"]`);
-                    
                     if (activeMapItem) {
                         activeMapItem.classList.add('active-map');
-
                         if (!isAutoScrolling) {
                             const mapContainer = document.getElementById('miniMap');
                             const containerRect = mapContainer.getBoundingClientRect();
                             const itemRect = activeMapItem.getBoundingClientRect();
-                            
                             if (itemRect.top < containerRect.top + 20 || itemRect.bottom > containerRect.bottom - 20) {
-                                mapContainer.scrollTo({
-                                    top: mapContainer.scrollTop + (itemRect.top - containerRect.top) - (containerRect.height / 2) + (itemRect.height / 2),
-                                    behavior: 'smooth'
-                                });
+                                mapContainer.scrollTo({ top: mapContainer.scrollTop + (itemRect.top - containerRect.top) - (containerRect.height / 2) + (itemRect.height / 2), behavior: 'smooth' });
                             }
                         }
                     }
@@ -1467,15 +1344,11 @@
         function scrollToCard(card) {
             const headerHeight = document.getElementById('stickyHeader').offsetHeight;
             const elementPosition = card.getBoundingClientRect().top + window.scrollY;
-            window.scrollTo({
-                top: elementPosition - headerHeight - 15,
-                behavior: "smooth"
-            });
+            window.scrollTo({ top: elementPosition - headerHeight - 15, behavior: "smooth" });
         }
 
         function generateSegments(isQuickAdd = false) {
             let area, direction, routeSelect, selectedRouteKey;
-
             if (isQuickAdd) {
                 area = currentActiveArea;
                 direction = currentActiveDirection;
@@ -1488,32 +1361,19 @@
                 selectedRouteKey = routeSelect.value;
             }
             
-            if (!area || !selectedRouteKey) { 
-                showSystemAlert('Invalid Selection. Ensure Area and Block are selected.', 'SELECTION ERROR', true); 
-                return; 
-            }
-            
-            if (loadedRoutes.has(selectedRouteKey)) {
-                showSystemAlert('This section is already loaded in the workspace.', 'DUPLICATE LOAD');
-                return;
-            }
+            if (!area || !selectedRouteKey) { showSystemAlert('Invalid Selection. Ensure Area and Block are selected.', 'SELECTION ERROR', true); return; }
+            if (loadedRoutes.has(selectedRouteKey)) { showSystemAlert('This section is already loaded in the workspace.', 'DUPLICATE LOAD'); return; }
 
             const selectedRouteData = window.globalDatabase[area][direction][selectedRouteKey];
             const container = document.getElementById('segments-container');
             const mapContainer = document.getElementById('miniMap');
 
-            // HIDE HELP OVERLAY ONCE A ROUTE IS LOADED
             toggleHelp(false);
-
             const newCards = []; 
-
             selectedRouteData.segments.forEach(range => {
                 const blockColor = range.color || 'var(--primary)'; 
-                if (range.start <= range.end) { 
-                    for (let i = range.start; i <= range.end; i++) newCards.push({ num: i, color: blockColor }); 
-                } else { 
-                    for (let i = range.start; i >= range.end; i--) newCards.push({ num: i, color: blockColor }); 
-                }
+                if (range.start <= range.end) { for (let i = range.start; i <= range.end; i++) newCards.push({ num: i, color: blockColor }); } 
+                else { for (let i = range.start; i >= range.end; i--) newCards.push({ num: i, color: blockColor }); }
             });
             
             newCards.forEach((item, index) => {
@@ -1528,9 +1388,7 @@
                 mapBtn.setAttribute('data-route-key', selectedRouteKey); 
                 mapBtn.textContent = `TS-${item.num}`;
                 mapBtn.style.borderLeft = `4px solid ${item.color}`;
-                
                 attachMapItemListeners(mapBtn, card, item.num, selectedRouteKey);
-                
                 mapContainer.appendChild(mapBtn);
             });
             
@@ -1538,25 +1396,15 @@
             routeLoadHistory.push(selectedRouteKey);
             currentActiveArea = area;
             currentActiveDirection = direction;
-
             document.getElementById('quickAddBtn').style.display = 'flex';
-
             routeSelect.value = '';
-            if (isQuickAdd) {
-                toggleQuickAddModal(false);
-                updateRouteDropdown(); 
-            } else {
-                updateRouteDropdown();
-                toggleMenu(true);
-            }
+            
+            if (isQuickAdd) { toggleQuickAddModal(false); updateRouteDropdown(); } 
+            else { updateRouteDropdown(); toggleMenu(true); }
         }
 
         async function undoLastLoad() {
-            if (routeLoadHistory.length === 0) {
-                showSystemAlert("No actions to undo.", "SYSTEM NOTICE");
-                return;
-            }
-            
+            if (routeLoadHistory.length === 0) { showSystemAlert("No actions to undo.", "SYSTEM NOTICE"); return; }
             const lastRouteKey = routeLoadHistory[routeLoadHistory.length - 1];
             const cardsToRemove = document.querySelectorAll(`.segment-card[data-route-key="${lastRouteKey}"]`);
             
@@ -1566,24 +1414,15 @@
 
             cardsToRemove.forEach(card => {
                 if (hasData) return; 
-                
                 if (card.querySelector('.segment-notes').value.trim() !== '') hasData = true;
-                
                 card.querySelectorAll('.defect-row').forEach(row => {
                     const images = JSON.parse(row.dataset.images || "[]");
                     const isCustom = row.dataset.isCustom === "true";
                     const compVal = isCustom ? row.querySelector('.custom-comp').value : row.querySelector('.component-select').value;
                     const defVal = isCustom ? row.querySelector('.custom-def').value : row.querySelector('.defect-select').value;
-
-                    if (compVal || defVal || images.length > 0) {
-                        hasData = true;
-                    }
+                    if (compVal || defVal || images.length > 0) hasData = true;
                 });
-
-                if (hasData) {
-                    conflictTS = card.getAttribute('data-segment');
-                    conflictRoute = card.getAttribute('data-route-name');
-                }
+                if (hasData) { conflictTS = card.getAttribute('data-segment'); conflictRoute = card.getAttribute('data-route-name'); }
             });
 
             if (hasData) {
@@ -1594,7 +1433,6 @@
             routeLoadHistory.pop();
             cardsToRemove.forEach(el => el.remove());
             document.querySelectorAll(`.map-item[data-route-key="${lastRouteKey}"]`).forEach(el => el.remove());
-            
             loadedRoutes.delete(lastRouteKey);
             
             if (loadedRoutes.size === 0) {
@@ -1603,11 +1441,8 @@
                 currentActiveDirection = "";
                 document.getElementById('active-area-display').textContent = '';
                 document.getElementById('active-route-display').textContent = 'AWAITING...';
-                
-                // IF WORKSPACE IS EMPTY, SHOW THE HELP SCREEN AGAIN
                 toggleHelp(true);
             }
-            
             toggleQuickAddModal(false);
             updateRouteDropdown();
         }
@@ -1618,7 +1453,6 @@
             const cards = Array.from(container.children);
             const mapItems = Array.from(mapContainer.children);
             if (cards.length === 0) return;
-
             cards.reverse();
             mapItems.reverse();
             cards.forEach((card, index) => {
@@ -1671,9 +1505,7 @@
 
             const compSelect = document.createElement('select');
             compSelect.className = 'component-select';
-            
             const extendedComponents = ['Select Component', ...lineComponents, 'CUSTOM ENTRY...'];
-            
             extendedComponents.forEach(c => {
                 let opt = document.createElement('option');
                 opt.value = c === 'Select Component' ? '' : c;
@@ -1722,23 +1554,18 @@
             function updateDefects(selectedComp, selectedDefect = '') {
                 defSelect.innerHTML = '';
                 if (selectedComp && specificDefectMap[selectedComp]) {
-                    
-                    const mapData = specificDefectMap[selectedComp];
-                    const defectList = Array.isArray(mapData) ? mapData : (mapData.defects || []);
-
+                    const defectList = specificDefectMap[selectedComp];
                     defSelect.disabled = false;
                     let defDefault = document.createElement('option');
                     defDefault.value = '';
                     defDefault.textContent = 'SELECT DEFECT';
                     defSelect.appendChild(defDefault);
-                    
                     defectList.forEach(d => {
                         let opt = document.createElement('option');
                         opt.value = d;
                         opt.textContent = d.toUpperCase();
                         defSelect.appendChild(opt);
                     });
-                    
                     if (selectedDefect) defSelect.value = selectedDefect;
                 } else {
                     defSelect.disabled = true;
@@ -1806,12 +1633,10 @@
                             canvas.width = width; canvas.height = height;
                             const ctx = canvas.getContext('2d');
                             ctx.drawImage(img, 0, 0, width, height);
-                            
                             const newImgObj = { img: canvas.toDataURL('image/jpeg', 0.8), w: width, h: height };
                             const currentImages = JSON.parse(row.dataset.images || "[]");
                             currentImages.push(newImgObj);
                             row.dataset.images = JSON.stringify(currentImages);
-                            
                             updatePhotoUI(row, cameraLabel, badgeContainer);
                             checkSegmentData(row.closest('.segment-card'));
                         };
@@ -1843,7 +1668,6 @@
                     customCompInput.style.display = 'block';
                     customDefInput.style.display = 'block';
                     revertBtn.style.display = 'flex';
-                    
                     customCompInput.value = prefill.comp || '';
                     customDefInput.value = prefill.def || '';
                 } else if (prefill.comp) {
@@ -1891,7 +1715,6 @@
 
             try {
                 if (window.showSaveFilePicker) {
-                    // Modern API: Prompts user for Save Location
                     const handle = await window.showSaveFilePicker({
                         suggestedName: exportName,
                         types: [{ description: 'JSON File', accept: {'application/json': ['.json']} }],
@@ -1902,7 +1725,6 @@
                     currentFileName = handle.name;
                     showSystemAlert('Data saved successfully to selected location.', 'SAVE COMPLETE');
                 } else {
-                    // Fallback for Mobile/Older browsers
                     const blob = new Blob([dataStr], { type: 'application/json' });
                     const link = document.createElement("a");
                     link.href = URL.createObjectURL(blob);
@@ -1918,95 +1740,8 @@
                     showSystemAlert('Failed to save file.', 'SAVE ERROR', true);
                 }
             }
-            
             toggleMenu(true);
         }
-
-        function loadProject(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            currentFileName = file.name;
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const projectData = JSON.parse(e.target.result);
-                    const container = document.getElementById('segments-container');
-                    const mapContainer = document.getElementById('miniMap');
-                    container.innerHTML = '';
-                    mapContainer.innerHTML = '';
-                    
-                    loadedRoutes.clear(); 
-                    routeLoadHistory = [];
-
-                    // HIDE HELP OVERLAY ON SUCCESSFUL LOAD
-                    toggleHelp(false);
-
-                    projectData.forEach((segData, index) => {
-                        const safeAreaName = segData.areaName || '';
-                        const activeKey = segData.routeKey || segData.routeName; 
-                        
-                        const card = createSegmentCard(segData.segmentNum, activeKey, segData.routeName, segData.direction, segData.color, safeAreaName);
-                        card.style.animationDelay = `${index * 0.05}s`;
-                        
-                        card.querySelector('.segment-notes').value = segData.notes;
-                        const defectList = card.querySelector('.defect-list');
-                        defectList.innerHTML = '';
-                        
-                        if (segData.defects.length === 0) { 
-                            addDefectRow(defectList, null, safeAreaName); 
-                        } else { 
-                            segData.defects.forEach(defData => { 
-                                if (defData.photoBase64 && (!defData.images || defData.images.length === 0)) {
-                                    defData.images = [{ img: defData.photoBase64, w: defData.imgW, h: defData.imgH }];
-                                }
-                                addDefectRow(defectList, defData, safeAreaName); 
-                            }); 
-                        }
-
-                        container.appendChild(card);
-                        scrollObserver.observe(card);
-
-                        const mapBtn = document.createElement('div');
-                        mapBtn.className = 'map-item';
-                        mapBtn.setAttribute('data-map-segment', segData.segmentNum);
-                        mapBtn.setAttribute('data-route-key', activeKey);
-                        mapBtn.textContent = `TS-${segData.segmentNum}`;
-                        mapBtn.style.borderLeft = `4px solid ${segData.color || '#ccc'}`;
-                        
-                        attachMapItemListeners(mapBtn, card, segData.segmentNum, activeKey);
-                        
-                        mapContainer.appendChild(mapBtn);
-                        
-                        checkSegmentData(card);
-
-                        if (activeKey && !loadedRoutes.has(activeKey)) {
-                            loadedRoutes.add(activeKey);
-                            routeLoadHistory.push(activeKey);
-                        }
-                        currentActiveArea = safeAreaName;
-                        currentActiveDirection = segData.direction;
-                    });
-
-                    if (loadedRoutes.size > 0) {
-                        document.getElementById('quickAddBtn').style.display = 'flex';
-                        updateRouteDropdown(); 
-                    }
-
-                    showSystemAlert('Backup file imported successfully.', 'DATA LOADED');
-                    toggleMenu(true);
-
-                } catch (err) {
-                    showSystemAlert('Corrupt or invalid JSON file.', 'SYSTEM ERROR', true);
-                    console.error(err);
-                }
-                document.getElementById('importFile').value = '';
-            };
-            reader.readAsText(file);
-        }
-
-        const delay = ms => new Promise(res => setTimeout(res, ms));
 
         async function exportData() {
             if (typeof ExcelJS === 'undefined' || typeof window.jspdf === 'undefined') {
@@ -2036,6 +1771,7 @@
                 worksheet.getRow(1).font = { bold: true };
 
                 let pdfJobs = [];
+                let hasDataRows = false;
 
                 cards.forEach(card => {
                     const segmentNum = card.getAttribute('data-segment');
@@ -2055,6 +1791,7 @@
                         
                         if (comp || def || images.length > 0) {
                             hasDefects = true;
+                            hasDataRows = true;
                             worksheet.addRow({ line: areaName, route: routeName, segment: tsId, notes: notes, component: comp, defect: def });
                         }
 
@@ -2067,28 +1804,77 @@
                     });
 
                     if (!hasDefects && notes.trim() !== '') {
+                        hasDataRows = true;
                         worksheet.addRow({ line: areaName, route: routeName, segment: tsId, notes: notes, component: '', defect: '' });
                     }
                 });
 
-                if (worksheet.rowCount > 1) {
-                    const buffer = await workbook.xlsx.writeBuffer();
-                    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-                    const link = document.createElement("a");
-                    const date = new Date().toISOString().split('T')[0];
-                    link.href = URL.createObjectURL(blob);
-                    link.download = `DEFECT_REPORT_${date}.xlsx`;
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                } else {
+                if (!hasDataRows) {
                     showSystemAlert("No filled track sections found to export to Excel.", "EXPORT NOTICE");
+                    exportBtn.disabled = false;
+                    exportBtn.innerHTML = '📊 EXPORT REPORT (Excel & PDF)';
+                    return;
                 }
 
-                if (pdfJobs.length > 0) {
-                    exportBtn.innerHTML = `⏳ BUILDING ${pdfJobs.length} PDFs...`;
-                    await delay(800); 
-                    for (let job of pdfJobs) { generatePDF(job); await delay(800); }
+                const buffer = await workbook.xlsx.writeBuffer();
+                const excelBlob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+                const date = new Date().toISOString().split('T')[0];
+                const excelFilename = `DEFECT_REPORT_${date}.xlsx`;
+
+                // NEW DIRECTORY PICKER LOGIC FOR MULTIPLE FILES
+                if (pdfJobs.length > 0 && window.showDirectoryPicker) {
+                    try {
+                        exportBtn.innerHTML = '📂 SELECT FOLDER...';
+                        const dirHandle = await window.showDirectoryPicker({ mode: 'readwrite' });
+                        
+                        exportBtn.innerHTML = '⏳ SAVING EXCEL...';
+                        const excelFileHandle = await dirHandle.getFileHandle(excelFilename, { create: true });
+                        const excelWritable = await excelFileHandle.createWritable();
+                        await excelWritable.write(excelBlob);
+                        await excelWritable.close();
+
+                        exportBtn.innerHTML = `⏳ BUILDING ${pdfJobs.length} PDFs...`;
+                        for (let i = 0; i < pdfJobs.length; i++) {
+                            const job = pdfJobs[i];
+                            const pdfBlob = generatePDF(job);
+                            const cleanComp = job.comp ? job.comp.replace(/[^a-z0-9]/gi, '_') : 'UNKNOWN';
+                            const pdfFilename = `${job.tsId}_${cleanComp}_DEFECT.pdf`;
+                            
+                            const pdfFileHandle = await dirHandle.getFileHandle(pdfFilename, { create: true });
+                            const pdfWritable = await pdfFileHandle.createWritable();
+                            await pdfWritable.write(pdfBlob);
+                            await pdfWritable.close();
+                            
+                            exportBtn.innerHTML = `⏳ SAVED ${i + 1}/${pdfJobs.length} PDFs...`;
+                        }
+                        showSystemAlert("All files successfully saved to the selected folder.", "EXPORT COMPLETE");
+                    } catch (err) {
+                        if (err.name !== 'AbortError') {
+                            console.error(err);
+                            showSystemAlert('Folder selection failed. Falling back to default downloads.', 'EXPORT ERROR', true);
+                            fallbackDownload(excelBlob, excelFilename, pdfJobs);
+                        }
+                    }
+                // SAVE FILE PICKER FOR SINGLE EXCEL FILE
+                } else if (pdfJobs.length === 0 && window.showSaveFilePicker) {
+                    try {
+                        const handle = await window.showSaveFilePicker({
+                            suggestedName: excelFilename,
+                            types: [{ description: 'Excel File', accept: {'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx']} }],
+                        });
+                        const writable = await handle.createWritable();
+                        await writable.write(excelBlob);
+                        await writable.close();
+                        showSystemAlert("Excel report saved successfully.", "EXPORT COMPLETE");
+                    } catch (err) {
+                        if (err.name !== 'AbortError') {
+                            console.error(err);
+                            fallbackDownload(excelBlob, excelFilename, []);
+                        }
+                    }
+                } else {
+                    // FALLBACK FOR MOBILE OR UNSUPPORTED BROWSER
+                    fallbackDownload(excelBlob, excelFilename, pdfJobs);
                 }
 
             } catch (error) {
@@ -2096,16 +1882,43 @@
                 showSystemAlert("File compiling failed.", "EXPORT ERROR", true);
             } finally {
                 exportBtn.disabled = false;
-                exportBtn.innerHTML = '📊 EXPORT FINAL REPORT';
+                exportBtn.innerHTML = '📊 EXPORT REPORT (Excel & PDF)';
             }
+        }
+
+        async function fallbackDownload(excelBlob, excelFilename, pdfJobs) {
+            const exportBtn = document.getElementById('exportBtn');
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(excelBlob);
+            link.download = excelFilename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            if (pdfJobs.length > 0) {
+                exportBtn.innerHTML = `⏳ BUILDING ${pdfJobs.length} PDFs...`;
+                await delay(800); 
+                for (let job of pdfJobs) { 
+                    const pdfBlob = generatePDF(job);
+                    const cleanComp = job.comp ? job.comp.replace(/[^a-z0-9]/gi, '_') : 'UNKNOWN';
+                    const pdfFilename = `${job.tsId}_${cleanComp}_DEFECT.pdf`;
+                    
+                    const pdflink = document.createElement("a");
+                    pdflink.href = URL.createObjectURL(pdfBlob);
+                    pdflink.download = pdfFilename;
+                    document.body.appendChild(pdflink);
+                    pdflink.click();
+                    document.body.removeChild(pdflink);
+                    await delay(800); 
+                }
+            }
+            showSystemAlert("Files downloaded to your device Downloads folder.", "EXPORT COMPLETE");
         }
 
         function generatePDF(data) {
             const { jsPDF } = window.jspdf;
-            
             const firstImg = data.images[0];
             let firstOrientation = (firstImg.w > firstImg.h) ? 'landscape' : 'portrait';
-            
             const doc = new jsPDF({ orientation: firstOrientation, unit: 'mm', format: 'a4' });
             
             const activeTheme = localStorage.getItem('appTheme') || 'tactical';
@@ -2113,14 +1926,10 @@
 
             data.images.forEach((imgObj, index) => {
                 let orientation = (imgObj.w > imgObj.h) ? 'landscape' : 'portrait';
-                
-                if (index > 0) {
-                    doc.addPage('a4', orientation);
-                }
+                if (index > 0) doc.addPage('a4', orientation);
 
                 const pageWidth = orientation === 'landscape' ? 297 : 210;
                 const pageHeight = orientation === 'landscape' ? 210 : 297;
-
                 const margin = 10;
                 const borderW = pageWidth - (margin * 2);
                 const borderH = pageHeight - (margin * 2);
@@ -2158,14 +1967,8 @@
                 const safeRatio = safeZoneW / safeZoneH;
                 
                 let finalW, finalH, finalX, finalY;
-                
-                if (imgRatio > safeRatio) {
-                    finalW = safeZoneW;
-                    finalH = safeZoneW / imgRatio;
-                } else {
-                    finalH = safeZoneH;
-                    finalW = safeZoneH * imgRatio;
-                }
+                if (imgRatio > safeRatio) { finalW = safeZoneW; finalH = safeZoneW / imgRatio; } 
+                else { finalH = safeZoneH; finalW = safeZoneH * imgRatio; }
                 
                 finalX = safeZoneX + ((safeZoneW - finalW) / 2);
                 finalY = safeZoneY + ((safeZoneH - finalH) / 2);
@@ -2180,7 +1983,6 @@
                 let textStartY = pageHeight - margin - 14; 
                 
                 doc.setTextColor(0, 0, 0); 
-                
                 doc.setFont("helvetica", "bold");
                 doc.setFontSize(11);
                 doc.text(`${data.tsId} | ${data.def}  ${data.comp}`, textStartX, textStartY);
@@ -2200,8 +2002,7 @@
                 doc.text(`PAGE ${index + 1} OF ${data.images.length}`, rightAlignX, textStartY, { align: "right" });
             });
 
-            const cleanComp = data.comp ? data.comp.replace(/[^a-z0-9]/gi, '_') : 'UNKNOWN';
-            doc.save(`${data.tsId}_${cleanComp}_DEFECT.pdf`);
+            return doc.output('blob'); // RETURNS A BLOB INSTEAD OF SAVING AUTOMATICALLY
         }
     </script>
 </body>
