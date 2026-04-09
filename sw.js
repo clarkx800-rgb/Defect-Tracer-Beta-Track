@@ -1,53 +1,2316 @@
-// Change version number to force users' phones to update!
-const CACHE_NAME = 'defect-tracker-v2-prod-2.0.88'; 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Defect Tracer V2</title>
 
-const ASSETS_TO_CACHE = [
-  './',
-  './index.html',
-  './db_expo.js',         // <-- NEW
-  './db_millennium.js',   // <-- NEW
-  './db_evergreen.js',    // <-- NEW
-  './themes.js',
-  './instructions.js',
-  './manifest.json',
-  './icon.png',
-  './exceljs.min.js',
-  './jspdf.umd.min.js'
-];
+    <link rel="icon" type="image/png" href="icon.png">
+    <link rel="manifest" href="manifest.json">
+    <meta id="themeColorMeta" name="theme-color" content="#1a1a1a">
+    
+    <link rel="apple-touch-icon" href="icon.png">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-status-bar-style" content="black-translucent">
 
-// 1. Install Event: Cache the new files
-self.addEventListener('install', event => {
-  self.skipWaiting(); // Forces the new service worker to take over immediately
-  event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => {
-      console.log('Caching offline assets');
-      return cache.addAll(ASSETS_TO_CACHE);
-    })
-  );
-});
+    <script src="db_expo.js"></script>
+    <script src="db_millennium.js"></script>
+    <script src="db_evergreen.js"></script>
+    <script src="themes.js"></script> 
+    <script src="instructions.js"></script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
-// 2. Activate Event: Delete the old files!
-self.addEventListener('activate', event => {
-  event.waitUntil(
-    caches.keys().then(cacheNames => {
-      return Promise.all(
-        cacheNames.map(cacheName => {
-          // If the cache name doesn't match our current version, delete it
-          if (cacheName !== CACHE_NAME) {
-            console.log('Deleting old cache:', cacheName);
-            return caches.delete(cacheName);
-          }
-        })
-      );
-    }).then(() => self.clients.claim()) // Take control of all open tabs immediately
-  );
-});
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js').catch(err => console.log('SW fail:', err));
+            });
+        }
+        
+        function applySavedSettings() {
+            const savedTheme = localStorage.getItem('appTheme') || 'tactical';
+            const savedFont = localStorage.getItem('appFontSize') || 'small';
+            
+            const themeData = systemThemes[savedTheme];
+            const fontData = systemFonts[savedFont];
+            
+            const root = document.documentElement;
+            for (let key in themeData) root.style.setProperty(key, themeData[key]);
+            for (let key in fontData) root.style.setProperty(key, fontData[key]);
+            
+            document.getElementById('themeColorMeta').setAttribute('content', themeData['--theme-color-meta']);
+        }
+        applySavedSettings();
+    </script>
+    
+    <style>
+        :root {
+            --primary: #8bc34a; 
+            --primary-dark: #33691e;
+            --danger: #d32f2f; 
+            --success: #4caf50;
+            --warning: #ffb300; 
+            --bg-color: #0d0d0d; 
+            --card-bg: #1a1a1a; 
+            --input-bg: #111111;
+            --text-color: #e0e0e0;
+            --text-muted: #888888;
+            --border-color: #333333;
+            --hud-glow: 0 0 8px rgba(139, 195, 74, 0.4);
+            --border-radius: 2px;
+            
+            --base-font: 13px;
+            --header-font: 16px;
+            --map-font: 15px;
+            --btn-font: 14px;
+            --map-width: 80px; 
+        }
 
-// 3. Fetch Event: Serve from cache, but fall back to network
-self.addEventListener('fetch', event => {
-  event.respondWith(
-    caches.match(event.request).then(response => {
-      return response || fetch(event.request);
-    })
-  );
-});
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0; 
+            box-sizing: border-box;
+            text-transform: uppercase; 
+            -webkit-font-smoothing: antialiased; 
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        * { border-radius: var(--border-radius) !important; }
+
+        .sticky-header {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background-color: var(--card-bg);
+            padding: 10px 15px;
+            border-bottom: 2px solid var(--primary);
+            box-shadow: var(--hud-glow); 
+            will-change: transform;
+            transition: background-color 0.3s ease;
+        }
+
+        .header-top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center; 
+            flex-wrap: nowrap; 
+            gap: 12px;
+        }
+        
+        .header-title-container {
+            flex: 1;
+            min-width: 0; 
+            position: relative; 
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        #active-area-display {
+            font-size: var(--base-font);
+            padding: 4px 10px;
+            font-weight: bold;
+            text-transform: uppercase;
+            border: 1px solid transparent;
+            display: inline-block;
+            margin: 0;
+        }
+        #active-area-display:empty { display: none; }
+
+        .sts-header-btn {
+            background-color: var(--input-bg);
+            border: 1px solid var(--primary);
+            color: var(--text-color);
+            padding: 4px 10px;
+            font-family: inherit;
+            font-size: var(--base-font);
+            font-weight: bold;
+            letter-spacing: 1px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            text-transform: uppercase;
+            transition: background-color 0.2s ease;
+            box-shadow: var(--hud-glow);
+            word-wrap: break-word;
+            white-space: normal;
+            text-align: left;
+            margin: 0;
+        }
+        .sts-header-btn:active { background-color: var(--border-color); }
+        .sts-header-btn span#active-route-display { color: var(--text-color); display: flex; align-items: center; }
+
+        .sts-shortcut-menu {
+            position: absolute;
+            top: 100%; 
+            left: 0;
+            background: var(--bg-color);
+            border: 1px solid var(--primary);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.9), var(--hud-glow);
+            z-index: 1002;
+            padding: 5px;
+            display: none;
+            flex-direction: column;
+            gap: 5px;
+            max-height: 350px;
+            overflow-y: auto;
+            width: 100%;
+            margin-top: 10px;
+        }
+        .sts-menu-item {
+            padding: 12px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            cursor: pointer;
+            font-size: var(--base-font);
+            font-weight: bold;
+            text-align: left;
+            letter-spacing: 1px;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+        }
+        .sts-menu-item:active { background: var(--primary-dark); border-color: var(--primary); color: #fff;}
+
+        .search-input-wrapper {
+            display: flex;
+            align-items: center;
+            background: var(--input-bg);
+            border: 1px solid var(--primary);
+            flex: 1;
+            padding: 0 10px;
+            box-shadow: var(--hud-glow);
+        }
+        .search-prefix {
+            color: var(--primary);
+            font-weight: bold;
+            font-size: var(--base-font);
+            letter-spacing: 1px;
+        }
+        #quickTsSearchInput, #cloneTsInput {
+            background: transparent !important;
+            border: none !important;
+            color: var(--text-color) !important;
+            font-size: var(--base-font);
+            font-weight: bold;
+            flex: 1;
+            padding: 12px 5px;
+            outline: none;
+            box-shadow: none !important;
+            width: 100%;
+            -webkit-appearance: none;
+        }
+
+        .menu-toggle-btn {
+            background-color: var(--card-bg);
+            color: var(--text-color); 
+            border: 1px solid var(--border-color);
+            width: 42px; 
+            height: 42px; 
+            cursor: pointer;
+            display: flex;       
+            align-items: center; 
+            justify-content: center;
+            flex-shrink: 0; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            padding: 0;
+            transition: background-color 0.2s ease;
+        }
+        .menu-toggle-btn:active { background-color: var(--border-color); }
+        .menu-toggle-icon { font-size: 20px; font-family: sans-serif; line-height: 1; pointer-events: none; }
+
+        #collapsible-menu {
+            overflow: hidden;
+            transition: max-height 0.3s ease-out, opacity 0.3s ease-out, margin-top 0.3s ease-out;
+            will-change: max-height, opacity; 
+        }
+        #collapsible-menu.expanded { max-height: 1200px; opacity: 1; margin-top: 15px; }
+        #collapsible-menu.collapsed { max-height: 0; opacity: 0; margin-top: 0; }
+
+        .control-panel {
+            background: var(--card-bg);
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            transition: background-color 0.3s ease;
+        }
+
+        .control-panel label { font-size: var(--base-font); letter-spacing: 1px; color: var(--text-muted); margin-top: 5px; }
+        .input-group { display: flex; gap: 8px; }
+        
+        /* SHARED INPUT STYLES */
+        select, .segment-notes, .custom-comp, .custom-def {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid var(--border-color) !important;
+            font-size: var(--base-font); 
+            background-color: var(--input-bg) !important;
+            color: var(--text-color) !important;
+            text-transform: uppercase;
+            font-family: inherit;
+            appearance: none; 
+            transition: background-color 0.3s ease;
+        }
+        select:focus, .segment-notes:focus, .custom-comp:focus, .custom-def:focus {
+            outline: none;
+            border-color: var(--primary) !important;
+            box-shadow: var(--hud-glow);
+        }
+        select:disabled { background-color: var(--border-color) !important; color: var(--text-muted) !important; cursor: not-allowed; }
+        
+        .custom-comp, .custom-def { flex: 1 1 35%; min-width: 100px; }
+
+        .action-buttons { display: flex; gap: 8px; margin-top: 5px; }
+        .save-load-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 5px; }
+
+        button {
+            padding: 12px;
+            border: 1px solid transparent;
+            font-size: var(--btn-font);
+            font-weight: bold;
+            letter-spacing: 1px;
+            color: white;
+            cursor: pointer;
+            touch-action: manipulation;
+            font-family: inherit;
+        }
+
+        .btn-primary { background-color: var(--primary-dark); color: #fff; border-color: var(--primary); flex: 2; }
+        .btn-success { background-color: var(--success); color: #fff; width: 100%; margin-bottom: 5px;}
+        .btn-warning { background-color: var(--warning); color: #000; }
+        .btn-info { background-color: #01579b; color: #fff; border-color: #29b6f6; }
+        .btn-danger { background-color: transparent; color: var(--danger); border-color: var(--danger); }
+        .btn-danger:active { background-color: var(--danger); color: #fff; }
+        .btn-outline { background-color: transparent; color: var(--primary); border: 1px solid var(--primary); flex: 1; }
+        
+        .revert-btn { border: 1px solid var(--warning); color: var(--warning); flex: 0 1 auto;}
+        .revert-btn:active { background-color: var(--warning); color: #000; }
+
+        .app-layout { display: flex; align-items: flex-start; gap: 10px; padding: 15px 15px 30px 10px; }
+
+        .mini-map-container {
+            position: sticky;
+            top: 90px; 
+            width: var(--map-width);
+            max-height: calc(100vh - 105px);
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            scrollbar-width: none; 
+            -ms-overflow-style: none;
+            padding-bottom: 90px; 
+            scroll-behavior: smooth; 
+        }
+        .mini-map-container::-webkit-scrollbar { display: none; }
+
+        .map-item {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            padding: 10px 0;
+            text-align: center;
+            font-weight: bold;
+            font-size: var(--map-font);
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            user-select: none;
+            will-change: transform, background-color;
+            touch-action: pan-y;
+        }
+        
+        .map-item:active { transform: scale(0.9); }
+        .map-item.has-data { background-color: var(--primary-dark); color: #fff; border-color: var(--primary-dark); }
+        .map-item.active-map { background: var(--primary); color: #fff; border-color: var(--primary-dark) !important; box-shadow: var(--hud-glow);}
+        .map-item.active-map.has-data { background-color: var(--warning); color: #000; border-color: var(--danger) !important;}
+
+        #segments-container { flex: 1; display: flex; flex-direction: column; gap: 15px; min-width: 0; padding-bottom: 90px; }
+
+        @keyframes cascadingFadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes searchFlash {
+            0%   { box-shadow: var(--hud-glow); border-color: var(--border-color); }
+            20%  { box-shadow: 0 0 20px 4px var(--primary); border-color: var(--primary); }
+            40%  { box-shadow: var(--hud-glow); border-color: var(--border-color); }
+            60%  { box-shadow: 0 0 20px 4px var(--primary); border-color: var(--primary); }
+            80%  { box-shadow: var(--hud-glow); border-color: var(--border-color); }
+            100% { box-shadow: var(--hud-glow); border-color: var(--border-color); }
+        }
+        .search-highlight {
+            animation: searchFlash 1.2s ease-in-out !important;
+            opacity: 1 !important; 
+            transform: translateY(0) !important;
+        }
+
+        .segment-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            padding: 15px;
+            position: relative;
+            opacity: 1; 
+            transform: translateY(0);
+            animation: cascadingFadeIn 0.3s ease-out; 
+            scroll-margin-top: 150px; 
+            will-change: opacity, transform, border-color, box-shadow;
+            transition: background-color 0.3s ease;
+            box-shadow: var(--hud-glow);
+        }
+
+        .segment-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; margin-bottom: 10px; }
+        .segment-header h3 { margin: 0; color: var(--primary); font-size: var(--header-font); letter-spacing: 2px;}
+        .segment-header-badges { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+        
+        .direction-badge { font-size: var(--base-font); font-weight: bold; color: var(--text-color); background: var(--input-bg); padding: 4px 8px; border: 1px solid var(--border-color);}
+
+        .segment-notes {
+            width: 100%; 
+            display: block; 
+            margin-bottom: 15px;
+            box-sizing: border-box; 
+            resize: vertical;
+            min-height: 60px;
+        }
+
+        .defect-list { display: flex; flex-direction: column; gap: 12px; }
+        .defect-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; background: var(--input-bg); padding: 10px; border: 1px solid var(--border-color); }
+
+        .photo-wrapper { display: flex; align-items: stretch; gap: 8px; flex: 1 1 100%; justify-content: space-between; background: var(--card-bg); padding: 5px; border: 1px solid var(--border-color); }
+        .file-input { display: none; }
+        .camera-btn { background-color: var(--border-color); color: var(--text-color); padding: 10px 12px; font-size: var(--base-font); font-weight: bold; cursor: pointer; text-align: center; border: 1px solid var(--border-color); flex: 0 1 auto; transition: background-color 0.2s; display: flex; align-items: center; justify-content: center;}
+        .camera-btn:active { background-color: var(--primary); color: white;}
+        
+        .status-badge-container { flex: 1; display: flex; align-items: center;}
+        .photo-status-badge { 
+            background: var(--primary-dark); color: #fff; padding: 8px 10px; cursor: pointer; 
+            font-size: var(--base-font); font-weight: bold; flex: 1; text-align: center; 
+            border: 1px solid var(--primary); transition: background 0.2s; box-shadow: var(--hud-glow);
+            display: flex; align-items: center; justify-content: center; height: 100%; box-sizing: border-box;
+        }
+        .photo-status-badge:active { background: var(--primary); }
+        
+        /* CLONE ENGINE BUTTON */
+        .clone-btn {
+            background-color: transparent; 
+            color: #0A84FF; 
+            border: 1px solid #0A84FF; 
+            width: 40px; 
+            font-size: 18px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            padding: 0; 
+            flex-shrink: 0;
+            transition: all 0.2s;
+        }
+        .clone-btn:active { background-color: #0A84FF; color: #fff; }
+
+        .delete-btn { 
+            background-color: transparent; 
+            color: var(--danger); 
+            border: 1px solid var(--danger); 
+            width: 40px; 
+            font-size: 18px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            padding: 0; 
+            flex-shrink: 0;
+            transition: all 0.2s;
+        }
+        .delete-btn:active { background-color: var(--danger); color: #fff; }
+
+        .add-defect-btn { background-color: transparent; color: var(--text-muted); border: 1px dashed var(--text-muted); margin-top: 10px; width: 100%; transition: all 0.2s;}
+        .add-defect-btn:active { border-color: var(--primary); color: var(--primary); }
+
+        /* COMMAND BAR SHEATH (GLIDING EXPANSION) */
+        .command-bar {
+            position: fixed;
+            bottom: 20px;
+            /* Expanded State: Dead Center */
+            left: 50%;
+            transform: translateX(-50%); 
+            display: flex;
+            align-items: center;
+            background-color: var(--card-bg);
+            border: 2px solid var(--primary);
+            border-radius: 28px; 
+            height: 56px; 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.8), var(--hud-glow);
+            z-index: 980; 
+            overflow: hidden;
+            /* Animate all properties so it glides smoothly from left to center while expanding */
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            width: 440px; 
+            max-width: 95vw; 
+            white-space: nowrap;
+        }
+        
+        .command-bar.collapsed {
+            width: 56px; 
+            /* Collapsed State: Tucked in the bottom left corner */
+            left: 20px;
+            transform: translateX(0);
+        }
+        
+        .command-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-color); 
+            width: 56px;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+            padding: 0;
+            border-radius: 0 !important;
+            flex-shrink: 0; 
+        }
+        .command-btn:active { background-color: var(--border-color); transform: scale(0.9); }
+        
+        .command-divider {
+            width: 2px;
+            height: 60%;
+            background-color: var(--border-color);
+            flex-shrink: 0;
+        }
+
+        .command-items {
+            display: flex;
+            align-items: center;
+            height: 100%;
+            opacity: 1;
+            transition: opacity 0.2s ease 0.1s;
+            width: calc(100% - 56px); 
+            justify-content: space-evenly; 
+        }
+        
+        .command-bar.collapsed .command-items {
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.1s ease;
+        }
+        
+        #cmdToggleIcon {
+            transition: transform 0.3s ease;
+            pointer-events: none;
+        }
+        .command-bar:not(.collapsed) #cmdToggleIcon {
+            transform: rotate(180deg); 
+        }
+
+        .quick-add-modal {
+            position: fixed;
+            bottom: 85px;
+            left: 50%;
+            transform: translateX(-50%); 
+            width: 280px;
+            background-color: var(--bg-color);
+            border: 1px solid var(--primary);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.9), var(--hud-glow);
+            z-index: 985; 
+            padding: 15px;
+            display: none; 
+            flex-direction: column;
+            gap: 10px;
+            will-change: opacity;
+        }
+        .quick-add-modal h4 { margin: 0 0 5px 0; color: var(--text-color); font-size: var(--base-font); letter-spacing: 1px; border-bottom: 1px solid var(--border-color); padding-bottom: 8px;}
+        
+        .system-modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 9999; display: none; align-items: center; justify-content: center;
+            backdrop-filter: blur(3px);
+        }
+        .system-modal {
+            background: var(--card-bg);
+            border: 1px solid var(--primary);
+            box-shadow: 0 0 20px rgba(0,0,0, 0.3);
+            width: 85%; max-width: 320px;
+            padding: 20px;
+            text-align: center;
+            animation: cascadingFadeIn 0.2s ease-out;
+        }
+        .system-modal-title {
+            color: var(--warning);
+            font-size: var(--header-font);
+            font-weight: bold;
+            margin-bottom: 15px;
+            letter-spacing: 2px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+        }
+        .system-modal-message {
+            color: var(--text-color);
+            font-size: var(--base-font);
+            margin-bottom: 20px;
+            line-height: 1.5;
+            white-space: pre-wrap;
+        }
+        .system-modal-btn-group { display: flex; gap: 10px; }
+
+        .gallery-modal {
+            background: var(--bg-color);
+            border: 1px solid var(--primary);
+            box-shadow: 0 0 25px rgba(0,0,0,0.9), var(--hud-glow);
+            width: 90%; max-width: 500px; max-height: 85vh;
+            display: flex; flex-direction: column;
+            animation: cascadingFadeIn 0.2s ease-out;
+            z-index: 9999;
+        }
+        .gallery-header {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 15px; border-bottom: 1px solid var(--border-color);
+            background: var(--card-bg);
+        }
+        .gallery-header h3 { margin: 0; color: var(--primary); font-size: var(--header-font); letter-spacing: 1px;}
+        .gallery-grid {
+            padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 20px; flex: 1;
+            background: #000; 
+        }
+        .gallery-item {
+            position: relative; border: 1px solid var(--border-color); background: var(--card-bg); padding: 5px;
+        }
+        .gallery-item img { width: 100%; height: auto; display: block; }
+        
+        .remove-img-btn {
+            position: absolute; top: 10px; left: 50%; transform: translateX(-50%);
+            background: var(--danger); color: #fff; border: 2px solid #fff;
+            height: 36px; padding: 0 15px; font-size: var(--base-font); font-weight: bold; letter-spacing: 1px; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; box-shadow: 0 4px 8px rgba(0,0,0,0.8); white-space: nowrap;
+        }
+        .remove-img-btn:active { transform: translateX(-50%) scale(0.9); }
+
+        .help-overlay {
+            position: fixed;
+            left: 0; width: 100%;
+            background: rgba(0, 0, 0, 0.85); 
+            backdrop-filter: blur(4px);
+            z-index: 990; 
+            display: flex;
+            align-items: flex-start; 
+            justify-content: center;
+            padding: 20px;
+            animation: cascadingFadeIn 0.2s ease-out;
+            box-sizing: border-box;
+        }
+        .help-modal {
+            background: var(--card-bg);
+            border: 2px solid var(--primary);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8), var(--hud-glow);
+            width: 100%; max-width: 600px;
+            max-height: 100%; 
+            display: flex;
+            flex-direction: column;
+        }
+        .help-header {
+            display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 2px solid var(--border-color); padding: 15px 20px;
+        }
+        .help-header h3 { color: var(--primary); font-size: var(--header-font); margin: 0; letter-spacing: 2px; }
+        #helpBodyContent {
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        @media (max-width: 600px) { select { flex: 1 1 100%; } }
+    </style>
+</head>
+<body>
+
+    <div class="sticky-header" id="stickyHeader">
+        <div class="header-top-bar">
+            <div class="header-title-container">
+                <span id="active-area-display"></span>
+                <button id="stsDropdownBtn" class="sts-header-btn" onclick="toggleStsMenu(event)" style="display: none;">
+                    <span style="color:var(--text-muted); font-weight:normal; margin-right:4px;">Sub RANGE:</span> 
+                    <span id="active-route-display">AWAITING...</span> 
+                    <span style="font-size:10px; margin-left:6px; color:var(--primary);">▼</span>
+                </button>
+                <div id="stsShortcutMenu" class="sts-shortcut-menu"></div>
+            </div>
+            
+            <div style="display: flex; gap: 8px;">
+                <button class="menu-toggle-btn" onclick="toggleMenu()" id="menuBtn">
+                    <span class="menu-toggle-icon">&#9881;&#xFE0E;</span>
+                </button>
+            </div>
+        </div>
+        
+        <div id="collapsible-menu" class="collapsed">
+            <div class="control-panel" style="margin-bottom: 15px; border-color: var(--primary);">
+                <div style="display: flex; gap: 8px;">
+                    <div style="flex: 1;">
+                        <label for="theme-selector" style="color: var(--primary); font-weight: bold;">UI THEME</label>
+                        <select id="theme-selector" onchange="changeTheme(this.value)">
+                            <option value="tactical">TACTICAL (DARK)</option>
+                            <option value="windows11">WINDOWS 11 (LIGHT)</option>
+                            <option value="pokemongo">FIELD TRAINER (GAME)</option>
+                            <option value="macosdark">MACOS (DARK)</option>
+                        </select>
+                    </div>
+                    <div style="flex: 1;">
+                        <label for="font-selector" style="color: var(--primary); font-weight: bold;">FONT SIZE</label>
+                        <select id="font-selector" onchange="changeFontSize(this.value)">
+                            <option value="small">STANDARD</option>
+                            <option value="medium">MEDIUM</option>
+                            <option value="large">LARGE</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <button id="exportBtn" class="btn-success" onclick="exportData()">📊 EXPORT REPORT (Excel & PDF)</button>
+            
+            <div class="save-load-grid">
+                <button class="btn-warning" onclick="saveProject()">💾 SAVE DATA</button>
+                <button class="btn-info" onclick="document.getElementById('importFile').click()">📂 LOAD DATA</button>
+                <input type="file" id="importFile" accept=".json,application/json" style="position: absolute; width: 0; height: 0; opacity: 0;" onchange="loadProject(event)">
+            </div>
+
+            <div class="control-panel">
+                <label for="general-area">1. SELECT LINE (EX, MI, EV)</label>
+                <div class="input-group">
+                    <select id="general-area" onchange="updateRouteDropdown()">
+                        <option value="">AWAITING INPUT...</option>
+                    </select>
+                </div>
+
+                <label for="page-direction">2. SELECT DIRECTION (IB or OB)</label>
+                <div class="input-group">
+                    <select id="page-direction" onchange="updateRouteDropdown()">
+                        <option value="Inbound Track">INBOUND (IB)</option>
+                        <option value="Outbound Track">OUTBOUND (OB)</option>
+                    </select>
+                </div>
+                
+                <label for="global-section">3. SELECT SUB-TO-SUB </label>
+                <div class="input-group">
+                    <select id="global-section">
+                        <option value="">AWAITING INPUT...</option>
+                    </select>
+                </div>
+                
+                <div class="action-buttons">
+                    <button class="btn-primary" onclick="generateSegments(false)">LOAD AREA</button>
+                    <button class="btn-outline" onclick="flipOrder()">🔃 FLIP DIR</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="helpOverlay" class="help-overlay" style="display: none;">
+        <div class="help-modal">
+            <div class="help-header">
+                <h3>HOW TO USE</h3>
+                <button class="menu-toggle-btn" onclick="toggleHelp(false)" style="width: 32px; height: 32px; border-color: transparent;">
+                    <span class="menu-toggle-icon" style="font-size: 14px;">✖</span>
+                </button>
+            </div>
+            <div id="helpBodyContent">
+                </div>
+        </div>
+    </div>
+
+    <div class="app-layout">
+        <div class="mini-map-container" id="miniMap"></div>
+        <div id="segments-container"></div>
+    </div>
+
+    <div class="command-bar collapsed" id="mainCommandBar">
+        
+        <button class="command-btn" onclick="toggleCommandBar(event)" id="cmdToggleBtn" title="Menu">
+            <svg id="cmdToggleIcon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+        </button>
+        
+        <div class="command-items" id="cmdItems">
+            <div class="command-divider"></div>
+            
+            <div style="display:flex; align-items:center; padding: 0 5px 0 10px; height: 100%;">
+                <span style="font-size: 18px; font-weight:bold; color:var(--primary); margin-right:2px;">TS-</span>
+                <input type="tel" id="pillSearchInput" style="width: 70px; background:transparent; border:none; color:var(--text-color); font-weight:bold; outline:none; font-size:16px; padding:0;" placeholder="(SEARCH)" onkeypress="if(event.key === 'Enter') searchTSFromPill()" onfocus="toggleHelp(false); toggleQuickAddModal(false); closeCloneModal();">
+            </div>
+            <button class="command-btn" onclick="searchTSFromPill()" title="Search" style="width: 40px;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="pointer-events: none;">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+            </button>
+            <div class="command-divider"></div>
+            
+            <div id="quickAddGroup" style="display: none; height: 100%; align-items: center;">
+                <button class="command-btn" id="quickAddBtn" onclick="toggleQuickAddModal(event)" title="Add Route">
+                    <span style="font-size: 28px; font-weight: bold; transform: translateY(-2px); pointer-events: none;">+</span>
+                </button>
+                <div class="command-divider"></div>
+            </div>
+            
+            <button class="command-btn" id="dynamicSaveLoadBtn" title="Command Action">
+                </button>
+            <div class="command-divider"></div>
+            
+            <button class="command-btn" onclick="togglePageScroll()" title="Scroll Page">
+                <svg id="scrollToggleIcon" data-dir="down" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="pointer-events: none; transition: transform 0.3s ease; transform: rotate(180deg);">
+                    <polyline points="18 15 12 9 6 15"></polyline>
+                </svg>
+            </button>
+            <div class="command-divider"></div>
+
+            <button class="command-btn" onclick="toggleHelp(true)" title="Help">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="pointer-events: none;">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                    <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <div class="quick-add-modal" id="quickAddModal">
+        <h4>ADD ROUTE TO: <span id="quick-add-title" style="color: var(--primary);"></span></h4>
+        <select id="quick-add-select" style="width: 100%; margin-bottom: 5px;">
+            <option value="">AWAITING INPUT...</option>
+        </select>
+        <div style="display: flex; gap: 8px;">
+            <button class="btn-primary" style="flex: 1; padding: 10px;" onclick="generateSegments(true)">ADD</button>
+            <button class="btn-outline" style="flex: 1; padding: 10px;" onclick="toggleQuickAddModal(false)">CANCEL</button>
+        </div>
+        <div style="display: flex; gap: 8px; margin-top: 5px;">
+            <button class="btn-danger" style="flex: 1; padding: 10px;" onclick="undoLastLoad()">↺ UNDO LAST</button>
+        </div>
+    </div>
+
+    <div class="quick-add-modal" id="insertModal">
+        <h4>SPLICE SWITCH AFTER TS-<span id="insert-target-ts" style="color: var(--primary);"></span></h4>
+        <select id="insert-route-select" style="width: 100%; margin-bottom: 5px;">
+            <option value="">AWAITING INPUT...</option>
+        </select>
+        <div style="display: flex; gap: 8px; margin-top: 10px;">
+            <button class="btn-primary" style="flex: 1; padding: 10px;" onclick="executeInsert()">INSERT</button>
+            <button class="btn-outline" style="flex: 1; padding: 10px;" onclick="closeInsertModal()">CANCEL</button>
+        </div>
+    </div>
+
+    <div class="quick-add-modal" id="cloneModal">
+        <h4>CLONE DEFECT TO TS:</h4>
+        <div class="search-input-wrapper" style="margin-bottom: 10px;">
+            <span class="search-prefix">TS-</span>
+            <input type="tel" id="cloneTsInput" placeholder="END TS NUMBER..." onkeypress="if(event.key === 'Enter') executeClone()">
+        </div>
+        <div style="display: flex; gap: 8px;">
+            <button class="btn-primary" style="flex: 1; padding: 10px; background-color: #0A84FF; border-color: #0A84FF;" onclick="executeClone()">CLONE</button>
+            <button class="btn-outline" style="flex: 1; padding: 10px;" onclick="closeCloneModal()">CANCEL</button>
+        </div>
+    </div>
+
+    <div class="system-modal-overlay" id="systemModalOverlay">
+        <div class="system-modal">
+            <div class="system-modal-title" id="systemModalTitle">SYSTEM ALERT</div>
+            <div class="system-modal-message" id="systemModalMessage">Message goes here</div>
+            <div class="system-modal-btn-group" id="systemModalBtnGroup">
+                <button class="btn-primary" style="width: 100%;" onclick="closeSystemModal()">ACKNOWLEDGE</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="system-modal-overlay" id="galleryModalOverlay">
+        <div class="gallery-modal">
+            <div class="gallery-header">
+                <h3 id="galleryTitle">ATTACHED PHOTOS</h3>
+                <button class="menu-toggle-btn" onclick="closeGallery()" style="width: 32px; height: 32px;">
+                    <span class="menu-toggle-icon" style="font-size: 14px;">✖</span>
+                </button>
+            </div>
+            <div class="gallery-grid" id="galleryGrid"></div>
+        </div>
+    </div>
+
+    <script>
+        let currentFileName = null;
+        let loadedRoutes = new Set();
+        let routeLoadHistory = []; 
+        let currentActiveArea = "";
+        let currentActiveDirection = "";
+        let isAutoScrolling = false;
+        let currentRowForGallery = null; 
+        let currentInsertTargetTS = null;
+        let currentRowToClone = null; 
+        let confirmResolve = null;
+
+        const iconLoad = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="pointer-events: none;"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>`;
+        const iconSave = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="pointer-events: none;"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>`;
+
+        // TACTICAL SCROLL ENGINE
+        let isPageScrolling = false;
+        function togglePageScroll() {
+            const btnIcon = document.getElementById('scrollToggleIcon');
+            const dir = btnIcon.dataset.dir || 'down'; 
+            const maxScroll = Math.max(document.body.scrollHeight, document.body.offsetHeight, document.documentElement.clientHeight, document.documentElement.scrollHeight, document.documentElement.offsetHeight) - window.innerHeight;
+            if (dir === 'up') doSmoothScroll(0, 800); 
+            else doSmoothScroll(maxScroll, 800);
+        }
+
+        function doSmoothScroll(targetY, duration) {
+            isPageScrolling = true;
+            const startY = window.scrollY;
+            const diff = targetY - startY;
+            let startTime = null;
+            function step(timestamp) {
+                if (!isPageScrolling) return; 
+                if (!startTime) startTime = timestamp;
+                const time = timestamp - startTime;
+                let percent = Math.min(time / duration, 1);
+                percent = percent < 0.5 ? 2 * percent * percent : -1 + (4 - 2 * percent) * percent;
+                window.scrollTo(0, startY + diff * percent);
+                if (time < duration) requestAnimationFrame(step);
+                else isPageScrolling = false;
+            }
+            requestAnimationFrame(step);
+        }
+        
+        ['touchstart', 'mousedown', 'wheel'].forEach(evt => { window.addEventListener(evt, () => { if (isPageScrolling) isPageScrolling = false; }, { passive: true }); });
+
+        window.addEventListener('scroll', () => {
+            const btnIcon = document.getElementById('scrollToggleIcon');
+            if (!btnIcon) return;
+            if (window.scrollY < 100) { btnIcon.style.transform = 'rotate(180deg)'; btnIcon.dataset.dir = 'down'; } 
+            else { btnIcon.style.transform = 'rotate(0deg)'; btnIcon.dataset.dir = 'up'; }
+        }, { passive: true });
+
+        // HIGHLANDER RULE MUTUALLY EXCLUSIVE TOGGLE LOGIC
+        function toggleCommandBar(e) {
+            if (e) e.stopPropagation();
+            const bar = document.getElementById('mainCommandBar');
+            if (bar.classList.contains('collapsed')) {
+                bar.classList.remove('collapsed');
+                toggleHelp(false); 
+                closeCloneModal();
+            } else {
+                bar.classList.add('collapsed');
+                toggleQuickAddModal(false); 
+            }
+        }
+
+        function updateCommandBar() {
+            const btn = document.getElementById('dynamicSaveLoadBtn');
+            if (loadedRoutes.size === 0) {
+                btn.innerHTML = iconLoad;
+                btn.onclick = () => { document.getElementById('importFile').click(); toggleCommandBar(); };
+            } else {
+                btn.innerHTML = iconSave;
+                btn.onclick = () => saveProject();
+            }
+        }
+
+        function toggleHelp(forceShow = null) {
+            const overlay = document.getElementById('helpOverlay');
+            const header = document.getElementById('stickyHeader');
+            const shouldShow = forceShow !== null ? forceShow : overlay.style.display === 'none';
+            if (shouldShow) {
+                const headerHeight = header.offsetHeight;
+                overlay.style.top = `${headerHeight}px`;
+                overlay.style.height = `calc(100vh - ${headerHeight}px - 85px)`; 
+                document.getElementById('helpBodyContent').innerHTML = systemInstructions;
+                overlay.style.display = 'flex';
+                if (document.getElementById('collapsible-menu').classList.contains('expanded')) toggleMenu(true);
+                document.getElementById('mainCommandBar').classList.add('collapsed');
+                toggleQuickAddModal(false);
+                closeCloneModal();
+            } else {
+                overlay.style.display = 'none';
+            }
+        }
+
+        // CLONE ENGINE
+        function openCloneModal(row) {
+            currentRowToClone = row;
+            document.getElementById('cloneTsInput').value = '';
+            document.getElementById('cloneModal').style.display = 'flex';
+            toggleMenu(true);
+            toggleQuickAddModal(false);
+            toggleHelp(false);
+            document.getElementById('mainCommandBar').classList.add('collapsed');
+            
+            setTimeout(() => document.getElementById('cloneTsInput').focus(), 100);
+        }
+
+        function closeCloneModal() {
+            document.getElementById('cloneModal').style.display = 'none';
+            currentRowToClone = null;
+        }
+
+        function executeClone() {
+            if (!currentRowToClone) return;
+            const targetTS = document.getElementById('cloneTsInput').value.trim();
+            
+            document.getElementById('cloneTsInput').blur(); // Close keyboard
+
+            if (!targetTS) { closeCloneModal(); return; }
+
+            const startCard = currentRowToClone.closest('.segment-card');
+            const endCard = document.querySelector(`.segment-card[data-segment="${targetTS}"]`);
+
+            if (!endCard) {
+                showSystemAlert(`Cannot find TS-${targetTS} in the current workspace. Please ensure it is loaded.`, "CLONE ERROR", true);
+                return;
+            }
+
+            const isCustom = currentRowToClone.dataset.isCustom === "true";
+            const comp = isCustom ? currentRowToClone.querySelector('.custom-comp').value : currentRowToClone.querySelector('.component-select').value;
+            const def = isCustom ? currentRowToClone.querySelector('.custom-def').value : currentRowToClone.querySelector('.defect-select').value;
+            const images = JSON.parse(currentRowToClone.dataset.images || "[]");
+
+            if (!comp && !def && images.length === 0) {
+                showSystemAlert("This row is entirely empty. There is no data to clone.", "CLONE ERROR", true);
+                closeCloneModal();
+                return;
+            }
+
+            const allCards = Array.from(document.querySelectorAll('.segment-card'));
+            const startIdx = allCards.indexOf(startCard);
+            const endIdx = allCards.indexOf(endCard);
+            const minIdx = Math.min(startIdx, endIdx);
+            const maxIdx = Math.max(startIdx, endIdx);
+            
+            let clonedCount = 0;
+
+            for (let i = minIdx; i <= maxIdx; i++) {
+                if (i === startIdx) continue; 
+
+                const targetCard = allCards[i];
+                const areaName = targetCard.getAttribute('data-area-name');
+                const defectList = targetCard.querySelector('.defect-list');
+
+                const existingRows = defectList.querySelectorAll('.defect-row');
+                if (existingRows.length === 1) {
+                    const r = existingRows[0];
+                    const rIsCustom = r.dataset.isCustom === "true";
+                    const rComp = rIsCustom ? r.querySelector('.custom-comp').value : r.querySelector('.component-select').value;
+                    const rDef = rIsCustom ? r.querySelector('.custom-def').value : r.querySelector('.defect-select').value;
+                    const rImgs = JSON.parse(r.dataset.images || "[]");
+                    
+                    if (!rComp && !rDef && rImgs.length === 0) {
+                        r.remove();
+                    }
+                }
+
+                addDefectRow(defectList, { isCustom, comp, def, images }, areaName);
+                checkSegmentData(targetCard);
+                clonedCount++;
+            }
+
+            closeCloneModal();
+            showSystemAlert(`Successfully cloned defect payload to ${clonedCount} track sections.`, "CLONE COMPLETE");
+        }
+
+        function showSystemAlert(message, title = "SYSTEM NOTICE", isDanger = false) {
+            document.getElementById('systemModalTitle').textContent = title;
+            document.getElementById('systemModalTitle').style.color = isDanger ? "var(--danger)" : "var(--primary)";
+            document.getElementById('systemModalTitle').style.borderColor = isDanger ? "var(--danger)" : "var(--primary)";
+            document.getElementById('systemModalMessage').textContent = message;
+            document.getElementById('systemModalBtnGroup').innerHTML = `<button class="btn-primary" style="width: 100%;" onclick="closeSystemModal()">ACKNOWLEDGE</button>`;
+            document.getElementById('systemModalOverlay').style.display = 'flex';
+        }
+
+        function showSystemConfirm(message, title = "SYSTEM WARNING") {
+            return new Promise((resolve) => {
+                document.getElementById('systemModalTitle').textContent = title;
+                document.getElementById('systemModalTitle').style.color = "var(--warning)";
+                document.getElementById('systemModalTitle').style.borderColor = "var(--warning)";
+                document.getElementById('systemModalMessage').textContent = message;
+                document.getElementById('systemModalBtnGroup').innerHTML = `<button class="btn-danger" style="flex: 1;" onclick="resolveSystemConfirm(true)">PROCEED</button><button class="btn-outline" style="flex: 1;" onclick="resolveSystemConfirm(false)">CANCEL</button>`;
+                confirmResolve = resolve;
+                document.getElementById('systemModalOverlay').style.display = 'flex';
+            });
+        }
+
+        function resolveSystemConfirm(result) { closeSystemModal(); if (confirmResolve) confirmResolve(result); }
+        function closeSystemModal() { document.getElementById('systemModalOverlay').style.display = 'none'; }
+
+        window.addEventListener('beforeunload', function (e) {
+            const cards = document.querySelectorAll('.segment-card');
+            if (cards.length > 0) { e.preventDefault(); e.returnValue = 'Data loss imminent. Are you sure you want to cancel?'; }
+        });
+
+        window.history.pushState({ isAppOpen: true }, "", "");
+        window.addEventListener('popstate', function(event) {
+            const cards = document.querySelectorAll('.segment-card');
+            if (cards.length > 0) {
+                window.history.pushState({ isAppOpen: true }, "", "");
+                showSystemConfirm("WARNING: Using the system back button will exit the app and delete unsaved data.\n\nAre you sure you want to exit?", "DATA LOSS IMMINENT").then(proceed => {
+                    if (proceed) window.history.go(-2); 
+                });
+            } else {
+                window.history.back();
+            }
+        });
+
+        function updatePhotoUI(row, cameraBtn, badgeContainer) {
+            const images = JSON.parse(row.dataset.images || "[]");
+            if (images.length === 0) {
+                cameraBtn.innerHTML = '📷 PHOTO';
+                cameraBtn.style.backgroundColor = 'var(--border-color)';
+                cameraBtn.style.color = 'var(--text-color)';
+                badgeContainer.innerHTML = ''; 
+            } else {
+                cameraBtn.innerHTML = '➕ ADD';
+                cameraBtn.style.backgroundColor = 'var(--success)';
+                cameraBtn.style.color = '#fff';
+                badgeContainer.innerHTML = `<div class="photo-status-badge" onclick="openGallery(this.closest('.defect-row'))">${images.length} ATTACHED (VIEW)</div>`;
+            }
+        }
+
+        function openGallery(row) {
+            currentRowForGallery = row;
+            const images = JSON.parse(row.dataset.images || "[]");
+            const grid = document.getElementById('galleryGrid');
+            grid.innerHTML = ''; 
+            images.forEach((imgObj, index) => {
+                const item = document.createElement('div');
+                item.className = 'gallery-item';
+                const img = document.createElement('img');
+                img.src = imgObj.img;
+                const delBtn = document.createElement('button');
+                delBtn.className = 'remove-img-btn';
+                delBtn.innerHTML = 'REMOVE PIC';
+                delBtn.onclick = () => removeImageFromGallery(index);
+                item.appendChild(img);
+                item.appendChild(delBtn);
+                grid.appendChild(item);
+            });
+            document.getElementById('galleryModalOverlay').style.display = 'flex';
+        }
+
+        function removeImageFromGallery(indexToRemove) {
+            if (!currentRowForGallery) return;
+            let images = JSON.parse(currentRowForGallery.dataset.images || "[]");
+            images.splice(indexToRemove, 1); 
+            currentRowForGallery.dataset.images = JSON.stringify(images); 
+            const wrapper = currentRowForGallery.querySelector('.photo-wrapper');
+            const cameraBtn = wrapper.querySelector('.camera-btn');
+            const badgeContainer = wrapper.querySelector('.status-badge-container');
+            updatePhotoUI(currentRowForGallery, cameraBtn, badgeContainer);
+            checkSegmentData(currentRowForGallery.closest('.segment-card'));
+
+            if (images.length === 0) closeGallery();
+            else openGallery(currentRowForGallery); 
+        }
+
+        function closeGallery() {
+            document.getElementById('galleryModalOverlay').style.display = 'none';
+            currentRowForGallery = null;
+        }
+
+        function changeTheme(themeName) {
+            localStorage.setItem('appTheme', themeName);
+            applySavedSettings(); 
+        }
+
+        function changeFontSize(sizeName) {
+            localStorage.setItem('appFontSize', sizeName);
+            applySavedSettings(); 
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('theme-selector').value = localStorage.getItem('appTheme') || 'tactical';
+            document.getElementById('font-selector').value = localStorage.getItem('appFontSize') || 'small';
+            
+            const areaSelect = document.getElementById('general-area');
+            for (let area in window.globalDatabase) {
+                let opt = document.createElement('option');
+                opt.value = area;
+                opt.textContent = area;
+                areaSelect.appendChild(opt);
+            }
+            if (loadedRoutes.size === 0) toggleHelp(true);
+            updateCommandBar(); 
+        });
+
+        // GLOBAL CLICK DETECTOR (AUTO HIDE ENGINE)
+        document.addEventListener('click', (e) => {
+            const menu = document.getElementById('collapsible-menu');
+            const fabModal = document.getElementById('quickAddModal');
+            const stsMenu = document.getElementById('stsShortcutMenu');
+            const insertModal = document.getElementById('insertModal');
+            const cloneModal = document.getElementById('cloneModal');
+            const menuBtn = document.getElementById('menuBtn');
+            const stsBtn = document.getElementById('stsDropdownBtn');
+            const helpOverlay = document.getElementById('helpOverlay');
+            const cmdBar = document.getElementById('mainCommandBar');
+
+            if (!menu.contains(e.target) && !menuBtn.contains(e.target) && menu.classList.contains('expanded')) toggleMenu(true);
+            if (stsMenu && stsBtn && !stsMenu.contains(e.target) && !stsBtn.contains(e.target) && stsMenu.style.display === 'flex') stsMenu.style.display = 'none';
+            if (insertModal && !insertModal.contains(e.target) && !e.target.closest('.map-item') && insertModal.style.display === 'flex') closeInsertModal();
+            if (cloneModal && !cloneModal.contains(e.target) && !e.target.closest('.clone-btn') && cloneModal.style.display === 'flex') closeCloneModal();
+            if (helpOverlay.style.display === 'flex' && e.target === helpOverlay) toggleHelp(false);
+            
+            // COMMAND BAR OUTSIDE CLICK AUTO-HIDE
+            if (cmdBar && !cmdBar.classList.contains('collapsed') && !cmdBar.contains(e.target) && (!fabModal || !fabModal.contains(e.target))) {
+                cmdBar.classList.add('collapsed');
+                toggleQuickAddModal(false);
+            }
+        });
+
+        function toggleMenu(forceClose = false) {
+            const menu = document.getElementById('collapsible-menu');
+            const btn = document.getElementById('menuBtn');
+            if (forceClose || menu.classList.contains('expanded')) {
+                menu.classList.remove('expanded');
+                menu.classList.add('collapsed');
+                btn.innerHTML = '<span class="menu-toggle-icon">&#9881;&#xFE0E;</span>';
+            } else {
+                menu.classList.remove('collapsed');
+                menu.classList.add('expanded');
+                btn.innerHTML = '<span class="menu-toggle-icon">✖</span>';
+                document.getElementById('stsShortcutMenu').style.display = 'none';
+                closeCloneModal();
+            }
+        }
+
+        // PILL SEARCH ENGINE WITH AUTO-BLUR
+        function searchTSFromPill() {
+            const input = document.getElementById('pillSearchInput');
+            const tsNumber = input.value.trim();
+            if(tsNumber) {
+                input.blur(); 
+                searchTS(tsNumber); 
+                input.value = ''; 
+                document.getElementById('mainCommandBar').classList.add('collapsed');
+            }
+        }
+
+        function searchTS(passedTs = null) {
+            const tsNumber = passedTs;
+            if (!tsNumber) return;
+
+            const targetCard = document.querySelector(`.segment-card[data-segment="${tsNumber}"]`);
+            if (targetCard) {
+                isAutoScrolling = true;
+                scrollToCard(targetCard);
+                const targetMapItem = document.querySelector(`.map-item[data-map-segment="${tsNumber}"]`);
+                if (targetMapItem) {
+                    const mapContainer = document.getElementById('miniMap');
+                    const containerRect = mapContainer.getBoundingClientRect();
+                    const itemRect = targetMapItem.getBoundingClientRect();
+                    mapContainer.scrollTo({ top: mapContainer.scrollTop + (itemRect.top - containerRect.top) - (containerRect.height / 2) + (itemRect.height / 2), behavior: 'smooth' });
+                }
+                setTimeout(() => {
+                    targetCard.classList.add('search-highlight');
+                    setTimeout(() => { targetCard.classList.remove('search-highlight'); }, 1200);
+                }, 500);
+                setTimeout(() => { isAutoScrolling = false; }, 800);
+            } else {
+                showSystemAlert(`Could not find TS-${tsNumber}.\nSub to sub section may have not been loaded.`, "TS MISSING", true);
+            }
+        }
+
+        function toggleStsMenu(e) {
+            if (e) e.stopPropagation();
+            const menu = document.getElementById('stsShortcutMenu');
+            if (menu.style.display === 'flex') {
+                menu.style.display = 'none';
+            } else {
+                populateStsMenu();
+                menu.style.display = 'flex';
+                toggleMenu(true); 
+                toggleQuickAddModal(false); 
+                closeCloneModal();
+            }
+        }
+
+        function populateStsMenu() {
+            const menu = document.getElementById('stsShortcutMenu');
+            menu.innerHTML = '';
+            const cards = document.querySelectorAll('.segment-card');
+            if (cards.length === 0) {
+                menu.innerHTML = '<div style="padding:10px; color:var(--text-muted); font-size:var(--base-font);">NO SECTIONS LOADED</div>';
+                return;
+            }
+            const orderedRoutes = [];
+            cards.forEach(card => {
+                const key = card.getAttribute('data-route-key');
+                const name = card.getAttribute('data-route-name');
+                const color = card.getAttribute('data-color') || 'var(--primary)';
+                if (!orderedRoutes.find(r => r.key === key)) orderedRoutes.push({ key, name, color });
+            });
+            orderedRoutes.forEach((route, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'sts-menu-item';
+                btn.style.display = 'flex';
+                btn.style.alignItems = 'center';
+                btn.innerHTML = `
+                    <span style="display:inline-block; width:12px; height:12px; border-radius:50%; background-color:${route.color}; margin-right:10px; flex-shrink:0; border:1px solid rgba(255,255,255,0.2);"></span>
+                    <span style="color:var(--primary); margin-right:8px;">${index + 1}.</span> 
+                    <span>${route.name}</span>
+                `;
+                btn.onclick = () => jumpToRoute(route.key);
+                menu.appendChild(btn);
+            });
+        }
+
+        function jumpToRoute(routeKey) {
+            isAutoScrolling = true; 
+            const firstCard = document.querySelector(`.segment-card[data-route-key="${routeKey}"]`);
+            if (firstCard) scrollToCard(firstCard);
+            const firstMapItem = document.querySelector(`.map-item[data-route-key="${routeKey}"]`);
+            if (firstMapItem) {
+                const mapContainer = document.getElementById('miniMap');
+                const containerRect = mapContainer.getBoundingClientRect();
+                const itemRect = firstMapItem.getBoundingClientRect();
+                mapContainer.scrollTo({ top: mapContainer.scrollTop + (itemRect.top - containerRect.top) - (containerRect.height / 2) + (itemRect.height / 2), behavior: 'smooth' });
+            }
+            document.getElementById('stsShortcutMenu').style.display = 'none';
+            setTimeout(() => { isAutoScrolling = false; }, 800); 
+        }
+
+        function openInsertModal(tsNumber, baseRouteKey) {
+            currentInsertTargetTS = tsNumber;
+            document.getElementById('insert-target-ts').textContent = tsNumber;
+            updateInsertDropdown(baseRouteKey);
+            document.getElementById('insertModal').style.display = 'flex';
+            toggleMenu(true);
+            toggleQuickAddModal(false);
+            closeCloneModal();
+            document.getElementById('stsShortcutMenu').style.display = 'none';
+            document.getElementById('mainCommandBar').classList.add('collapsed');
+        }
+
+        function closeInsertModal() {
+            document.getElementById('insertModal').style.display = 'none';
+            currentInsertTargetTS = null;
+        }
+
+        function updateInsertDropdown(baseRouteKey) {
+            const dropdown = document.getElementById('insert-route-select');
+            dropdown.innerHTML = '<option value="">AWAITING INPUT...</option>';
+            if (currentActiveArea && currentActiveDirection && window.globalDatabase[currentActiveArea] && window.globalDatabase[currentActiveArea][currentActiveDirection]) {
+                const routes = window.globalDatabase[currentActiveArea][currentActiveDirection];
+                let hasOptions = false;
+                for (let key in routes) {
+                    const routeName = routes[key].name;
+                    const isSwitchOrPocket = key.includes('-X') || key.endsWith('-ST') || routeName.includes('Pocket') || routeName.includes('Cross') || routeName.includes('Spur');
+                    if (!loadedRoutes.has(key) && isSwitchOrPocket) {
+                        let opt = document.createElement('option');
+                        opt.value = key;
+                        opt.textContent = routeName;
+                        dropdown.appendChild(opt);
+                        hasOptions = true;
+                    }
+                }
+                if (!hasOptions) dropdown.innerHTML = '<option value="">ALL SWITCHES LOADED</option>';
+            } else {
+                dropdown.innerHTML = '<option value="">NO AREA LOADED</option>';
+            }
+        }
+
+        function executeInsert() {
+            if (!currentInsertTargetTS) return;
+            const area = currentActiveArea;
+            const direction = currentActiveDirection;
+            const routeKey = document.getElementById('insert-route-select').value;
+            
+            if (!area || !routeKey) { showSystemAlert('Invalid Selection. Ensure Route is selected.', 'SELECTION ERROR', true); return; }
+            if (loadedRoutes.has(routeKey)) { showSystemAlert('This section is already loaded in the workspace.', 'DUPLICATE LOAD'); return; }
+
+            const selectedRouteData = window.globalDatabase[area][direction][routeKey];
+            const container = document.getElementById('segments-container');
+            const mapContainer = document.getElementById('miniMap');
+
+            const newCards = []; 
+            selectedRouteData.segments.forEach(range => {
+                const blockColor = range.color || 'var(--primary)'; 
+                if (range.start <= range.end) { for (let i = range.start; i <= range.end; i++) newCards.push({ num: i, color: blockColor }); } 
+                else { for (let i = range.start; i >= range.end; i--) newCards.push({ num: i, color: blockColor }); }
+            });
+
+            const targetCard = document.querySelector(`.segment-card[data-segment="${currentInsertTargetTS}"]`);
+            const targetMap = document.querySelector(`.map-item[data-map-segment="${currentInsertTargetTS}"]`);
+            const refCard = targetCard ? targetCard.nextSibling : null;
+            const refMap = targetMap ? targetMap.nextSibling : null;
+
+            newCards.forEach((item, index) => {
+                const card = createSegmentCard(item.num, routeKey, selectedRouteData.name, direction, item.color, area);
+                card.style.animationDelay = `${index * 0.05}s`;
+                container.insertBefore(card, refCard);
+                scrollObserver.observe(card);
+
+                const mapBtn = document.createElement('div');
+                mapBtn.className = 'map-item';
+                mapBtn.setAttribute('data-map-segment', item.num);
+                mapBtn.setAttribute('data-route-key', routeKey); 
+                mapBtn.textContent = `TS-${item.num}`;
+                mapBtn.style.borderLeft = `4px solid ${item.color}`;
+                attachMapItemListeners(mapBtn, card, item.num, routeKey);
+                mapContainer.insertBefore(mapBtn, refMap);
+            });
+
+            loadedRoutes.add(routeKey);
+            routeLoadHistory.push(routeKey);
+            closeInsertModal();
+            updateRouteDropdown(); 
+            
+            const firstNewCard = document.querySelector(`.segment-card[data-route-key="${routeKey}"]`);
+            if(firstNewCard) {
+                isAutoScrolling = true;
+                scrollToCard(firstNewCard);
+                firstNewCard.classList.add('search-highlight');
+                setTimeout(() => { firstNewCard.classList.remove('search-highlight'); isAutoScrolling = false; }, 1200);
+            }
+        }
+
+        function attachMapItemListeners(mapBtn, card, itemNum, routeKey) {
+            mapBtn.onclick = () => {
+                isAutoScrolling = true; 
+                scrollToCard(card);
+                setTimeout(() => { isAutoScrolling = false; }, 800);
+            };
+            let pressTimer;
+            const startPress = (e) => {
+                if (e.type === 'mousedown' && e.button !== 0) return; 
+                pressTimer = setTimeout(() => openInsertModal(itemNum, routeKey), 600);
+            };
+            const cancelPress = () => clearTimeout(pressTimer);
+            mapBtn.addEventListener('touchstart', startPress, {passive: true});
+            mapBtn.addEventListener('touchend', cancelPress);
+            mapBtn.addEventListener('touchmove', cancelPress);
+            mapBtn.addEventListener('mousedown', startPress);
+            mapBtn.addEventListener('mouseup', cancelPress);
+            mapBtn.addEventListener('mouseleave', cancelPress);
+            mapBtn.addEventListener('contextmenu', (e) => { e.preventDefault(); openInsertModal(itemNum, routeKey); });
+        }
+
+        function getLineColors(lineName) {
+            const activeTheme = localStorage.getItem('appTheme') || 'tactical';
+            const isLightMode = !['tactical', 'macosdark'].includes(activeTheme);
+            if (!lineName) return { bg: 'transparent', text: 'var(--text-color)', border: 'var(--border-color)' };
+            const name = lineName.toUpperCase();
+            if (name.includes("AREA 1") || name.includes("EXPO")) return { bg: isLightMode ? '#ffc107' : '#3e3000', text: isLightMode ? '#000' : '#ffc107', border: '#ffc107' };
+            if (name.includes("AREA 2") || name.includes("MILLENIUM") || name.includes("MILLENNIUM")) return { bg: isLightMode ? '#3399ff' : '#00254d', text: isLightMode ? '#fff' : '#3399ff', border: '#3399ff' };
+            if (name.includes("AREA 3") || name.includes("EVERGREEN")) return { bg: isLightMode ? '#4caf50' : '#0f3316', text: isLightMode ? '#fff' : '#4caf50', border: '#4caf50' };
+            return { bg: isLightMode ? '#e5e5e5' : '#222', text: isLightMode ? '#000' : '#aaa', border: '#555' };
+        }
+
+        function updateRouteDropdown() {
+            const area = document.getElementById('general-area').value;
+            const direction = document.getElementById('page-direction').value;
+            const dropdown = document.getElementById('global-section');
+            dropdown.innerHTML = '<option value="">AWAITING INPUT...</option>';
+            if (area && direction && window.globalDatabase[area] && window.globalDatabase[area][direction]) {
+                const routes = window.globalDatabase[area][direction];
+                let hasOptions = false;
+                for (let routeKey in routes) {
+                    if (!loadedRoutes.has(routeKey)) {
+                        let opt = document.createElement('option');
+                        opt.value = routeKey;
+                        opt.textContent = routes[routeKey].name;
+                        dropdown.appendChild(opt);
+                        hasOptions = true;
+                    }
+                }
+                if (!hasOptions) dropdown.innerHTML = '<option value="">ALL SECTIONS LOADED</option>';
+            }
+        }
+
+        function updateQuickAddDropdown() {
+            const dropdown = document.getElementById('quick-add-select');
+            dropdown.innerHTML = '<option value="">AWAITING INPUT...</option>';
+            if (currentActiveArea && currentActiveDirection && window.globalDatabase[currentActiveArea] && window.globalDatabase[currentActiveArea][currentActiveDirection]) {
+                const routes = window.globalDatabase[currentActiveArea][currentActiveDirection];
+                let hasOptions = false;
+                for (let routeKey in routes) {
+                    if (!loadedRoutes.has(routeKey)) {
+                        let opt = document.createElement('option');
+                        opt.value = routeKey;
+                        opt.textContent = routes[routeKey].name;
+                        dropdown.appendChild(opt);
+                        hasOptions = true;
+                    }
+                }
+                if (!hasOptions) dropdown.innerHTML = '<option value="">ALL SECTIONS LOADED</option>';
+            }
+        }
+
+        function toggleQuickAddModal(eventOrShow) {
+            const modal = document.getElementById('quickAddModal');
+            let shouldShow;
+            if (eventOrShow === true || eventOrShow === false) {
+                shouldShow = eventOrShow;
+            } else if (eventOrShow && typeof eventOrShow === 'object' && eventOrShow.stopPropagation) {
+                eventOrShow.stopPropagation();
+                shouldShow = modal.style.display !== 'flex'; 
+            } else {
+                shouldShow = modal.style.display !== 'flex';
+            }
+
+            if (shouldShow) {
+                const dirCode = currentActiveDirection === "Inbound Track" ? "IB" : "OB";
+                document.getElementById('quick-add-title').textContent = `${currentActiveArea} [${dirCode}]`;
+                updateQuickAddDropdown();
+                modal.style.display = 'flex';
+                toggleMenu(true); 
+                document.getElementById('stsShortcutMenu').style.display = 'none'; 
+                toggleHelp(false); 
+                closeCloneModal();
+            } else {
+                modal.style.display = 'none';
+            }
+        }
+
+        function checkSegmentData(card) {
+            if (!card) return;
+            const segNum = card.getAttribute('data-segment');
+            let hasData = false;
+            
+            if (card.querySelector('.segment-notes').value.trim() !== '') hasData = true;
+            card.querySelectorAll('.defect-row').forEach(row => {
+                const images = JSON.parse(row.dataset.images || "[]");
+                const isCustom = row.dataset.isCustom === "true";
+                const compVal = isCustom ? row.querySelector('.custom-comp').value : row.querySelector('.component-select').value;
+                const defVal = isCustom ? row.querySelector('.custom-def').value : row.querySelector('.defect-select').value;
+                if (compVal || defVal || images.length > 0) hasData = true;
+            });
+            
+            const mapItem = document.querySelector(`.map-item[data-map-segment="${segNum}"]`);
+            if (mapItem) {
+                if (hasData) mapItem.classList.add('has-data');
+                else mapItem.classList.remove('has-data');
+            }
+        }
+
+        document.getElementById('segments-container').addEventListener('input', (e) => checkSegmentData(e.target.closest('.segment-card')));
+        document.getElementById('segments-container').addEventListener('change', (e) => checkSegmentData(e.target.closest('.segment-card')));
+
+        const scrollObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const segNum = entry.target.getAttribute('data-segment');
+                    const routeName = entry.target.getAttribute('data-route-name');
+                    const areaName = entry.target.getAttribute('data-area-name');
+                    const routeColor = entry.target.getAttribute('data-color') || 'var(--primary)';
+
+                    const routeDisplay = document.getElementById('active-route-display');
+                    const areaDisplay = document.getElementById('active-area-display');
+                    
+                    if (routeName) {
+                        routeDisplay.innerHTML = `<span style="display:inline-block; width:10px; height:10px; border-radius:50%; background-color:${routeColor}; margin-right:6px; border: 1px solid rgba(255,255,255,0.3); vertical-align: middle; margin-bottom: 2px;"></span>${routeName}`;
+                    } else {
+                        routeDisplay.textContent = 'AWAITING...';
+                    }
+                    
+                    if (areaName) {
+                        areaDisplay.textContent = areaName;
+                        areaDisplay.style.display = 'inline-block';
+                        const colors = getLineColors(areaName);
+                        areaDisplay.style.backgroundColor = colors.bg;
+                        areaDisplay.style.color = colors.text;
+                        areaDisplay.style.borderColor = colors.border;
+                        document.getElementById('stsDropdownBtn').style.display = 'inline-flex';
+                    } else {
+                        areaDisplay.style.display = 'none';
+                        document.getElementById('stsDropdownBtn').style.display = 'none';
+                    }
+
+                    document.querySelectorAll('.map-item').forEach(item => item.classList.remove('active-map'));
+                    const activeMapItem = document.querySelector(`.map-item[data-map-segment="${segNum}"]`);
+                    if (activeMapItem) {
+                        activeMapItem.classList.add('active-map');
+                        if (!isAutoScrolling) {
+                            const mapContainer = document.getElementById('miniMap');
+                            const containerRect = mapContainer.getBoundingClientRect();
+                            const itemRect = activeMapItem.getBoundingClientRect();
+                            if (itemRect.top < containerRect.top + 20 || itemRect.bottom > containerRect.bottom - 20) {
+                                mapContainer.scrollTo({ top: mapContainer.scrollTop + (itemRect.top - containerRect.top) - (containerRect.height / 2) + (itemRect.height / 2), behavior: 'smooth' });
+                            }
+                        }
+                    }
+                }
+            });
+        }, { rootMargin: '-120px 0px -60% 0px' }); 
+
+        function scrollToCard(card) {
+            const headerHeight = document.getElementById('stickyHeader').offsetHeight;
+            const elementPosition = card.getBoundingClientRect().top + window.scrollY;
+            window.scrollTo({ top: elementPosition - headerHeight - 15, behavior: "smooth" });
+        }
+
+        function generateSegments(isQuickAdd = false) {
+            let area, direction, routeSelect, selectedRouteKey;
+            if (isQuickAdd) {
+                area = currentActiveArea;
+                direction = currentActiveDirection;
+                routeSelect = document.getElementById('quick-add-select');
+                selectedRouteKey = routeSelect.value;
+            } else {
+                area = document.getElementById('general-area').value;
+                direction = document.getElementById('page-direction').value;
+                routeSelect = document.getElementById('global-section');
+                selectedRouteKey = routeSelect.value;
+            }
+            
+            if (!area || !selectedRouteKey) { showSystemAlert('Invalid Selection. Ensure Area and Block are selected.', 'SELECTION ERROR', true); return; }
+            if (loadedRoutes.has(selectedRouteKey)) { showSystemAlert('This section is already loaded in the workspace.', 'DUPLICATE LOAD'); return; }
+
+            const selectedRouteData = window.globalDatabase[area][direction][selectedRouteKey];
+            const container = document.getElementById('segments-container');
+            const mapContainer = document.getElementById('miniMap');
+
+            toggleHelp(false);
+            const newCards = []; 
+            selectedRouteData.segments.forEach(range => {
+                const blockColor = range.color || 'var(--primary)'; 
+                if (range.start <= range.end) { for (let i = range.start; i <= range.end; i++) newCards.push({ num: i, color: blockColor }); } 
+                else { for (let i = range.start; i >= range.end; i--) newCards.push({ num: i, color: blockColor }); }
+            });
+            
+            newCards.forEach((item, index) => {
+                const card = createSegmentCard(item.num, selectedRouteKey, selectedRouteData.name, direction, item.color, area);
+                card.style.animationDelay = `${index * 0.05}s`;
+                container.appendChild(card);
+                scrollObserver.observe(card);
+
+                const mapBtn = document.createElement('div');
+                mapBtn.className = 'map-item';
+                mapBtn.setAttribute('data-map-segment', item.num);
+                mapBtn.setAttribute('data-route-key', selectedRouteKey); 
+                mapBtn.textContent = `TS-${item.num}`;
+                mapBtn.style.borderLeft = `4px solid ${item.color}`;
+                attachMapItemListeners(mapBtn, card, item.num, selectedRouteKey);
+                mapContainer.appendChild(mapBtn);
+            });
+            
+            loadedRoutes.add(selectedRouteKey);
+            routeLoadHistory.push(selectedRouteKey);
+            currentActiveArea = area;
+            currentActiveDirection = direction;
+            
+            document.getElementById('quickAddGroup').style.display = 'flex';
+            
+            routeSelect.value = '';
+            if (isQuickAdd) { toggleQuickAddModal(false); updateRouteDropdown(); } 
+            else { updateRouteDropdown(); toggleMenu(true); }
+            
+            updateCommandBar();
+            document.getElementById('mainCommandBar').classList.add('collapsed');
+        }
+
+        async function undoLastLoad() {
+            if (routeLoadHistory.length === 0) { showSystemAlert("No actions to undo.", "SYSTEM NOTICE"); return; }
+            const lastRouteKey = routeLoadHistory[routeLoadHistory.length - 1];
+            const cardsToRemove = document.querySelectorAll(`.segment-card[data-route-key="${lastRouteKey}"]`);
+            
+            let hasData = false;
+            let conflictTS = "";
+            let conflictRoute = "";
+
+            cardsToRemove.forEach(card => {
+                if (hasData) return; 
+                if (card.querySelector('.segment-notes').value.trim() !== '') hasData = true;
+                card.querySelectorAll('.defect-row').forEach(row => {
+                    const images = JSON.parse(row.dataset.images || "[]");
+                    const isCustom = row.dataset.isCustom === "true";
+                    const compVal = isCustom ? row.querySelector('.custom-comp').value : row.querySelector('.component-select').value;
+                    const defVal = isCustom ? row.querySelector('.custom-def').value : row.querySelector('.defect-select').value;
+                    if (compVal || defVal || images.length > 0) hasData = true;
+                });
+                if (hasData) { conflictTS = card.getAttribute('data-segment'); conflictRoute = card.getAttribute('data-route-name'); }
+            });
+
+            if (hasData) {
+                const proceed = await showSystemConfirm(`TS-${conflictTS} has data.\n\nUndoing this will erase the "${conflictRoute}" and details.\n\nAre you sure you want to cancel?`);
+                if (!proceed) return; 
+            }
+            
+            routeLoadHistory.pop();
+            cardsToRemove.forEach(el => el.remove());
+            document.querySelectorAll(`.map-item[data-route-key="${lastRouteKey}"]`).forEach(el => el.remove());
+            loadedRoutes.delete(lastRouteKey);
+            
+            if (loadedRoutes.size === 0) {
+                document.getElementById('quickAddGroup').style.display = 'none';
+                currentActiveArea = "";
+                currentActiveDirection = "";
+                document.getElementById('active-area-display').style.display = 'none';
+                document.getElementById('stsDropdownBtn').style.display = 'none';
+                toggleHelp(true);
+            }
+            toggleQuickAddModal(false);
+            updateRouteDropdown();
+            updateCommandBar();
+            document.getElementById('mainCommandBar').classList.add('collapsed');
+        }
+
+        function flipOrder() {
+            const container = document.getElementById('segments-container');
+            const mapContainer = document.getElementById('miniMap');
+            const cards = Array.from(container.children);
+            const mapItems = Array.from(mapContainer.children);
+            if (cards.length === 0) return;
+            cards.reverse();
+            mapItems.reverse();
+            cards.forEach((card, index) => {
+                container.appendChild(card); 
+                card.style.animation = 'none';
+                void card.offsetWidth; 
+                card.style.animation = `cascadingFadeIn 0.3s ease-out ${index * 0.05}s both`;
+            });
+            mapItems.forEach(item => mapContainer.appendChild(item));
+        }
+
+        function createSegmentCard(segmentNum, routeKey, routeText, direction, color = 'var(--primary)', areaName = '') {
+            const card = document.createElement('div');
+            card.className = 'segment-card';
+            card.setAttribute('data-segment', segmentNum);
+            card.setAttribute('data-route-key', routeKey); 
+            card.setAttribute('data-route-name', routeText); 
+            card.setAttribute('data-direction', direction); 
+            card.setAttribute('data-color', color);
+            card.setAttribute('data-area-name', areaName); 
+            card.style.borderLeft = `4px solid ${color}`;
+
+            const colors = getLineColors(areaName);
+            const areaBadge = areaName ? `<span class="direction-badge" style="background-color: ${colors.bg}; color: ${colors.text}; border-color: ${colors.border};">${areaName}</span>` : '';
+
+            card.innerHTML = `
+                <div class="segment-header">
+                    <h3>TS-${segmentNum}</h3>
+                    <div class="segment-header-badges">
+                        ${areaBadge}
+                        <span class="direction-badge">${routeText}</span>
+                    </div>
+                </div>
+                <textarea class="segment-notes" placeholder="INPUT SECTION LOG..."></textarea>
+                <div class="defect-list"></div>
+                <button class="add-defect-btn" onclick="addDefectRow(this.previousElementSibling, null, '${areaName}')">+ ADD DEFECT ROW</button>
+            `;
+            addDefectRow(card.querySelector('.defect-list'), null, areaName);
+            return card;
+        }
+
+        function addDefectRow(container, prefill = null, areaName = '') {
+            const row = document.createElement('div');
+            row.className = 'defect-row';
+            row.dataset.images = "[]"; 
+            row.dataset.isCustom = "false"; 
+
+            const specificDefectMap = window.globalDefectMaps && window.globalDefectMaps[areaName] ? window.globalDefectMaps[areaName] : {};
+            const lineComponents = Object.keys(specificDefectMap);
+
+            const compSelect = document.createElement('select');
+            compSelect.className = 'component-select';
+            const extendedComponents = ['Select Component', ...lineComponents, 'CUSTOM ENTRY...'];
+            extendedComponents.forEach(c => {
+                let opt = document.createElement('option');
+                opt.value = c === 'Select Component' ? '' : c;
+                opt.textContent = c.toUpperCase();
+                compSelect.appendChild(opt);
+            });
+
+            const defSelect = document.createElement('select');
+            defSelect.className = 'defect-select';
+            defSelect.disabled = true; 
+            let defaultOpt = document.createElement('option');
+            defaultOpt.value = '';
+            defaultOpt.textContent = 'AWAITING COMPONENT';
+            defSelect.appendChild(defaultOpt);
+
+            const customCompInput = document.createElement('input');
+            customCompInput.type = 'text';
+            customCompInput.placeholder = 'COMP NAME...';
+            customCompInput.className = 'custom-comp';
+            customCompInput.style.display = 'none';
+
+            const customDefInput = document.createElement('input');
+            customDefInput.type = 'text';
+            customDefInput.placeholder = 'DEFECT TYPE...';
+            customDefInput.className = 'custom-def';
+            customDefInput.style.display = 'none';
+
+            const revertBtn = document.createElement('button');
+            revertBtn.className = 'delete-btn revert-btn';
+            revertBtn.innerHTML = '↺'; 
+            revertBtn.style.display = 'none';
+            revertBtn.onclick = function() { 
+                row.dataset.isCustom = "false";
+                compSelect.style.display = '';
+                defSelect.style.display = '';
+                customCompInput.style.display = 'none';
+                customDefInput.style.display = 'none';
+                revertBtn.style.display = 'none';
+                compSelect.value = '';
+                customCompInput.value = '';
+                customDefInput.value = '';
+                updateDefects('');
+                checkSegmentData(row.closest('.segment-card'));
+            };
+
+            function updateDefects(selectedComp, selectedDefect = '') {
+                defSelect.innerHTML = '';
+                if (selectedComp && specificDefectMap[selectedComp]) {
+                    const defectList = specificDefectMap[selectedComp];
+                    defSelect.disabled = false;
+                    let defDefault = document.createElement('option');
+                    defDefault.value = '';
+                    defDefault.textContent = 'SELECT DEFECT';
+                    defSelect.appendChild(defDefault);
+                    defectList.forEach(d => {
+                        let opt = document.createElement('option');
+                        opt.value = d;
+                        opt.textContent = d.toUpperCase();
+                        defSelect.appendChild(opt);
+                    });
+                    if (selectedDefect) defSelect.value = selectedDefect;
+                } else {
+                    defSelect.disabled = true;
+                    let resetOpt = document.createElement('option');
+                    resetOpt.value = '';
+                    resetOpt.textContent = 'AWAITING COMPONENT';
+                    defSelect.appendChild(resetOpt);
+                }
+            }
+
+            compSelect.addEventListener('change', function() { 
+                if (this.value === 'CUSTOM ENTRY...') {
+                    row.dataset.isCustom = "true";
+                    compSelect.style.display = 'none';
+                    defSelect.style.display = 'none';
+                    customCompInput.style.display = 'block';
+                    customDefInput.style.display = 'block';
+                    revertBtn.style.display = 'flex';
+                    customCompInput.focus();
+                } else {
+                    updateDefects(this.value); 
+                }
+                checkSegmentData(row.closest('.segment-card'));
+            });
+
+            customCompInput.addEventListener('input', () => checkSegmentData(row.closest('.segment-card')));
+            customDefInput.addEventListener('input', () => checkSegmentData(row.closest('.segment-card')));
+
+            const photoWrapper = document.createElement('div');
+            photoWrapper.className = 'photo-wrapper';
+            const fileInputId = 'photo-' + Math.random().toString(36).substr(2, 9);
+            const fileInput = document.createElement('input');
+            fileInput.type = 'file';
+            fileInput.accept = 'image/*';
+            fileInput.capture = 'environment';
+            fileInput.className = 'file-input';
+            fileInput.id = fileInputId;
+
+            const cameraLabel = document.createElement('label');
+            cameraLabel.htmlFor = fileInputId;
+            cameraLabel.className = 'camera-btn';
+            cameraLabel.innerHTML = '📷 PHOTO';
+
+            const badgeContainer = document.createElement('div');
+            badgeContainer.className = 'status-badge-container';
+
+            const cloneBtn = document.createElement('button');
+            cloneBtn.className = 'clone-btn';
+            cloneBtn.innerHTML = '⇊';
+            cloneBtn.title = "Clone Defect to other Track Sections";
+            cloneBtn.onclick = function() { openCloneModal(row); };
+
+            const delBtn = document.createElement('button');
+            delBtn.className = 'delete-btn';
+            delBtn.innerHTML = '✖'; 
+            delBtn.onclick = function() { const card = row.closest('.segment-card'); row.remove(); checkSegmentData(card); };
+
+            fileInput.addEventListener('change', function(e) {
+                if (this.files && this.files.length > 0) {
+                    const file = this.files[0];
+                    cameraLabel.innerHTML = '⏳ LOAD...';
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        const img = new Image();
+                        img.onload = function() {
+                            const canvas = document.createElement('canvas');
+                            const MAX_WIDTH = 1200, MAX_HEIGHT = 1200;
+                            let width = img.width, height = img.height;
+                            if (width > height) { if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; } } 
+                            else { if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; } }
+                            canvas.width = width; canvas.height = height;
+                            const ctx = canvas.getContext('2d');
+                            ctx.drawImage(img, 0, 0, width, height);
+                            const newImgObj = { img: canvas.toDataURL('image/jpeg', 0.8), w: width, h: height };
+                            const currentImages = JSON.parse(row.dataset.images || "[]");
+                            currentImages.push(newImgObj);
+                            row.dataset.images = JSON.stringify(currentImages);
+                            updatePhotoUI(row, cameraLabel, badgeContainer);
+                            checkSegmentData(row.closest('.segment-card'));
+                        };
+                        img.src = event.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                }
+                this.value = ''; 
+            });
+
+            photoWrapper.appendChild(cameraLabel);
+            photoWrapper.appendChild(fileInput);
+            photoWrapper.appendChild(badgeContainer);
+            photoWrapper.appendChild(cloneBtn);
+            photoWrapper.appendChild(delBtn); 
+            
+            row.appendChild(compSelect);
+            row.appendChild(defSelect);
+            row.appendChild(customCompInput);
+            row.appendChild(customDefInput);
+            row.appendChild(revertBtn);
+            row.appendChild(photoWrapper);
+            container.appendChild(row);
+
+            if (prefill) {
+                if (prefill.isCustom || (prefill.comp && prefill.comp !== '' && !specificDefectMap[prefill.comp])) {
+                    row.dataset.isCustom = "true";
+                    compSelect.style.display = 'none';
+                    defSelect.style.display = 'none';
+                    customCompInput.style.display = 'block';
+                    customDefInput.style.display = 'block';
+                    revertBtn.style.display = 'flex';
+                    customCompInput.value = prefill.comp || '';
+                    customDefInput.value = prefill.def || '';
+                } else if (prefill.comp) {
+                    compSelect.value = prefill.comp;
+                    updateDefects(prefill.comp, prefill.def);
+                }
+                if (prefill.images && prefill.images.length > 0) {
+                    row.dataset.images = JSON.stringify(prefill.images);
+                    updatePhotoUI(row, cameraLabel, badgeContainer);
+                }
+            }
+        }
+
+        function loadProject(event) {
+            const fileInput = event.target;
+            const file = fileInput.files[0];
+            if (!file) return;
+
+            currentFileName = file.name;
+            toggleHelp(false);
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const projectData = JSON.parse(e.target.result);
+                    if (!Array.isArray(projectData)) throw new Error("Invalid format");
+
+                    const container = document.getElementById('segments-container');
+                    const mapContainer = document.getElementById('miniMap');
+                    container.innerHTML = '';
+                    mapContainer.innerHTML = '';
+                    
+                    loadedRoutes.clear(); 
+                    routeLoadHistory = [];
+
+                    toggleHelp(false);
+
+                    projectData.forEach((segData, index) => {
+                        const safeAreaName = segData.areaName || '';
+                        const activeKey = segData.routeKey || segData.routeName; 
+                        
+                        const card = createSegmentCard(segData.segmentNum, activeKey, segData.routeName, segData.direction, segData.color, safeAreaName);
+                        card.style.animationDelay = `${index * 0.05}s`;
+                        
+                        card.querySelector('.segment-notes').value = segData.notes || '';
+                        const defectList = card.querySelector('.defect-list');
+                        defectList.innerHTML = '';
+                        
+                        if (!segData.defects || segData.defects.length === 0) { 
+                            addDefectRow(defectList, null, safeAreaName); 
+                        } else { 
+                            segData.defects.forEach(defData => { 
+                                if (defData.photoBase64 && (!defData.images || defData.images.length === 0)) {
+                                    defData.images = [{ img: defData.photoBase64, w: defData.imgW, h: defData.imgH }];
+                                }
+                                addDefectRow(defectList, defData, safeAreaName); 
+                            }); 
+                        }
+
+                        container.appendChild(card);
+                        scrollObserver.observe(card);
+
+                        const mapBtn = document.createElement('div');
+                        mapBtn.className = 'map-item';
+                        mapBtn.setAttribute('data-map-segment', segData.segmentNum);
+                        mapBtn.setAttribute('data-route-key', activeKey);
+                        mapBtn.textContent = `TS-${segData.segmentNum}`;
+                        mapBtn.style.borderLeft = `4px solid ${segData.color || '#ccc'}`;
+                        
+                        attachMapItemListeners(mapBtn, card, segData.segmentNum, activeKey);
+                        
+                        mapContainer.appendChild(mapBtn);
+                        
+                        checkSegmentData(card);
+
+                        if (activeKey && !loadedRoutes.has(activeKey)) {
+                            loadedRoutes.add(activeKey);
+                            routeLoadHistory.push(activeKey);
+                        }
+                        currentActiveArea = safeAreaName;
+                        currentActiveDirection = segData.direction;
+                    });
+
+                    if (loadedRoutes.size > 0) {
+                        document.getElementById('quickAddGroup').style.display = 'flex';
+                        updateRouteDropdown(); 
+                    }
+
+                    showSystemAlert('Backup file imported successfully.', 'DATA LOADED');
+                    toggleMenu(true);
+                    updateCommandBar();
+
+                } catch (err) {
+                    showSystemAlert('Corrupt or invalid JSON file.', 'SYSTEM ERROR', true);
+                    console.error(err);
+                }
+            };
+            
+            reader.onerror = function() {
+                showSystemAlert('Could not read file from device.', 'FILE ERROR', true);
+            };
+
+            reader.readAsText(file);
+            fileInput.value = ''; 
+        }
+
+        async function saveProject() {
+            const cards = document.querySelectorAll('.segment-card');
+            if (cards.length === 0) { showSystemAlert('No data available to save.', 'SAVE FAILED', true); return; }
+
+            const projectData = [];
+            cards.forEach(card => {
+                const segData = {
+                    segmentNum: card.getAttribute('data-segment'),
+                    routeKey: card.getAttribute('data-route-key'),
+                    routeName: card.getAttribute('data-route-name'),
+                    direction: card.getAttribute('data-direction'),
+                    color: card.getAttribute('data-color'),
+                    areaName: card.getAttribute('data-area-name'), 
+                    notes: card.querySelector('.segment-notes').value,
+                    defects: []
+                };
+
+                card.querySelectorAll('.defect-row').forEach(row => {
+                    const isCustom = row.dataset.isCustom === "true";
+                    segData.defects.push({
+                        isCustom: isCustom,
+                        comp: isCustom ? row.querySelector('.custom-comp').value : row.querySelector('.component-select').value,
+                        def: isCustom ? row.querySelector('.custom-def').value : row.querySelector('.defect-select').value,
+                        images: JSON.parse(row.dataset.images || "[]") 
+                    });
+                });
+                projectData.push(segData);
+            });
+
+            const dataStr = JSON.stringify(projectData, null, 2);
+            let exportName = currentFileName || `TRACK_DATA_${new Date().toISOString().split('T')[0]}.json`;
+
+            try {
+                if (window.showSaveFilePicker) {
+                    const handle = await window.showSaveFilePicker({
+                        suggestedName: exportName,
+                        types: [{ description: 'JSON File', accept: {'application/json': ['.json']} }],
+                    });
+                    const writable = await handle.createWritable();
+                    await writable.write(dataStr);
+                    await writable.close();
+                    currentFileName = handle.name;
+                    showSystemAlert('Data saved successfully to selected location.', 'SAVE COMPLETE');
+                } else {
+                    const blob = new Blob([dataStr], { type: 'application/json' });
+                    const link = document.createElement("a");
+                    link.href = URL.createObjectURL(blob);
+                    link.download = exportName;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    showSystemAlert('Data downloaded to your device Downloads folder.', 'SAVE COMPLETE');
+                }
+            } catch (err) {
+                if (err.name !== 'AbortError') {
+                    console.error(err);
+                    showSystemAlert('Failed to save file.', 'SAVE ERROR', true);
+                }
+            }
+            toggleMenu(true);
+            document.getElementById('mainCommandBar').classList.add('collapsed');
+        }
+
+        async function exportData() {
+            if (typeof ExcelJS === 'undefined' || typeof window.jspdf === 'undefined') {
+                showSystemAlert("Libraries offline. Requires network connection for initial boot.", "EXPORT ERROR", true);
+                return;
+            }
+
+            const cards = document.querySelectorAll('.segment-card');
+            if (cards.length === 0) { showSystemAlert('No data available to export.', 'EXPORT FAILED'); return; }
+
+            const exportBtn = document.getElementById('exportBtn');
+            exportBtn.disabled = true;
+            exportBtn.innerHTML = '⏳ COMPILING DATA...';
+
+            try {
+                const workbook = new ExcelJS.Workbook();
+                const worksheet = workbook.addWorksheet('Defects Report');
+                
+                worksheet.columns = [
+                    { header: 'Line / Area', key: 'line', width: 18 },
+                    { header: 'Route', key: 'route', width: 22 },
+                    { header: 'TS', key: 'segment', width: 15 },
+                    { header: 'Notes', key: 'notes', width: 35 },
+                    { header: 'Component', key: 'component', width: 20 },
+                    { header: 'Defect', key: 'defect', width: 20 }
+                ];
+                worksheet.getRow(1).font = { bold: true };
+
+                let pdfJobs = [];
+                let hasDataRows = false;
+
+                cards.forEach(card => {
+                    const segmentNum = card.getAttribute('data-segment');
+                    const tsId = `TS-${segmentNum}`;
+                    const routeName = card.getAttribute('data-route-name');
+                    const areaName = card.getAttribute('data-area-name') || '';
+                    const notes = card.querySelector('.segment-notes').value;
+                    const rows = card.querySelectorAll('.defect-row');
+                    
+                    let hasDefects = false;
+
+                    rows.forEach((row, index) => {
+                        const isCustom = row.dataset.isCustom === "true";
+                        const comp = isCustom ? row.querySelector('.custom-comp').value : row.querySelector('.component-select').value;
+                        const def = isCustom ? row.querySelector('.custom-def').value : row.querySelector('.defect-select').value;
+                        const images = JSON.parse(row.dataset.images || "[]");
+                        
+                        if (comp || def || images.length > 0) {
+                            hasDefects = true;
+                            hasDataRows = true;
+                            worksheet.addRow({ line: areaName, route: routeName, segment: tsId, notes: notes, component: comp, defect: def });
+                        }
+
+                        if (images.length > 0) {
+                            pdfJobs.push({
+                                lineName: areaName, routeName: routeName, tsId: tsId, notes: notes, comp: comp || "N/A", def: def || "N/A",
+                                images: images, defectID: index + 1
+                            });
+                        }
+                    });
+
+                    if (!hasDefects && notes.trim() !== '') {
+                        hasDataRows = true;
+                        worksheet.addRow({ line: areaName, route: routeName, segment: tsId, notes: notes, component: '', defect: '' });
+                    }
+                });
+
+                if (!hasDataRows) {
+                    showSystemAlert("No filled track sections found to export to Excel.", "EXPORT NOTICE");
+                    exportBtn.disabled = false;
+                    exportBtn.innerHTML = '📊 EXPORT REPORT (Excel & PDF)';
+                    return;
+                }
+
+                const buffer = await workbook.xlsx.writeBuffer();
+                const excelBlob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+                const date = new Date().toISOString().split('T')[0];
+                const excelFilename = `DEFECT_REPORT_${date}.xlsx`;
+
+                if (pdfJobs.length > 0 && window.showDirectoryPicker) {
+                    try {
+                        exportBtn.innerHTML = '📂 SELECT FOLDER...';
+                        const dirHandle = await window.showDirectoryPicker({ mode: 'readwrite' });
+                        
+                        exportBtn.innerHTML = '⏳ SAVING EXCEL...';
+                        const excelFileHandle = await dirHandle.getFileHandle(excelFilename, { create: true });
+                        const excelWritable = await excelFileHandle.createWritable();
+                        await excelWritable.write(excelBlob);
+                        await excelWritable.close();
+
+                        exportBtn.innerHTML = `⏳ BUILDING ${pdfJobs.length} PDFs...`;
+                        for (let i = 0; i < pdfJobs.length; i++) {
+                            const job = pdfJobs[i];
+                            const pdfBlob = generatePDF(job);
+                            const cleanComp = job.comp ? job.comp.replace(/[^a-z0-9]/gi, '_') : 'UNKNOWN';
+                            const pdfFilename = `${job.tsId}_${cleanComp}_DEFECT.pdf`;
+                            
+                            const pdfFileHandle = await dirHandle.getFileHandle(pdfFilename, { create: true });
+                            const pdfWritable = await pdfFileHandle.createWritable();
+                            await pdfWritable.write(pdfBlob);
+                            await pdfWritable.close();
+                            
+                            exportBtn.innerHTML = `⏳ SAVED ${i + 1}/${pdfJobs.length} PDFs...`;
+                        }
+                        showSystemAlert("All files successfully saved to the selected folder.", "EXPORT COMPLETE");
+                    } catch (err) {
+                        if (err.name !== 'AbortError') {
+                            console.error(err);
+                            showSystemAlert('Folder selection failed. Falling back to default downloads.', 'EXPORT ERROR', true);
+                            fallbackDownload(excelBlob, excelFilename, pdfJobs);
+                        }
+                    }
+                } else if (pdfJobs.length === 0 && window.showSaveFilePicker) {
+                    try {
+                        const handle = await window.showSaveFilePicker({
+                            suggestedName: excelFilename,
+                            types: [{ description: 'Excel File', accept: {'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx']} }],
+                        });
+                        const writable = await handle.createWritable();
+                        await writable.write(excelBlob);
+                        await writable.close();
+                        showSystemAlert("Excel report saved successfully.", "EXPORT COMPLETE");
+                    } catch (err) {
+                        if (err.name !== 'AbortError') {
+                            console.error(err);
+                            fallbackDownload(excelBlob, excelFilename, []);
+                        }
+                    }
+                } else {
+                    fallbackDownload(excelBlob, excelFilename, pdfJobs);
+                }
+
+            } catch (error) {
+                console.error(error);
+                showSystemAlert("File compiling failed.", "EXPORT ERROR", true);
+            } finally {
+                exportBtn.disabled = false;
+                exportBtn.innerHTML = '📊 EXPORT FINAL REPORT';
+            }
+        }
+
+        async function fallbackDownload(excelBlob, excelFilename, pdfJobs) {
+            const exportBtn = document.getElementById('exportBtn');
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(excelBlob);
+            link.download = excelFilename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            if (pdfJobs.length > 0) {
+                exportBtn.innerHTML = `⏳ BUILDING ${pdfJobs.length} PDFs...`;
+                await delay(800); 
+                for (let job of pdfJobs) { 
+                    const pdfBlob = generatePDF(job);
+                    const cleanComp = job.comp ? job.comp.replace(/[^a-z0-9]/gi, '_') : 'UNKNOWN';
+                    const pdfFilename = `${job.tsId}_${cleanComp}_DEFECT.pdf`;
+                    
+                    const pdflink = document.createElement("a");
+                    pdflink.href = URL.createObjectURL(pdfBlob);
+                    pdflink.download = pdfFilename;
+                    document.body.appendChild(pdflink);
+                    pdflink.click();
+                    document.body.removeChild(pdflink);
+                    await delay(800); 
+                }
+            }
+            showSystemAlert("Files downloaded to your device Downloads folder.", "EXPORT COMPLETE");
+        }
+
+        function generatePDF(data) {
+            const { jsPDF } = window.jspdf;
+            const firstImg = data.images[0];
+            let firstOrientation = (firstImg.w > firstImg.h) ? 'landscape' : 'portrait';
+            const doc = new jsPDF({ orientation: firstOrientation, unit: 'mm', format: 'a4' });
+            
+            const activeTheme = localStorage.getItem('appTheme') || 'tactical';
+            const todayDate = new Date().toLocaleDateString();
+
+            data.images.forEach((imgObj, index) => {
+                let orientation = (imgObj.w > imgObj.h) ? 'landscape' : 'portrait';
+                if (index > 0) doc.addPage('a4', orientation);
+
+                const pageWidth = orientation === 'landscape' ? 297 : 210;
+                const pageHeight = orientation === 'landscape' ? 210 : 297;
+                const margin = 10;
+                const borderW = pageWidth - (margin * 2);
+                const borderH = pageHeight - (margin * 2);
+
+                if (activeTheme === 'windows11') {
+                    doc.setDrawColor(0, 120, 212); 
+                    doc.setLineWidth(0.5);
+                    doc.roundedRect(margin, margin, borderW, borderH, 3, 3, 'S');
+                } else if (activeTheme === 'pokemongo') {
+                    doc.setDrawColor(227, 53, 13); 
+                    doc.setLineWidth(1.0);
+                    doc.roundedRect(margin, margin, borderW, borderH, 5, 5, 'S');
+                    doc.setDrawColor(40, 172, 168); 
+                    doc.setLineWidth(0.3);
+                    doc.roundedRect(margin + 1, margin + 1, borderW - 2, borderH - 2, 4, 4, 'S');
+                } else if (activeTheme === 'macosdark') {
+                    doc.setDrawColor(80, 80, 80); 
+                    doc.setLineWidth(0.5);
+                    doc.roundedRect(margin, margin, borderW, borderH, 4, 4, 'S');
+                } else {
+                    doc.setDrawColor(30, 30, 30);
+                    doc.setLineWidth(1.0);
+                    doc.rect(margin, margin, borderW, borderH, 'S');
+                    doc.setLineWidth(0.3);
+                    doc.rect(margin + 1.5, margin + 1.5, borderW - 3, borderH - 3, 'S');
+                }
+
+                const footerHeight = 22; 
+                const safeZoneX = margin + 2;
+                const safeZoneY = margin + 2;
+                const safeZoneW = borderW - 4;
+                const safeZoneH = borderH - footerHeight - 4; 
+
+                const imgRatio = imgObj.w / imgObj.h;
+                const safeRatio = safeZoneW / safeZoneH;
+                
+                let finalW, finalH, finalX, finalY;
+                if (imgRatio > safeRatio) { finalW = safeZoneW; finalH = safeZoneW / imgRatio; } 
+                else { finalH = safeZoneH; finalW = safeZoneH * imgRatio; }
+                
+                finalX = safeZoneX + ((safeZoneW - finalW) / 2);
+                finalY = safeZoneY + ((safeZoneH - finalH) / 2);
+
+                doc.addImage(imgObj.img, 'JPEG', finalX, finalY, finalW, finalH);
+
+                doc.setDrawColor(200, 200, 200);
+                doc.setLineWidth(0.3);
+                doc.line(margin, pageHeight - margin - footerHeight, pageWidth - margin, pageHeight - margin - footerHeight);
+
+                const textStartX = margin + 4;
+                let textStartY = pageHeight - margin - 14; 
+                
+                doc.setTextColor(0, 0, 0); 
+                doc.setFont("helvetica", "bold");
+                doc.setFontSize(11);
+                doc.text(`${data.tsId} | ${data.def}  ${data.comp}`, textStartX, textStartY);
+                
+                textStartY += 5;
+                doc.setFont("helvetica", "normal");
+                doc.setFontSize(10);
+                const cleanLineName = data.lineName ? data.lineName.replace(/ Line/i, '').trim().toUpperCase() : '';
+                doc.text(`Location: ${data.routeName} - ${cleanLineName}`, textStartX, textStartY);
+                
+                textStartY += 5;
+                doc.text(`Date taken: ${todayDate}`, textStartX, textStartY);
+
+                const rightAlignX = pageWidth - margin - 4;
+                doc.setFont("helvetica", "bold");
+                doc.setFontSize(9);
+                doc.text(`PAGE ${index + 1} OF ${data.images.length}`, rightAlignX, textStartY, { align: "right" });
+            });
+
+            return doc.output('blob');
+        }
+    </script>
+</body>
+</html>
