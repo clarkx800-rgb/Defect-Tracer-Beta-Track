@@ -4,7 +4,7 @@ const systemInstructions = `
         <div style="text-align: center; margin-bottom: 20px; color: var(--text-muted);">
             <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
             <div style="font-weight: bold; letter-spacing: 1px; margin-top: 10px; font-size: 18px; color: var(--text-color);">FIELD REFERENCE MANUAL</div>
-            <div style="font-size: 13px; color: var(--primary); margin-top: 4px; font-weight: bold; letter-spacing: 2px;">TRACER v2.0.92</div>
+            <div style="font-size: 13px; color: var(--primary); margin-top: 4px; font-weight: bold; letter-spacing: 2px;">DESIGNED AND CREATED BY: "THAT GUY"</div>
             
             <div style="margin-top: 15px; font-size: 14px; color: var(--warning); font-weight: bold; border: 2px solid var(--warning); display: inline-block; padding: 8px 12px; border-radius: 4px; background: rgba(255, 179, 0, 0.1);">
                 CAN'T READ THIS? Tap the ⚙ top-right to change FONT SIZE.
