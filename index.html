@@ -192,7 +192,7 @@
             font-size: var(--base-font);
             letter-spacing: 1px;
         }
-        #quickTsSearchInput {
+        #quickTsSearchInput, #cloneTsInput {
             background: transparent !important;
             border: none !important;
             color: var(--text-color) !important;
@@ -398,6 +398,22 @@
         }
         .photo-status-badge:active { background: var(--primary); }
         
+        /* CLONE ENGINE BUTTON */
+        .clone-btn {
+            background-color: transparent; 
+            color: #0A84FF; 
+            border: 1px solid #0A84FF; 
+            width: 40px; 
+            font-size: 18px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            padding: 0; 
+            flex-shrink: 0;
+            transition: all 0.2s;
+        }
+        .clone-btn:active { background-color: #0A84FF; color: #fff; }
+
         .delete-btn { 
             background-color: transparent; 
             color: var(--danger); 
@@ -416,7 +432,7 @@
         .add-defect-btn { background-color: transparent; color: var(--text-muted); border: 1px dashed var(--text-muted); margin-top: 10px; width: 100%; transition: all 0.2s;}
         .add-defect-btn:active { border-color: var(--primary); color: var(--primary); }
 
-        /* UNIFIED COMMAND BAR SHEATH */
+        /* COMMAND BAR SHEATH (BOTTOM LEFT) */
         .command-bar {
             position: fixed;
             bottom: 20px;
@@ -716,7 +732,7 @@
             
             <div style="display:flex; align-items:center; padding: 0 5px 0 12px; height: 100%;">
                 <span style="font-size: 18px; font-weight:bold; color:var(--primary); margin-right:2px;">TS-</span>
-                <input type="tel" id="pillSearchInput" style="width: 85px; background:transparent; border:none; color:var(--text-color); font-weight:bold; outline:none; font-size:16px; padding:0;" placeholder="(SEARCH)" onkeypress="if(event.key === 'Enter') searchTSFromPill()" onfocus="toggleHelp(false); toggleQuickAddModal(false);">
+                <input type="tel" id="pillSearchInput" style="width: 85px; background:transparent; border:none; color:var(--text-color); font-weight:bold; outline:none; font-size:16px; padding:0;" placeholder="(SEARCH)" onkeypress="if(event.key === 'Enter') searchTSFromPill()" onfocus="toggleHelp(false); toggleQuickAddModal(false); closeCloneModal();">
             </div>
             <button class="command-btn" onclick="searchTSFromPill()" title="Search">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="pointer-events: none;">
@@ -779,6 +795,18 @@
         </div>
     </div>
 
+    <div class="quick-add-modal" id="cloneModal">
+        <h4>CLONE DEFECT TO TS:</h4>
+        <div class="search-input-wrapper" style="margin-bottom: 10px;">
+            <span class="search-prefix">TS-</span>
+            <input type="tel" id="cloneTsInput" placeholder="END TS NUMBER..." onkeypress="if(event.key === 'Enter') executeClone()">
+        </div>
+        <div style="display: flex; gap: 8px;">
+            <button class="btn-primary" style="flex: 1; padding: 10px; background-color: #0A84FF; border-color: #0A84FF;" onclick="executeClone()">CLONE</button>
+            <button class="btn-outline" style="flex: 1; padding: 10px;" onclick="closeCloneModal()">CANCEL</button>
+        </div>
+    </div>
+
     <div class="system-modal-overlay" id="systemModalOverlay">
         <div class="system-modal">
             <div class="system-modal-title" id="systemModalTitle">SYSTEM ALERT</div>
@@ -810,28 +838,20 @@
         let isAutoScrolling = false;
         let currentRowForGallery = null; 
         let currentInsertTargetTS = null;
+        let currentRowToClone = null; // Used for Clone Engine
         let confirmResolve = null;
 
         const iconLoad = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="pointer-events: none;"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>`;
         const iconSave = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="pointer-events: none;"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>`;
 
-        // NEW TACTICAL SCROLL ENGINE
+        // TACTICAL SCROLL ENGINE
         let isPageScrolling = false;
-
         function togglePageScroll() {
             const btnIcon = document.getElementById('scrollToggleIcon');
             const dir = btnIcon.dataset.dir || 'down'; 
-            
-            const maxScroll = Math.max(
-                document.body.scrollHeight, document.body.offsetHeight, 
-                document.documentElement.clientHeight, document.documentElement.scrollHeight, document.documentElement.offsetHeight
-            ) - window.innerHeight;
-
-            if (dir === 'up') {
-                doSmoothScroll(0, 800); // 800ms moderate speed
-            } else {
-                doSmoothScroll(maxScroll, 800);
-            }
+            const maxScroll = Math.max(document.body.scrollHeight, document.body.offsetHeight, document.documentElement.clientHeight, document.documentElement.scrollHeight, document.documentElement.offsetHeight) - window.innerHeight;
+            if (dir === 'up') doSmoothScroll(0, 800); 
+            else doSmoothScroll(maxScroll, 800);
         }
 
         function doSmoothScroll(targetY, duration) {
@@ -839,48 +859,27 @@
             const startY = window.scrollY;
             const diff = targetY - startY;
             let startTime = null;
-
             function step(timestamp) {
-                if (!isPageScrolling) return; // Instantly stops if interrupted
+                if (!isPageScrolling) return; 
                 if (!startTime) startTime = timestamp;
                 const time = timestamp - startTime;
                 let percent = Math.min(time / duration, 1);
-                
-                // Ease-in-out curve for smooth visual
                 percent = percent < 0.5 ? 2 * percent * percent : -1 + (4 - 2 * percent) * percent;
-                
                 window.scrollTo(0, startY + diff * percent);
-                
-                if (time < duration) {
-                    requestAnimationFrame(step);
-                } else {
-                    isPageScrolling = false;
-                }
+                if (time < duration) requestAnimationFrame(step);
+                else isPageScrolling = false;
             }
             requestAnimationFrame(step);
         }
+        
+        ['touchstart', 'mousedown', 'wheel'].forEach(evt => { window.addEventListener(evt, () => { if (isPageScrolling) isPageScrolling = false; }, { passive: true }); });
 
-        // Tap screen to stop scrolling
-        ['touchstart', 'mousedown', 'wheel'].forEach(evt => {
-            window.addEventListener(evt, () => {
-                if (isPageScrolling) isPageScrolling = false;
-            }, { passive: true });
-        });
-
-        // Auto-flip icon based on position
         window.addEventListener('scroll', () => {
             const btnIcon = document.getElementById('scrollToggleIcon');
             if (!btnIcon) return;
-            
-            if (window.scrollY < 100) {
-                btnIcon.style.transform = 'rotate(180deg)'; // Point Down
-                btnIcon.dataset.dir = 'down';
-            } else {
-                btnIcon.style.transform = 'rotate(0deg)'; // Point Up
-                btnIcon.dataset.dir = 'up';
-            }
+            if (window.scrollY < 100) { btnIcon.style.transform = 'rotate(180deg)'; btnIcon.dataset.dir = 'down'; } 
+            else { btnIcon.style.transform = 'rotate(0deg)'; btnIcon.dataset.dir = 'up'; }
         }, { passive: true });
-
 
         // HIGHLANDER RULE MUTUALLY EXCLUSIVE TOGGLE LOGIC
         function toggleCommandBar(e) {
@@ -889,6 +888,7 @@
             if (bar.classList.contains('collapsed')) {
                 bar.classList.remove('collapsed');
                 toggleHelp(false); 
+                closeCloneModal();
             } else {
                 bar.classList.add('collapsed');
                 toggleQuickAddModal(false); 
@@ -899,10 +899,7 @@
             const btn = document.getElementById('dynamicSaveLoadBtn');
             if (loadedRoutes.size === 0) {
                 btn.innerHTML = iconLoad;
-                btn.onclick = () => {
-                    document.getElementById('importFile').click();
-                    toggleCommandBar(); 
-                };
+                btn.onclick = () => { document.getElementById('importFile').click(); toggleCommandBar(); };
             } else {
                 btn.innerHTML = iconSave;
                 btn.onclick = () => saveProject();
@@ -912,25 +909,106 @@
         function toggleHelp(forceShow = null) {
             const overlay = document.getElementById('helpOverlay');
             const header = document.getElementById('stickyHeader');
-            
             const shouldShow = forceShow !== null ? forceShow : overlay.style.display === 'none';
-            
             if (shouldShow) {
                 const headerHeight = header.offsetHeight;
                 overlay.style.top = `${headerHeight}px`;
-                // Leaves bottom 85px fully clear so it doesn't cover the sheath
                 overlay.style.height = `calc(100vh - ${headerHeight}px - 85px)`; 
                 document.getElementById('helpBodyContent').innerHTML = systemInstructions;
                 overlay.style.display = 'flex';
-                
-                if (document.getElementById('collapsible-menu').classList.contains('expanded')) {
-                    toggleMenu(true);
-                }
+                if (document.getElementById('collapsible-menu').classList.contains('expanded')) toggleMenu(true);
                 document.getElementById('mainCommandBar').classList.add('collapsed');
                 toggleQuickAddModal(false);
+                closeCloneModal();
             } else {
                 overlay.style.display = 'none';
             }
+        }
+
+        // CLONE ENGINE
+        function openCloneModal(row) {
+            currentRowToClone = row;
+            document.getElementById('cloneTsInput').value = '';
+            document.getElementById('cloneModal').style.display = 'flex';
+            toggleMenu(true);
+            toggleQuickAddModal(false);
+            toggleHelp(false);
+            document.getElementById('mainCommandBar').classList.add('collapsed');
+            
+            // Focus the input safely
+            setTimeout(() => document.getElementById('cloneTsInput').focus(), 100);
+        }
+
+        function closeCloneModal() {
+            document.getElementById('cloneModal').style.display = 'none';
+            currentRowToClone = null;
+        }
+
+        function executeClone() {
+            if (!currentRowToClone) return;
+            const targetTS = document.getElementById('cloneTsInput').value.trim();
+            
+            document.getElementById('cloneTsInput').blur(); // Close keyboard
+
+            if (!targetTS) { closeCloneModal(); return; }
+
+            const startCard = currentRowToClone.closest('.segment-card');
+            const endCard = document.querySelector(`.segment-card[data-segment="${targetTS}"]`);
+
+            if (!endCard) {
+                showSystemAlert(`Cannot find TS-${targetTS} in the current workspace. Please ensure it is loaded.`, "CLONE ERROR", true);
+                return;
+            }
+
+            // Extract data from the source row
+            const isCustom = currentRowToClone.dataset.isCustom === "true";
+            const comp = isCustom ? currentRowToClone.querySelector('.custom-comp').value : currentRowToClone.querySelector('.component-select').value;
+            const def = isCustom ? currentRowToClone.querySelector('.custom-def').value : currentRowToClone.querySelector('.defect-select').value;
+            const images = JSON.parse(currentRowToClone.dataset.images || "[]");
+
+            if (!comp && !def && images.length === 0) {
+                showSystemAlert("This row is entirely empty. There is no data to clone.", "CLONE ERROR", true);
+                closeCloneModal();
+                return;
+            }
+
+            const allCards = Array.from(document.querySelectorAll('.segment-card'));
+            const startIdx = allCards.indexOf(startCard);
+            const endIdx = allCards.indexOf(endCard);
+            const minIdx = Math.min(startIdx, endIdx);
+            const maxIdx = Math.max(startIdx, endIdx);
+            
+            let clonedCount = 0;
+
+            for (let i = minIdx; i <= maxIdx; i++) {
+                if (i === startIdx) continue; // Skip source
+
+                const targetCard = allCards[i];
+                const areaName = targetCard.getAttribute('data-area-name');
+                const defectList = targetCard.querySelector('.defect-list');
+
+                // Smart Cleanup: If target TS only has 1 completely empty default row, remove it first
+                const existingRows = defectList.querySelectorAll('.defect-row');
+                if (existingRows.length === 1) {
+                    const r = existingRows[0];
+                    const rIsCustom = r.dataset.isCustom === "true";
+                    const rComp = rIsCustom ? r.querySelector('.custom-comp').value : r.querySelector('.component-select').value;
+                    const rDef = rIsCustom ? r.querySelector('.custom-def').value : r.querySelector('.defect-select').value;
+                    const rImgs = JSON.parse(r.dataset.images || "[]");
+                    
+                    if (!rComp && !rDef && rImgs.length === 0) {
+                        r.remove();
+                    }
+                }
+
+                // Add the cloned row
+                addDefectRow(defectList, { isCustom, comp, def, images }, areaName);
+                checkSegmentData(targetCard);
+                clonedCount++;
+            }
+
+            closeCloneModal();
+            showSystemAlert(`Successfully cloned defect payload to ${clonedCount} track sections.`, "CLONE COMPLETE");
         }
 
         function showSystemAlert(message, title = "SYSTEM NOTICE", isDanger = false) {
@@ -938,11 +1016,7 @@
             document.getElementById('systemModalTitle').style.color = isDanger ? "var(--danger)" : "var(--primary)";
             document.getElementById('systemModalTitle').style.borderColor = isDanger ? "var(--danger)" : "var(--primary)";
             document.getElementById('systemModalMessage').textContent = message;
-            
-            document.getElementById('systemModalBtnGroup').innerHTML = `
-                <button class="btn-primary" style="width: 100%;" onclick="closeSystemModal()">ACKNOWLEDGE</button>
-            `;
-            
+            document.getElementById('systemModalBtnGroup').innerHTML = `<button class="btn-primary" style="width: 100%;" onclick="closeSystemModal()">ACKNOWLEDGE</button>`;
             document.getElementById('systemModalOverlay').style.display = 'flex';
         }
 
@@ -952,36 +1026,21 @@
                 document.getElementById('systemModalTitle').style.color = "var(--warning)";
                 document.getElementById('systemModalTitle').style.borderColor = "var(--warning)";
                 document.getElementById('systemModalMessage').textContent = message;
-                
-                document.getElementById('systemModalBtnGroup').innerHTML = `
-                    <button class="btn-danger" style="flex: 1;" onclick="resolveSystemConfirm(true)">PROCEED</button>
-                    <button class="btn-outline" style="flex: 1;" onclick="resolveSystemConfirm(false)">CANCEL</button>
-                `;
-                
+                document.getElementById('systemModalBtnGroup').innerHTML = `<button class="btn-danger" style="flex: 1;" onclick="resolveSystemConfirm(true)">PROCEED</button><button class="btn-outline" style="flex: 1;" onclick="resolveSystemConfirm(false)">CANCEL</button>`;
                 confirmResolve = resolve;
                 document.getElementById('systemModalOverlay').style.display = 'flex';
             });
         }
 
-        function resolveSystemConfirm(result) {
-            closeSystemModal();
-            if (confirmResolve) confirmResolve(result);
-        }
-
-        function closeSystemModal() {
-            document.getElementById('systemModalOverlay').style.display = 'none';
-        }
+        function resolveSystemConfirm(result) { closeSystemModal(); if (confirmResolve) confirmResolve(result); }
+        function closeSystemModal() { document.getElementById('systemModalOverlay').style.display = 'none'; }
 
         window.addEventListener('beforeunload', function (e) {
             const cards = document.querySelectorAll('.segment-card');
-            if (cards.length > 0) {
-                e.preventDefault();
-                e.returnValue = 'Data loss imminent. Are you sure you want to cancel?';
-            }
+            if (cards.length > 0) { e.preventDefault(); e.returnValue = 'Data loss imminent. Are you sure you want to cancel?'; }
         });
 
         window.history.pushState({ isAppOpen: true }, "", "");
-
         window.addEventListener('popstate', function(event) {
             const cards = document.querySelectorAll('.segment-card');
             if (cards.length > 0) {
@@ -1014,7 +1073,6 @@
             const images = JSON.parse(row.dataset.images || "[]");
             const grid = document.getElementById('galleryGrid');
             grid.innerHTML = ''; 
-
             images.forEach((imgObj, index) => {
                 const item = document.createElement('div');
                 item.className = 'gallery-item';
@@ -1028,7 +1086,6 @@
                 item.appendChild(delBtn);
                 grid.appendChild(item);
             });
-
             document.getElementById('galleryModalOverlay').style.display = 'flex';
         }
 
@@ -1042,7 +1099,6 @@
             const badgeContainer = wrapper.querySelector('.status-badge-container');
             updatePhotoUI(currentRowForGallery, cameraBtn, badgeContainer);
             checkSegmentData(currentRowForGallery.closest('.segment-card'));
-
             if (images.length === 0) closeGallery();
             else openGallery(currentRowForGallery); 
         }
@@ -1073,7 +1129,6 @@
                 opt.textContent = area;
                 areaSelect.appendChild(opt);
             }
-            
             if (loadedRoutes.size === 0) toggleHelp(true);
             updateCommandBar(); 
         });
@@ -1084,6 +1139,7 @@
             const fabModal = document.getElementById('quickAddModal');
             const stsMenu = document.getElementById('stsShortcutMenu');
             const insertModal = document.getElementById('insertModal');
+            const cloneModal = document.getElementById('cloneModal');
             const menuBtn = document.getElementById('menuBtn');
             const stsBtn = document.getElementById('stsDropdownBtn');
             const helpOverlay = document.getElementById('helpOverlay');
@@ -1092,6 +1148,7 @@
             if (!menu.contains(e.target) && !menuBtn.contains(e.target) && menu.classList.contains('expanded')) toggleMenu(true);
             if (stsMenu && stsBtn && !stsMenu.contains(e.target) && !stsBtn.contains(e.target) && stsMenu.style.display === 'flex') stsMenu.style.display = 'none';
             if (insertModal && !insertModal.contains(e.target) && !e.target.closest('.map-item') && insertModal.style.display === 'flex') closeInsertModal();
+            if (cloneModal && !cloneModal.contains(e.target) && !e.target.closest('.clone-btn') && cloneModal.style.display === 'flex') closeCloneModal();
             if (helpOverlay.style.display === 'flex' && e.target === helpOverlay) toggleHelp(false);
             
             // COMMAND BAR OUTSIDE CLICK AUTO-HIDE
@@ -1113,6 +1170,7 @@
                 menu.classList.add('expanded');
                 btn.innerHTML = '<span class="menu-toggle-icon">✖</span>';
                 document.getElementById('stsShortcutMenu').style.display = 'none';
+                closeCloneModal();
             }
         }
 
@@ -1143,7 +1201,6 @@
                     const itemRect = targetMapItem.getBoundingClientRect();
                     mapContainer.scrollTo({ top: mapContainer.scrollTop + (itemRect.top - containerRect.top) - (containerRect.height / 2) + (itemRect.height / 2), behavior: 'smooth' });
                 }
-                
                 setTimeout(() => {
                     targetCard.classList.add('search-highlight');
                     setTimeout(() => { targetCard.classList.remove('search-highlight'); }, 1200);
@@ -1164,6 +1221,7 @@
                 menu.style.display = 'flex';
                 toggleMenu(true); 
                 toggleQuickAddModal(false); 
+                closeCloneModal();
             }
         }
 
@@ -1212,6 +1270,7 @@
             document.getElementById('insertModal').style.display = 'flex';
             toggleMenu(true);
             toggleQuickAddModal(false);
+            closeCloneModal();
             document.getElementById('stsShortcutMenu').style.display = 'none';
             document.getElementById('mainCommandBar').classList.add('collapsed');
         }
@@ -1390,7 +1449,8 @@
                 modal.style.display = 'flex';
                 toggleMenu(true); 
                 document.getElementById('stsShortcutMenu').style.display = 'none'; 
-                toggleHelp(false); // Highlander Rule: Close Help
+                toggleHelp(false); 
+                closeCloneModal();
             } else {
                 modal.style.display = 'none';
             }
@@ -1738,6 +1798,13 @@
             const badgeContainer = document.createElement('div');
             badgeContainer.className = 'status-badge-container';
 
+            // CLONE BUTTON
+            const cloneBtn = document.createElement('button');
+            cloneBtn.className = 'clone-btn';
+            cloneBtn.innerHTML = '⇊';
+            cloneBtn.title = "Clone Defect to other Track Sections";
+            cloneBtn.onclick = function() { openCloneModal(row); };
+
             const delBtn = document.createElement('button');
             delBtn.className = 'delete-btn';
             delBtn.innerHTML = '✖'; 
@@ -1776,6 +1843,7 @@
             photoWrapper.appendChild(cameraLabel);
             photoWrapper.appendChild(fileInput);
             photoWrapper.appendChild(badgeContainer);
+            photoWrapper.appendChild(cloneBtn);
             photoWrapper.appendChild(delBtn); 
             
             row.appendChild(compSelect);
