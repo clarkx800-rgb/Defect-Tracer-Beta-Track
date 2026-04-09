@@ -31,8 +31,9 @@ const systemInstructions = `
 
         <p style="color: var(--text-color); font-weight: bold; text-transform: uppercase;">EXTRAS: STYLES & TEXT SIZES</p>
         <ul style="margin-top: 5px; padding-left: 20px; margin-bottom: 20px;">
-            <b>FONT SIZE</b> Open the top right menu (✖/⚙) to choose font sizes: STANDARD, MEDIUM, LARGE.
-            <b>UI THEME</b> Open the top right menu (✖/⚙) to choose styles: TACTICAL (DARK), WINDOWS11 (LIGHT), FIELD TRAINER (LIGHT)
+            <b>FONT SIZE:</b> Open the top right menu (✖/⚙) to choose font sizes: STANDARD, MEDIUM, LARGE.</ul>
+        <ul> style="margin-top: 5px; padding-left: 20px; margin-bottom: 20px;">   
+            <b>UI THEME:</b> Open the top right menu (✖/⚙) to choose styles TACTICAL (DARK), WINDOWS11 (LIGHT), FIELD TRAINER (GAME).
         </ul>
     </div>
 `;
