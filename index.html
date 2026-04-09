@@ -177,6 +177,35 @@
         }
         .sts-menu-item:active { background: var(--primary-dark); border-color: var(--primary); color: #fff;}
 
+        .search-input-wrapper {
+            display: flex;
+            align-items: center;
+            background: var(--input-bg);
+            border: 1px solid var(--primary);
+            flex: 1;
+            padding: 0 10px;
+            box-shadow: var(--hud-glow);
+        }
+        .search-prefix {
+            color: var(--primary);
+            font-weight: bold;
+            font-size: var(--base-font);
+            letter-spacing: 1px;
+        }
+        #quickTsSearchInput {
+            background: transparent !important;
+            border: none !important;
+            color: var(--text-color) !important;
+            font-size: var(--base-font);
+            font-weight: bold;
+            flex: 1;
+            padding: 12px 5px;
+            outline: none;
+            box-shadow: none !important;
+            width: 100%;
+            -webkit-appearance: none;
+        }
+
         .menu-toggle-btn {
             background-color: var(--card-bg);
             color: var(--text-color); 
@@ -388,7 +417,7 @@
         .add-defect-btn { background-color: transparent; color: var(--text-muted); border: 1px dashed var(--text-muted); margin-top: 10px; width: 100%; transition: all 0.2s;}
         .add-defect-btn:active { border-color: var(--primary); color: var(--primary); }
 
-        /* NEW TUCKED COMMAND BAR (SHEATH) */
+        /* UNIFIED COMMAND BAR (BOTTOM LEFT - SHEATH) */
         .command-bar {
             position: fixed;
             bottom: 20px;
@@ -397,18 +426,18 @@
             align-items: center;
             background-color: var(--card-bg);
             border: 2px solid var(--primary);
-            border-radius: 28px; /* Perfectly round pill */
+            border-radius: 28px; 
             height: 56px; 
             box-shadow: 0 4px 10px rgba(0,0,0,0.8), var(--hud-glow);
-            z-index: 980; /* Stays below Help Overlay */
+            z-index: 980; 
             overflow: hidden;
             transition: max-width 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-            max-width: 450px; /* Expanded state width */
+            max-width: 450px; 
             white-space: nowrap;
         }
         
         .command-bar.collapsed {
-            max-width: 56px; /* Shrinks to just the toggle button */
+            max-width: 56px; 
         }
         
         .command-btn {
@@ -424,7 +453,7 @@
             transition: background-color 0.2s ease, transform 0.1s ease;
             padding: 0;
             border-radius: 0 !important;
-            flex-shrink: 0; /* Prevents button squishing during transition */
+            flex-shrink: 0; 
         }
         .command-btn:active { background-color: var(--border-color); transform: scale(0.9); }
         
@@ -454,10 +483,9 @@
             pointer-events: none;
         }
         .command-bar:not(.collapsed) #cmdToggleIcon {
-            transform: rotate(180deg); /* Flips arrow inwards when open */
+            transform: rotate(180deg); 
         }
 
-        /* MODALS */
         .quick-add-modal {
             position: fixed;
             bottom: 85px;
@@ -466,7 +494,7 @@
             background-color: var(--bg-color);
             border: 1px solid var(--primary);
             box-shadow: 0 10px 25px rgba(0,0,0,0.9), var(--hud-glow);
-            z-index: 985; /* Sits exactly between Command Bar and Help Overlay */
+            z-index: 985; 
             padding: 15px;
             display: none; 
             flex-direction: column;
@@ -540,15 +568,14 @@
         }
         .remove-img-btn:active { transform: translateX(-50%) scale(0.9); }
 
-        /* RE-LAYERED HOW TO USE OVERLAY */
         .help-overlay {
             position: fixed;
             left: 0; width: 100%;
             background: rgba(0, 0, 0, 0.85); 
             backdrop-filter: blur(4px);
-            z-index: 990; /* PERFECT LAYER: Stays below Top Bar, but sits entirely over the Command Bar */
+            z-index: 990; 
             display: flex;
-            align-items: flex-start; 
+            align-items: center; 
             justify-content: center;
             padding: 20px;
             animation: cascadingFadeIn 0.2s ease-out;
@@ -689,8 +716,8 @@
             <div class="command-divider"></div>
             
             <div style="display:flex; align-items:center; padding: 0 5px 0 12px; height: 100%;">
-                <span style="font-size: 14px; font-weight:bold; color:var(--primary); margin-right:2px;">TS-</span>
-                <input type="tel" id="pillSearchInput" style="width: 50px; background:transparent; border:none; color:var(--text-color); font-weight:bold; outline:none; font-size:14px; padding:0;" placeholder="###" onkeypress="if(event.key === 'Enter') searchTSFromPill()">
+                <span style="font-size: 18px; font-weight:bold; color:var(--primary); margin-right:2px;">TS-</span>
+                <input type="tel" id="pillSearchInput" style="width: 85px; background:transparent; border:none; color:var(--text-color); font-weight:bold; outline:none; font-size:16px; padding:0;" placeholder="(SEARCH)" onkeypress="if(event.key === 'Enter') searchTSFromPill()" onfocus="toggleHelp(false); toggleQuickAddModal(false);">
             </div>
             <button class="command-btn" onclick="searchTSFromPill()" title="Search">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="pointer-events: none;">
@@ -711,7 +738,7 @@
                 </button>
             <div class="command-divider"></div>
             
-            <button class="command-btn" onclick="toggleHelp()" title="Help">
+            <button class="command-btn" onclick="toggleHelp(true)" title="Help">
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="pointer-events: none;">
                     <circle cx="12" cy="12" r="10"></circle>
                     <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
@@ -782,12 +809,13 @@
         const iconLoad = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="pointer-events: none;"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>`;
         const iconSave = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="pointer-events: none;"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>`;
 
-        // NEW TOGGLE COMMAND BAR 
+        // MUTUALLY EXCLUSIVE TOGGLE LOGIC
         function toggleCommandBar(e) {
             if (e) e.stopPropagation();
             const bar = document.getElementById('mainCommandBar');
             if (bar.classList.contains('collapsed')) {
                 bar.classList.remove('collapsed');
+                toggleHelp(false); // Close Help if opening Sheath
             } else {
                 bar.classList.add('collapsed');
                 toggleQuickAddModal(false); 
@@ -800,7 +828,7 @@
                 btn.innerHTML = iconLoad;
                 btn.onclick = () => {
                     document.getElementById('importFile').click();
-                    toggleCommandBar(); // Auto hide after clicking
+                    toggleCommandBar(); 
                 };
             } else {
                 btn.innerHTML = iconSave;
@@ -991,7 +1019,6 @@
             if (!menu.contains(e.target) && !menuBtn.contains(e.target) && menu.classList.contains('expanded')) toggleMenu(true);
             if (stsMenu && stsBtn && !stsMenu.contains(e.target) && !stsBtn.contains(e.target) && stsMenu.style.display === 'flex') stsMenu.style.display = 'none';
             if (insertModal && !insertModal.contains(e.target) && !e.target.closest('.map-item') && insertModal.style.display === 'flex') closeInsertModal();
-            if (helpOverlay.style.display === 'flex' && e.target === helpOverlay) toggleHelp(false);
             
             // COMMAND BAR OUTSIDE CLICK AUTO-HIDE
             if (cmdBar && !cmdBar.classList.contains('collapsed') && !cmdBar.contains(e.target) && (!fabModal || !fabModal.contains(e.target))) {
@@ -1015,11 +1042,12 @@
             }
         }
 
-        // NEW PILL SEARCH ENGINE
+        // NEW PILL SEARCH ENGINE WITH AUTO-BLUR
         function searchTSFromPill() {
             const input = document.getElementById('pillSearchInput');
             const tsNumber = input.value.trim();
             if(tsNumber) {
+                input.blur(); // Drops Mobile Keyboard instantly
                 searchTS(tsNumber); 
                 input.value = ''; 
                 document.getElementById('mainCommandBar').classList.add('collapsed');
@@ -1111,6 +1139,7 @@
             toggleMenu(true);
             toggleQuickAddModal(false);
             document.getElementById('stsShortcutMenu').style.display = 'none';
+            document.getElementById('mainCommandBar').classList.add('collapsed');
         }
 
         function closeInsertModal() {
@@ -1287,6 +1316,7 @@
                 modal.style.display = 'flex';
                 toggleMenu(true); 
                 document.getElementById('stsShortcutMenu').style.display = 'none'; 
+                toggleHelp(false); // Highlander Rule: Close Help
             } else {
                 modal.style.display = 'none';
             }
@@ -1701,97 +1731,6 @@
                     updatePhotoUI(row, cameraLabel, badgeContainer);
                 }
             }
-        }
-
-        function loadProject(event) {
-            const fileInput = event.target;
-            const file = fileInput.files[0];
-            if (!file) return;
-
-            currentFileName = file.name;
-            toggleHelp(false);
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const projectData = JSON.parse(e.target.result);
-                    if (!Array.isArray(projectData)) throw new Error("Invalid format");
-
-                    const container = document.getElementById('segments-container');
-                    const mapContainer = document.getElementById('miniMap');
-                    container.innerHTML = '';
-                    mapContainer.innerHTML = '';
-                    
-                    loadedRoutes.clear(); 
-                    routeLoadHistory = [];
-
-                    projectData.forEach((segData, index) => {
-                        const safeAreaName = segData.areaName || '';
-                        const activeKey = segData.routeKey || segData.routeName; 
-                        
-                        const card = createSegmentCard(segData.segmentNum, activeKey, segData.routeName, segData.direction, segData.color, safeAreaName);
-                        card.style.animationDelay = `${index * 0.05}s`;
-                        
-                        card.querySelector('.segment-notes').value = segData.notes || '';
-                        const defectList = card.querySelector('.defect-list');
-                        defectList.innerHTML = '';
-                        
-                        if (!segData.defects || segData.defects.length === 0) { 
-                            addDefectRow(defectList, null, safeAreaName); 
-                        } else { 
-                            segData.defects.forEach(defData => { 
-                                if (defData.photoBase64 && (!defData.images || defData.images.length === 0)) {
-                                    defData.images = [{ img: defData.photoBase64, w: defData.imgW, h: defData.imgH }];
-                                }
-                                addDefectRow(defectList, defData, safeAreaName); 
-                            }); 
-                        }
-
-                        container.appendChild(card);
-                        scrollObserver.observe(card);
-
-                        const mapBtn = document.createElement('div');
-                        mapBtn.className = 'map-item';
-                        mapBtn.setAttribute('data-map-segment', segData.segmentNum);
-                        mapBtn.setAttribute('data-route-key', activeKey);
-                        mapBtn.textContent = `TS-${segData.segmentNum}`;
-                        mapBtn.style.borderLeft = `4px solid ${segData.color || '#ccc'}`;
-                        
-                        attachMapItemListeners(mapBtn, card, segData.segmentNum, activeKey);
-                        
-                        mapContainer.appendChild(mapBtn);
-                        
-                        checkSegmentData(card);
-
-                        if (activeKey && !loadedRoutes.has(activeKey)) {
-                            loadedRoutes.add(activeKey);
-                            routeLoadHistory.push(activeKey);
-                        }
-                        currentActiveArea = safeAreaName;
-                        currentActiveDirection = segData.direction;
-                    });
-
-                    if (loadedRoutes.size > 0) {
-                        document.getElementById('quickAddGroup').style.display = 'flex';
-                        updateRouteDropdown(); 
-                    }
-
-                    showSystemAlert('Backup file imported successfully.', 'DATA LOADED');
-                    toggleMenu(true);
-                    updateCommandBar();
-
-                } catch (err) {
-                    showSystemAlert('Corrupt or invalid JSON file.', 'SYSTEM ERROR', true);
-                    console.error(err);
-                }
-            };
-            
-            reader.onerror = function() {
-                showSystemAlert('Could not read file from device.', 'FILE ERROR', true);
-            };
-
-            reader.readAsText(file);
-            fileInput.value = ''; 
         }
 
         async function saveProject() {
