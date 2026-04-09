@@ -177,35 +177,6 @@
         }
         .sts-menu-item:active { background: var(--primary-dark); border-color: var(--primary); color: #fff;}
 
-        .search-input-wrapper {
-            display: flex;
-            align-items: center;
-            background: var(--input-bg);
-            border: 1px solid var(--primary);
-            flex: 1;
-            padding: 0 10px;
-            box-shadow: var(--hud-glow);
-        }
-        .search-prefix {
-            color: var(--primary);
-            font-weight: bold;
-            font-size: var(--base-font);
-            letter-spacing: 1px;
-        }
-        #quickTsSearchInput {
-            background: transparent !important;
-            border: none !important;
-            color: var(--text-color) !important;
-            font-size: var(--base-font);
-            font-weight: bold;
-            flex: 1;
-            padding: 12px 5px;
-            outline: none;
-            box-shadow: none !important;
-            width: 100%;
-            -webkit-appearance: none;
-        }
-
         .menu-toggle-btn {
             background-color: var(--card-bg);
             color: var(--text-color); 
@@ -432,7 +403,7 @@
             z-index: 980; /* Stays below Help Overlay */
             overflow: hidden;
             transition: max-width 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-            max-width: 300px; /* Expanded state width */
+            max-width: 450px; /* Expanded state width */
             white-space: nowrap;
         }
         
@@ -577,7 +548,7 @@
             backdrop-filter: blur(4px);
             z-index: 990; /* PERFECT LAYER: Stays below Top Bar, but sits entirely over the Command Bar */
             display: flex;
-            align-items: center; 
+            align-items: flex-start; 
             justify-content: center;
             padding: 20px;
             animation: cascadingFadeIn 0.2s ease-out;
@@ -717,8 +688,20 @@
         <div class="command-items" id="cmdItems">
             <div class="command-divider"></div>
             
+            <div style="display:flex; align-items:center; padding: 0 5px 0 12px; height: 100%;">
+                <span style="font-size: 14px; font-weight:bold; color:var(--primary); margin-right:2px;">TS-</span>
+                <input type="tel" id="pillSearchInput" style="width: 50px; background:transparent; border:none; color:var(--text-color); font-weight:bold; outline:none; font-size:14px; padding:0;" placeholder="###" onkeypress="if(event.key === 'Enter') searchTSFromPill()">
+            </div>
+            <button class="command-btn" onclick="searchTSFromPill()" title="Search">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="pointer-events: none;">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+            </button>
+            <div class="command-divider"></div>
+            
             <div id="quickAddGroup" style="display: none; height: 100%; align-items: center;">
-                <button class="command-btn" id="quickAddBtn" onclick="toggleQuickAddModal(event)" title="Add Route / Search">
+                <button class="command-btn" id="quickAddBtn" onclick="toggleQuickAddModal(event)" title="Add Route">
                     <span style="font-size: 28px; font-weight: bold; transform: translateY(-2px); pointer-events: none;">+</span>
                 </button>
                 <div class="command-divider"></div>
@@ -750,15 +733,6 @@
         <div style="display: flex; gap: 8px; margin-top: 5px;">
             <button class="btn-danger" style="flex: 1; padding: 10px;" onclick="undoLastLoad()">↺ UNDO LAST</button>
         </div>
-        
-        <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 15px 0 10px 0;">
-        
-        <h4>FIND TRACK SECTION</h4>
-        <div class="search-input-wrapper">
-            <span class="search-prefix">TS-</span>
-            <input type="tel" id="quickTsSearchInput" placeholder="NUMBER..." onkeypress="if(event.key === 'Enter') searchTSFromQuick()">
-        </div>
-        <button class="btn-primary" onclick="searchTSFromQuick()" style="width: 100%; margin-top: 5px; padding: 10px;">FIND</button>
     </div>
 
     <div class="quick-add-modal" id="insertModal">
@@ -843,7 +817,8 @@
             if (shouldShow) {
                 const headerHeight = header.offsetHeight;
                 overlay.style.top = `${headerHeight}px`;
-                overlay.style.height = `calc(100vh - ${headerHeight}px)`;
+                // Leaves bottom 85px fully clear so it doesn't cover the sheath
+                overlay.style.height = `calc(100vh - ${headerHeight}px - 85px)`; 
                 document.getElementById('helpBodyContent').innerHTML = systemInstructions;
                 overlay.style.display = 'flex';
                 
@@ -1040,13 +1015,13 @@
             }
         }
 
-        function searchTSFromQuick() {
-            const input = document.getElementById('quickTsSearchInput');
+        // NEW PILL SEARCH ENGINE
+        function searchTSFromPill() {
+            const input = document.getElementById('pillSearchInput');
             const tsNumber = input.value.trim();
             if(tsNumber) {
                 searchTS(tsNumber); 
                 input.value = ''; 
-                toggleQuickAddModal(false); 
                 document.getElementById('mainCommandBar').classList.add('collapsed');
             }
         }
@@ -1087,7 +1062,6 @@
                 menu.style.display = 'flex';
                 toggleMenu(true); 
                 toggleQuickAddModal(false); 
-                document.getElementById('mainCommandBar').classList.add('collapsed');
             }
         }
 
@@ -1137,7 +1111,6 @@
             toggleMenu(true);
             toggleQuickAddModal(false);
             document.getElementById('stsShortcutMenu').style.display = 'none';
-            document.getElementById('mainCommandBar').classList.add('collapsed');
         }
 
         function closeInsertModal() {
