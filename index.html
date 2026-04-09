@@ -236,6 +236,7 @@
             padding: 0;
             transition: background-color 0.2s ease;
         }
+        
         .menu-toggle-btn:active { background-color: var(--border-color); }
         .menu-toggle-icon { font-size: 20px; font-family: sans-serif; line-height: 1; pointer-events: none; }
 
@@ -416,6 +417,7 @@
         .defect-list { display: flex; flex-direction: column; gap: 12px; }
         .defect-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; background: var(--input-bg); padding: 10px; border: 1px solid var(--border-color); }
 
+        /* MULTI-PHOTO UI REWORK */
         .photo-wrapper { display: flex; align-items: stretch; gap: 8px; flex: 1 1 100%; justify-content: space-between; background: var(--card-bg); padding: 5px; border: 1px solid var(--border-color); }
         .file-input { display: none; }
         .camera-btn { background-color: var(--border-color); color: var(--text-color); padding: 10px 12px; font-size: var(--base-font); font-weight: bold; cursor: pointer; text-align: center; border: 1px solid var(--border-color); flex: 0 1 auto; transition: background-color 0.2s; display: flex; align-items: center; justify-content: center;}
@@ -1196,14 +1198,8 @@
             if (currentActiveArea && currentActiveDirection && window.globalDatabase[currentActiveArea] && window.globalDatabase[currentActiveArea][currentActiveDirection]) {
                 const routes = window.globalDatabase[currentActiveArea][currentActiveDirection];
                 let hasOptions = false;
-                
                 for (let key in routes) {
                     const routeName = routes[key].name;
-                    
-                    // STRICT FILTER: 
-                    // 1. includes '-X'
-                    // 2. specifically ENDS WITH '-ST' (prevents grabbing "STZ" mainline tracks)
-                    // 3. Checks the actual display name for switch terminology
                     const isSwitchOrPocket = key.includes('-X') || key.endsWith('-ST') || routeName.includes('Pocket') || routeName.includes('Cross') || routeName.includes('Spur');
                     
                     if (!loadedRoutes.has(key) && isSwitchOrPocket) {
@@ -1214,14 +1210,6 @@
                         hasOptions = true;
                     }
                 }
-                
-                if (!hasOptions) {
-                    dropdown.innerHTML = '<option value="">ALL SWITCHES LOADED</option>';
-                }
-            } else {
-                dropdown.innerHTML = '<option value="">NO AREA LOADED</option>';
-            }
-        }
                 if (!hasOptions) {
                     dropdown.innerHTML = '<option value="">ALL SWITCHES LOADED</option>';
                 }
@@ -1717,6 +1705,11 @@
             defaultOpt.textContent = 'AWAITING COMPONENT';
             defSelect.appendChild(defaultOpt);
 
+            // NEW READ-ONLY PART NUMBER BADGE
+            const partBadge = document.createElement('div');
+            partBadge.className = 'part-badge';
+            partBadge.innerHTML = '[ PART #: AWAITING COMPONENT ]';
+
             const customCompInput = document.createElement('input');
             customCompInput.type = 'text';
             customCompInput.placeholder = 'COMP NAME...';
@@ -1729,6 +1722,13 @@
             customDefInput.className = 'custom-def';
             customDefInput.style.display = 'none';
 
+            // CUSTOM PART NUMBER INPUT
+            const customPartInput = document.createElement('input');
+            customPartInput.type = 'text';
+            customPartInput.placeholder = 'ENTER PART # (OPTIONAL)...';
+            customPartInput.className = 'custom-part';
+            customPartInput.style.display = 'none';
+
             const revertBtn = document.createElement('button');
             revertBtn.className = 'delete-btn revert-btn';
             revertBtn.innerHTML = '↺'; 
@@ -1737,12 +1737,15 @@
                 row.dataset.isCustom = "false";
                 compSelect.style.display = '';
                 defSelect.style.display = '';
+                partBadge.style.display = 'none';
                 customCompInput.style.display = 'none';
                 customDefInput.style.display = 'none';
+                customPartInput.style.display = 'none';
                 revertBtn.style.display = 'none';
                 compSelect.value = '';
                 customCompInput.value = '';
                 customDefInput.value = '';
+                customPartInput.value = '';
                 updateDefects('');
                 checkSegmentData(row.closest('.segment-card'));
             };
@@ -1750,17 +1753,28 @@
             function updateDefects(selectedComp, selectedDefect = '') {
                 defSelect.innerHTML = '';
                 if (selectedComp && specificDefectMap[selectedComp]) {
+                    
+                    const mapData = specificDefectMap[selectedComp];
+                    const defectList = Array.isArray(mapData) ? mapData : (mapData.defects || []);
+                    const pn = Array.isArray(mapData) ? "N/A" : (mapData.partNumber || "N/A");
+
+                    partBadge.innerHTML = `[ PART #: <span style="color:var(--warning)">${pn}</span> ]`;
+                    partBadge.style.display = 'block';
+                    row.dataset.partNumber = pn;
+
                     defSelect.disabled = false;
                     let defDefault = document.createElement('option');
                     defDefault.value = '';
                     defDefault.textContent = 'SELECT DEFECT';
                     defSelect.appendChild(defDefault);
-                    specificDefectMap[selectedComp].forEach(d => {
+                    
+                    defectList.forEach(d => {
                         let opt = document.createElement('option');
                         opt.value = d;
                         opt.textContent = d.toUpperCase();
                         defSelect.appendChild(opt);
                     });
+                    
                     if (selectedDefect) defSelect.value = selectedDefect;
                 } else {
                     defSelect.disabled = true;
@@ -1768,6 +1782,9 @@
                     resetOpt.value = '';
                     resetOpt.textContent = 'AWAITING COMPONENT';
                     defSelect.appendChild(resetOpt);
+                    
+                    partBadge.style.display = 'none';
+                    row.dataset.partNumber = "";
                 }
             }
 
@@ -1776,8 +1793,12 @@
                     row.dataset.isCustom = "true";
                     compSelect.style.display = 'none';
                     defSelect.style.display = 'none';
+                    partBadge.style.display = 'none';
+                    
                     customCompInput.style.display = 'block';
                     customDefInput.style.display = 'block';
+                    customPartInput.style.display = 'block';
+                    
                     revertBtn.style.display = 'flex';
                     customCompInput.focus();
                 } else {
@@ -1851,8 +1872,10 @@
             
             row.appendChild(compSelect);
             row.appendChild(defSelect);
+            row.appendChild(partBadge); 
             row.appendChild(customCompInput);
             row.appendChild(customDefInput);
+            row.appendChild(customPartInput); 
             row.appendChild(revertBtn);
             row.appendChild(photoWrapper);
             container.appendChild(row);
@@ -1862,11 +1885,15 @@
                     row.dataset.isCustom = "true";
                     compSelect.style.display = 'none';
                     defSelect.style.display = 'none';
+                    partBadge.style.display = 'none';
                     customCompInput.style.display = 'block';
                     customDefInput.style.display = 'block';
+                    customPartInput.style.display = 'block';
                     revertBtn.style.display = 'flex';
+                    
                     customCompInput.value = prefill.comp || '';
                     customDefInput.value = prefill.def || '';
+                    customPartInput.value = prefill.partNum || '';
                 } else if (prefill.comp) {
                     compSelect.value = prefill.comp;
                     updateDefects(prefill.comp, prefill.def);
@@ -1901,6 +1928,7 @@
                         isCustom: isCustom,
                         comp: isCustom ? row.querySelector('.custom-comp').value : row.querySelector('.component-select').value,
                         def: isCustom ? row.querySelector('.custom-def').value : row.querySelector('.defect-select').value,
+                        partNum: isCustom ? row.querySelector('.custom-part').value : row.dataset.partNumber,
                         images: JSON.parse(row.dataset.images || "[]") 
                     });
                 });
@@ -1945,7 +1973,6 @@
                     loadedRoutes.clear(); 
                     routeLoadHistory = [];
 
-                    // HIDE HELP OVERLAY ON SUCCESSFUL LOAD
                     toggleHelp(false);
 
                     projectData.forEach((segData, index) => {
@@ -2036,6 +2063,7 @@
                     { header: 'TS', key: 'segment', width: 15 },
                     { header: 'Notes', key: 'notes', width: 35 },
                     { header: 'Component', key: 'component', width: 20 },
+                    { header: 'Part Number', key: 'partnum', width: 20 }, 
                     { header: 'Defect', key: 'defect', width: 20 }
                 ];
                 worksheet.getRow(1).font = { bold: true };
@@ -2056,23 +2084,24 @@
                         const isCustom = row.dataset.isCustom === "true";
                         const comp = isCustom ? row.querySelector('.custom-comp').value : row.querySelector('.component-select').value;
                         const def = isCustom ? row.querySelector('.custom-def').value : row.querySelector('.defect-select').value;
+                        const pn = isCustom ? row.querySelector('.custom-part').value : row.dataset.partNumber;
                         const images = JSON.parse(row.dataset.images || "[]");
                         
                         if (comp || def || images.length > 0) {
                             hasDefects = true;
-                            worksheet.addRow({ line: areaName, route: routeName, segment: tsId, notes: notes, component: comp, defect: def });
+                            worksheet.addRow({ line: areaName, route: routeName, segment: tsId, notes: notes, component: comp, partnum: pn, defect: def });
                         }
 
                         if (images.length > 0) {
                             pdfJobs.push({
-                                lineName: areaName, routeName: routeName, tsId: tsId, notes: notes, comp: comp || "N/A", def: def || "N/A",
+                                lineName: areaName, routeName: routeName, tsId: tsId, notes: notes, comp: comp || "N/A", def: def || "N/A", partNum: pn || "N/A",
                                 images: images, defectID: index + 1
                             });
                         }
                     });
 
                     if (!hasDefects && notes.trim() !== '') {
-                        worksheet.addRow({ line: areaName, route: routeName, segment: tsId, notes: notes, component: '', defect: '' });
+                        worksheet.addRow({ line: areaName, route: routeName, segment: tsId, notes: notes, component: '', partnum: '', defect: '' });
                     }
                 });
 
@@ -2188,7 +2217,9 @@
                 
                 doc.setFont("helvetica", "bold");
                 doc.setFontSize(11);
-                doc.text(`${data.tsId} | ${data.def}  ${data.comp}`, textStartX, textStartY);
+                
+                let pnString = data.partNum && data.partNum !== "N/A" ? ` (PN: ${data.partNum})` : "";
+                doc.text(`${data.tsId} | ${data.def}  ${data.comp}${pnString}`, textStartX, textStartY);
                 
                 textStartY += 5;
                 doc.setFont("helvetica", "normal");
