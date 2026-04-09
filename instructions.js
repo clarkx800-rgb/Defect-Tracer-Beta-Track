@@ -5,7 +5,7 @@ const systemInstructions = `
             <li>Open the top right menu (✖/⚙).</li>
             <li>Select <b>1. LINE</b>, <b>2. DIRECTION</b> (IB or OB), and <b>3. SUB-TO-SUB AREA</b>.</li>
             <li>Tap <b>LOAD AREA</b> to generate your inspection route.</li>
-                <b>TIP:</b> Load all needed sub to sub areas in normal order before flipping direction if the start of inpsection on the opposite side.
+                <b>TIP:</b> Load all needed sub to sub areas in normal order before flipping direction if the start of inpsection is on the opposite side.
         </ul>
 
         <p style="color: var(--text-color); font-weight: bold; text-transform: uppercase;">STEP 2: LOG DEFECTS</p>
