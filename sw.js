@@ -1,5 +1,5 @@
 // Change version number to force users' phones to update!
-const CACHE_NAME = 'defect-tracker-v2-prod-1.2.88'; 
+const CACHE_NAME = 'defect-tracker-v2-prod-1.2.89'; 
 
 const ASSETS_TO_CACHE = [
   './',
