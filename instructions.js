@@ -57,10 +57,10 @@ const systemInstructions = `
                 <div style="width: 36px; height: 36px; border-radius: 50%; background: var(--success); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 20px;">4</div>
             </div>
             <div>
-                <h4 style="margin: 0 0 8px 0; color: var(--success); text-transform: uppercase; letter-spacing: 1px; font-size: 18px;">End of Shift Export</h4>
+                <h4 style="margin: 0 0 8px 0; color: var(--success); text-transform: uppercase; letter-spacing: 1px; font-size: 18px;">End of Inspection</h4>
                 <p style="margin: 0 0 8px 0; font-size: 15px; font-weight: 500;">At end of inspection, hit <b>💾 SAVE</b> to back it up, or directly tap <b style="color: var(--success);">📊 EXPORT REPORT</b>.</p>
                 <div style="background: var(--bg-color); padding: 10px; border-radius: 4px; border-left: 3px solid var(--success); font-size: 14px;">
-                    Generated files: excel and pdf can now be uploaded to your <b>ONE DRIVE</b> or send via email to work email. Attach PDF picture files to your newly opened work orders.
+                    Generated files: excel and pdf can now be uploaded to your <b>ONE DRIVE</b> or send via email to work email. Attach PDF picture files to your newly opened work orders. Excel file serves as the list of all defect or deficiencies you found with all details. Only the track section you filled will be exported and no blank rows in between. This can be viewed in the phone as well. Take note of where you saved the files.
                 </div>
             </div>
         </div>
