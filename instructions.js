@@ -31,7 +31,7 @@ const systemInstructions = `
 
         <p style="color: var(--text-color); font-weight: bold; text-transform: uppercase;">EXTRAS: STYLES & TEXT SIZES</p>
         <ul style="margin-top: 5px; padding-left: 20px; margin-bottom: 20px;">
-            <li><b>FONT SIZE:</b> Open the top right menu (✖/⚙) to choose font sizes: STANDARD, MEDIUM, LARGE.<li/>
+            <li><b>FONT SIZE:</b> Open the top right menu (✖/⚙) to choose font sizes: STANDARD, MEDIUM, LARGE.</li>
             <li><b>UI THEME:</b> TACTICAL (DARK), WINDOWS11 (LIGHT), FIELD TRAINER (GAME).</li>
         </ul>
     </div>
