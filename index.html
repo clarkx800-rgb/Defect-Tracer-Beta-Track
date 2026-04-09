@@ -263,7 +263,7 @@
         .input-group { display: flex; gap: 8px; }
         
         /* SHARED INPUT STYLES */
-        select, .segment-notes, .custom-comp, .custom-def, .custom-part {
+        select, .segment-notes, .custom-comp, .custom-def {
             flex: 1;
             padding: 12px;
             border: 1px solid var(--border-color) !important;
@@ -275,7 +275,7 @@
             appearance: none; 
             transition: background-color 0.3s ease;
         }
-        select:focus, .segment-notes:focus, .custom-comp:focus, .custom-def:focus, .custom-part:focus {
+        select:focus, .segment-notes:focus, .custom-comp:focus, .custom-def:focus {
             outline: none;
             border-color: var(--primary) !important;
             box-shadow: var(--hud-glow);
@@ -283,21 +283,6 @@
         select:disabled { background-color: var(--border-color) !important; color: var(--text-muted) !important; cursor: not-allowed; }
         
         .custom-comp, .custom-def { flex: 1 1 35%; min-width: 100px; }
-        .custom-part { flex: 1 1 100%; display: none; }
-
-        .part-badge {
-            background-color: var(--input-bg);
-            border: 1px dashed var(--border-color);
-            color: var(--text-muted);
-            padding: 8px;
-            font-size: 11px;
-            font-weight: bold;
-            text-align: center;
-            flex: 1 1 100%;
-            margin-top: -4px;
-            margin-bottom: 4px;
-            display: none;
-        }
 
         .action-buttons { display: flex; gap: 8px; margin-top: 5px; }
         .save-load-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 5px; }
@@ -417,7 +402,6 @@
         .defect-list { display: flex; flex-direction: column; gap: 12px; }
         .defect-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; background: var(--input-bg); padding: 10px; border: 1px solid var(--border-color); }
 
-        /* MULTI-PHOTO UI REWORK */
         .photo-wrapper { display: flex; align-items: stretch; gap: 8px; flex: 1 1 100%; justify-content: space-between; background: var(--card-bg); padding: 5px; border: 1px solid var(--border-color); }
         .file-input { display: none; }
         .camera-btn { background-color: var(--border-color); color: var(--text-color); padding: 10px 12px; font-size: var(--base-font); font-weight: bold; cursor: pointer; text-align: center; border: 1px solid var(--border-color); flex: 0 1 auto; transition: background-color 0.2s; display: flex; align-items: center; justify-content: center;}
@@ -1705,11 +1689,6 @@
             defaultOpt.textContent = 'AWAITING COMPONENT';
             defSelect.appendChild(defaultOpt);
 
-            // NEW READ-ONLY PART NUMBER BADGE
-            const partBadge = document.createElement('div');
-            partBadge.className = 'part-badge';
-            partBadge.innerHTML = '[ PART #: AWAITING COMPONENT ]';
-
             const customCompInput = document.createElement('input');
             customCompInput.type = 'text';
             customCompInput.placeholder = 'COMP NAME...';
@@ -1722,13 +1701,6 @@
             customDefInput.className = 'custom-def';
             customDefInput.style.display = 'none';
 
-            // CUSTOM PART NUMBER INPUT
-            const customPartInput = document.createElement('input');
-            customPartInput.type = 'text';
-            customPartInput.placeholder = 'ENTER PART # (OPTIONAL)...';
-            customPartInput.className = 'custom-part';
-            customPartInput.style.display = 'none';
-
             const revertBtn = document.createElement('button');
             revertBtn.className = 'delete-btn revert-btn';
             revertBtn.innerHTML = '↺'; 
@@ -1737,15 +1709,12 @@
                 row.dataset.isCustom = "false";
                 compSelect.style.display = '';
                 defSelect.style.display = '';
-                partBadge.style.display = 'none';
                 customCompInput.style.display = 'none';
                 customDefInput.style.display = 'none';
-                customPartInput.style.display = 'none';
                 revertBtn.style.display = 'none';
                 compSelect.value = '';
                 customCompInput.value = '';
                 customDefInput.value = '';
-                customPartInput.value = '';
                 updateDefects('');
                 checkSegmentData(row.closest('.segment-card'));
             };
@@ -1756,11 +1725,6 @@
                     
                     const mapData = specificDefectMap[selectedComp];
                     const defectList = Array.isArray(mapData) ? mapData : (mapData.defects || []);
-                    const pn = Array.isArray(mapData) ? "N/A" : (mapData.partNumber || "N/A");
-
-                    partBadge.innerHTML = `[ PART #: <span style="color:var(--warning)">${pn}</span> ]`;
-                    partBadge.style.display = 'block';
-                    row.dataset.partNumber = pn;
 
                     defSelect.disabled = false;
                     let defDefault = document.createElement('option');
@@ -1782,9 +1746,6 @@
                     resetOpt.value = '';
                     resetOpt.textContent = 'AWAITING COMPONENT';
                     defSelect.appendChild(resetOpt);
-                    
-                    partBadge.style.display = 'none';
-                    row.dataset.partNumber = "";
                 }
             }
 
@@ -1793,12 +1754,8 @@
                     row.dataset.isCustom = "true";
                     compSelect.style.display = 'none';
                     defSelect.style.display = 'none';
-                    partBadge.style.display = 'none';
-                    
                     customCompInput.style.display = 'block';
                     customDefInput.style.display = 'block';
-                    customPartInput.style.display = 'block';
-                    
                     revertBtn.style.display = 'flex';
                     customCompInput.focus();
                 } else {
@@ -1872,10 +1829,8 @@
             
             row.appendChild(compSelect);
             row.appendChild(defSelect);
-            row.appendChild(partBadge); 
             row.appendChild(customCompInput);
             row.appendChild(customDefInput);
-            row.appendChild(customPartInput); 
             row.appendChild(revertBtn);
             row.appendChild(photoWrapper);
             container.appendChild(row);
@@ -1885,15 +1840,12 @@
                     row.dataset.isCustom = "true";
                     compSelect.style.display = 'none';
                     defSelect.style.display = 'none';
-                    partBadge.style.display = 'none';
                     customCompInput.style.display = 'block';
                     customDefInput.style.display = 'block';
-                    customPartInput.style.display = 'block';
                     revertBtn.style.display = 'flex';
                     
                     customCompInput.value = prefill.comp || '';
                     customDefInput.value = prefill.def || '';
-                    customPartInput.value = prefill.partNum || '';
                 } else if (prefill.comp) {
                     compSelect.value = prefill.comp;
                     updateDefects(prefill.comp, prefill.def);
@@ -1905,9 +1857,9 @@
             }
         }
 
-        function saveProject() {
+        async function saveProject() {
             const cards = document.querySelectorAll('.segment-card');
-            if (cards.length === 0) { showSystemAlert('No data available to save.', 'SAVE FAILED'); return; }
+            if (cards.length === 0) { showSystemAlert('No data available to save.', 'SAVE FAILED', true); return; }
 
             const projectData = [];
             cards.forEach(card => {
@@ -1928,29 +1880,44 @@
                         isCustom: isCustom,
                         comp: isCustom ? row.querySelector('.custom-comp').value : row.querySelector('.component-select').value,
                         def: isCustom ? row.querySelector('.custom-def').value : row.querySelector('.defect-select').value,
-                        partNum: isCustom ? row.querySelector('.custom-part').value : row.dataset.partNumber,
                         images: JSON.parse(row.dataset.images || "[]") 
                     });
                 });
                 projectData.push(segData);
             });
 
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(projectData));
-            const link = document.createElement("a");
-            
-            let exportName = currentFileName;
-            if (!exportName) {
-                const date = new Date().toISOString().split('T')[0];
-                exportName = `TRACK_DATA_${date}.json`;
-            }
+            const dataStr = JSON.stringify(projectData, null, 2);
+            let exportName = currentFileName || `TRACK_DATA_${new Date().toISOString().split('T')[0]}.json`;
 
-            link.setAttribute("href", dataStr);
-            link.setAttribute("download", exportName);
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            
-            currentFileName = exportName;
+            try {
+                if (window.showSaveFilePicker) {
+                    // Modern API: Prompts user for Save Location
+                    const handle = await window.showSaveFilePicker({
+                        suggestedName: exportName,
+                        types: [{ description: 'JSON File', accept: {'application/json': ['.json']} }],
+                    });
+                    const writable = await handle.createWritable();
+                    await writable.write(dataStr);
+                    await writable.close();
+                    currentFileName = handle.name;
+                    showSystemAlert('Data saved successfully to selected location.', 'SAVE COMPLETE');
+                } else {
+                    // Fallback for Mobile/Older browsers
+                    const blob = new Blob([dataStr], { type: 'application/json' });
+                    const link = document.createElement("a");
+                    link.href = URL.createObjectURL(blob);
+                    link.download = exportName;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    showSystemAlert('Data downloaded to your device Downloads folder.', 'SAVE COMPLETE');
+                }
+            } catch (err) {
+                if (err.name !== 'AbortError') {
+                    console.error(err);
+                    showSystemAlert('Failed to save file.', 'SAVE ERROR', true);
+                }
+            }
             
             toggleMenu(true);
         }
@@ -1973,6 +1940,7 @@
                     loadedRoutes.clear(); 
                     routeLoadHistory = [];
 
+                    // HIDE HELP OVERLAY ON SUCCESSFUL LOAD
                     toggleHelp(false);
 
                     projectData.forEach((segData, index) => {
@@ -2063,7 +2031,6 @@
                     { header: 'TS', key: 'segment', width: 15 },
                     { header: 'Notes', key: 'notes', width: 35 },
                     { header: 'Component', key: 'component', width: 20 },
-                    { header: 'Part Number', key: 'partnum', width: 20 }, 
                     { header: 'Defect', key: 'defect', width: 20 }
                 ];
                 worksheet.getRow(1).font = { bold: true };
@@ -2084,24 +2051,23 @@
                         const isCustom = row.dataset.isCustom === "true";
                         const comp = isCustom ? row.querySelector('.custom-comp').value : row.querySelector('.component-select').value;
                         const def = isCustom ? row.querySelector('.custom-def').value : row.querySelector('.defect-select').value;
-                        const pn = isCustom ? row.querySelector('.custom-part').value : row.dataset.partNumber;
                         const images = JSON.parse(row.dataset.images || "[]");
                         
                         if (comp || def || images.length > 0) {
                             hasDefects = true;
-                            worksheet.addRow({ line: areaName, route: routeName, segment: tsId, notes: notes, component: comp, partnum: pn, defect: def });
+                            worksheet.addRow({ line: areaName, route: routeName, segment: tsId, notes: notes, component: comp, defect: def });
                         }
 
                         if (images.length > 0) {
                             pdfJobs.push({
-                                lineName: areaName, routeName: routeName, tsId: tsId, notes: notes, comp: comp || "N/A", def: def || "N/A", partNum: pn || "N/A",
+                                lineName: areaName, routeName: routeName, tsId: tsId, notes: notes, comp: comp || "N/A", def: def || "N/A",
                                 images: images, defectID: index + 1
                             });
                         }
                     });
 
                     if (!hasDefects && notes.trim() !== '') {
-                        worksheet.addRow({ line: areaName, route: routeName, segment: tsId, notes: notes, component: '', partnum: '', defect: '' });
+                        worksheet.addRow({ line: areaName, route: routeName, segment: tsId, notes: notes, component: '', defect: '' });
                     }
                 });
 
@@ -2217,9 +2183,7 @@
                 
                 doc.setFont("helvetica", "bold");
                 doc.setFontSize(11);
-                
-                let pnString = data.partNum && data.partNum !== "N/A" ? ` (PN: ${data.partNum})` : "";
-                doc.text(`${data.tsId} | ${data.def}  ${data.comp}${pnString}`, textStartX, textStartY);
+                doc.text(`${data.tsId} | ${data.def}  ${data.comp}`, textStartX, textStartY);
                 
                 textStartY += 5;
                 doc.setFont("helvetica", "normal");
