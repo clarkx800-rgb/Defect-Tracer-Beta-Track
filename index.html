@@ -23,6 +23,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
     <script>
+        const APP_VERSION = "2.0.91"; // CHANGE THIS NUMBER TO AUTO-UPDATE THE ENTIRE APP UI
+
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('sw.js').catch(err => console.log('SW fail:', err));
@@ -471,7 +473,7 @@
         .add-defect-btn { background-color: transparent; color: var(--text-muted); border: 1px dashed var(--text-muted); margin-top: 10px; width: 100%; transition: all 0.2s;}
         .add-defect-btn:active { border-color: var(--primary); color: var(--primary); }
 
-        /* COMMAND BAR SHEATH (GLIDING EXPANSION) */
+        /* UNIFIED COMMAND BAR SHEATH */
         .command-bar {
             position: fixed;
             bottom: 20px;
@@ -494,8 +496,8 @@
         
         .command-bar.collapsed {
             width: 56px; 
-            left: 20px; /* Tucks back to the left */
-            transform: translateX(0); /* Removes centering transform */
+            left: 20px; /* Tucks back to the left edge */
+            transform: translateX(0); /* Removes centering offset */
         }
         
         .command-btn {
@@ -750,7 +752,7 @@
     <div id="helpOverlay" class="help-overlay" style="display: none;">
         <div class="help-modal">
             <div class="help-header">
-                <h3>HOW TO USE <span style="font-size: 12px; color: var(--text-muted); letter-spacing: 0;">TRACER v2.0.91</span></h3>
+                <h3>HOW TO USE <span id="app-version-display" style="font-size: 12px; color: var(--text-muted); letter-spacing: 0;"></span></h3>
                 <button class="menu-toggle-btn" onclick="toggleHelp(false)" style="width: 32px; height: 32px; border-color: transparent;">
                     <span class="menu-toggle-icon" style="font-size: 14px;">✖</span>
                 </button>
@@ -1164,6 +1166,9 @@
             document.getElementById('theme-selector').value = localStorage.getItem('appTheme') || 'tactical';
             document.getElementById('font-selector').value = localStorage.getItem('appFontSize') || 'small';
             
+            const versionSpan = document.getElementById('app-version-display');
+            if(versionSpan) versionSpan.textContent = `TRACER v${APP_VERSION}`;
+            
             const areaSelect = document.getElementById('general-area');
             for (let area in window.globalDatabase) {
                 let opt = document.createElement('option');
@@ -1550,7 +1555,12 @@
 
                     const routeDisplay = document.getElementById('active-route-display');
                     const areaDisplay = document.getElementById('active-area-display');
-                    routeDisplay.textContent = routeName ? routeName : 'AWAITING...';
+                    
+                    if (routeName) {
+                        routeDisplay.innerHTML = `<span style="display:inline-block; width:10px; height:10px; border-radius:50%; background-color:${routeColor}; margin-right:6px; border: 1px solid rgba(255,255,255,0.3); vertical-align: middle; margin-bottom: 2px;"></span>${routeName}`;
+                    } else {
+                        routeDisplay.textContent = 'AWAITING...';
+                    }
                     
                     if (areaName) {
                         areaDisplay.textContent = areaName;
@@ -1922,7 +1932,7 @@
                             row.dataset.images = JSON.stringify(currentImages);
                             updatePhotoUI(row, cameraLabel, badgeContainer);
                             checkSegmentData(row.closest('.segment-card'));
-                            fileInput.value = ''; // SAFE CLEAR AFTER PROCESSING
+                            fileInput.value = ''; 
                         };
                         img.src = event.target.result;
                     };
@@ -2045,20 +2055,18 @@
                     showSystemAlert('Backup file imported successfully.', 'DATA LOADED');
                     toggleMenu(true);
                     updateCommandBar();
-                    document.getElementById('mainCommandBar').classList.add('collapsed');
 
                 } catch (err) {
                     showSystemAlert('Corrupt or invalid JSON file.', 'SYSTEM ERROR', true);
                     console.error(err);
                 }
                 
-                // SAFE CACHE WIPE AFTER PROCESSING IS FULLY COMPLETE
                 fileInput.value = ''; 
             };
             
             reader.onerror = function() {
                 showSystemAlert('Could not read file from device.', 'FILE ERROR', true);
-                fileInput.value = ''; // Wipe on error as well
+                fileInput.value = ''; 
             };
 
             reader.readAsText(file);
