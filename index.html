@@ -270,6 +270,42 @@
         
         .custom-comp, .custom-def { flex: 1 1 35%; min-width: 100px; }
 
+        /* MULTI-SELECT CHECKBOX STYLES */
+        .checkbox-list {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            max-height: 250px;
+            overflow-y: auto;
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: var(--border-radius);
+        }
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--text-color);
+            font-size: var(--base-font);
+            cursor: pointer;
+            text-transform: uppercase;
+            font-weight: bold;
+            padding: 8px 5px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            transition: background-color 0.2s;
+        }
+        .checkbox-item:active { background-color: rgba(255,255,255,0.1); }
+        .checkbox-item:last-child { border-bottom: none; }
+        .checkbox-item input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            accent-color: var(--primary);
+            cursor: pointer;
+            margin: 0;
+        }
+
         .action-buttons { display: flex; gap: 8px; margin-top: 5px; }
         .save-load-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 5px; }
 
@@ -435,11 +471,10 @@
         .add-defect-btn { background-color: transparent; color: var(--text-muted); border: 1px dashed var(--text-muted); margin-top: 10px; width: 100%; transition: all 0.2s;}
         .add-defect-btn:active { border-color: var(--primary); color: var(--primary); }
 
-        /* COMMAND BAR SHEATH (GLIDING EXPANSION) */
+        /* COMMAND BAR SHEATH (CENTERED BOTTOM) */
         .command-bar {
             position: fixed;
             bottom: 20px;
-            /* Expanded State: Dead Center */
             left: 50%;
             transform: translateX(-50%); 
             display: flex;
@@ -451,8 +486,7 @@
             box-shadow: 0 4px 10px rgba(0,0,0,0.8), var(--hud-glow);
             z-index: 980; 
             overflow: hidden;
-            /* Animate all properties so it glides smoothly from left to center while expanding */
-            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            transition: width 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
             width: 440px; 
             max-width: 95vw; 
             white-space: nowrap;
@@ -460,9 +494,6 @@
         
         .command-bar.collapsed {
             width: 56px; 
-            /* Collapsed State: Tucked in the bottom left corner */
-            left: 20px;
-            transform: translateX(0);
         }
         
         .command-btn {
@@ -518,7 +549,7 @@
             bottom: 85px;
             left: 50%;
             transform: translateX(-50%); 
-            width: 280px;
+            width: 300px;
             background-color: var(--bg-color);
             border: 1px solid var(--primary);
             box-shadow: 0 10px 25px rgba(0,0,0,0.9), var(--hud-glow);
@@ -785,15 +816,17 @@
 
     <div class="quick-add-modal" id="quickAddModal">
         <h4>ADD ROUTE TO: <span id="quick-add-title" style="color: var(--primary);"></span></h4>
-        <select id="quick-add-select" style="width: 100%; margin-bottom: 5px;">
-            <option value="">AWAITING INPUT...</option>
-        </select>
+        
+        <div id="quick-add-checklist" class="checkbox-list">
+            <div style="color: var(--text-muted); text-align: center; font-style: italic;">AWAITING INPUT...</div>
+        </div>
+
         <div style="display: flex; gap: 8px;">
-            <button class="btn-primary" style="flex: 1; padding: 10px;" onclick="generateSegments(true)">ADD</button>
+            <button class="btn-primary" style="flex: 1; padding: 10px;" onclick="generateSegments(true)">ADD SELECTED</button>
             <button class="btn-outline" style="flex: 1; padding: 10px;" onclick="toggleQuickAddModal(false)">CANCEL</button>
         </div>
         <div style="display: flex; gap: 8px; margin-top: 5px;">
-            <button class="btn-danger" style="flex: 1; padding: 10px;" onclick="undoLastLoad()">↺ UNDO LAST</button>
+            <button class="btn-danger" style="flex: 1; padding: 10px;" onclick="undoLastLoad()">↺ UNDO BATCH</button>
         </div>
     </div>
 
@@ -1362,7 +1395,7 @@
             });
 
             loadedRoutes.add(routeKey);
-            routeLoadHistory.push(routeKey);
+            routeLoadHistory.push([routeKey]);
             closeInsertModal();
             updateRouteDropdown(); 
             
@@ -1428,22 +1461,37 @@
             }
         }
 
-        function updateQuickAddDropdown() {
-            const dropdown = document.getElementById('quick-add-select');
-            dropdown.innerHTML = '<option value="">AWAITING INPUT...</option>';
+        // CHECKLIST ENGINE
+        function updateQuickAddChecklist() {
+            const container = document.getElementById('quick-add-checklist');
+            container.innerHTML = '';
             if (currentActiveArea && currentActiveDirection && window.globalDatabase[currentActiveArea] && window.globalDatabase[currentActiveArea][currentActiveDirection]) {
                 const routes = window.globalDatabase[currentActiveArea][currentActiveDirection];
                 let hasOptions = false;
                 for (let routeKey in routes) {
                     if (!loadedRoutes.has(routeKey)) {
-                        let opt = document.createElement('option');
-                        opt.value = routeKey;
-                        opt.textContent = routes[routeKey].name;
-                        dropdown.appendChild(opt);
+                        const label = document.createElement('label');
+                        label.className = 'checkbox-item';
+                        
+                        const cb = document.createElement('input');
+                        cb.type = 'checkbox';
+                        cb.value = routeKey;
+                        // Store index for precise physical sorting
+                        cb.dataset.index = Object.keys(routes).indexOf(routeKey);
+                        
+                        const text = document.createTextNode(routes[routeKey].name);
+                        
+                        label.appendChild(cb);
+                        label.appendChild(text);
+                        container.appendChild(label);
                         hasOptions = true;
                     }
                 }
-                if (!hasOptions) dropdown.innerHTML = '<option value="">ALL SECTIONS LOADED</option>';
+                if (!hasOptions) {
+                    container.innerHTML = '<div style="color: var(--text-muted); text-align: center;">ALL SECTIONS LOADED</div>';
+                }
+            } else {
+                container.innerHTML = '<div style="color: var(--text-muted); text-align: center; font-style: italic;">AWAITING INPUT...</div>';
             }
         }
 
@@ -1462,7 +1510,7 @@
             if (shouldShow) {
                 const dirCode = currentActiveDirection === "Inbound Track" ? "IB" : "OB";
                 document.getElementById('quick-add-title').textContent = `${currentActiveArea} [${dirCode}]`;
-                updateQuickAddDropdown();
+                updateQuickAddChecklist();
                 modal.style.display = 'flex';
                 toggleMenu(true); 
                 document.getElementById('stsShortcutMenu').style.display = 'none'; 
@@ -1550,97 +1598,143 @@
             window.scrollTo({ top: elementPosition - headerHeight - 15, behavior: "smooth" });
         }
 
+        // BATCH LOADING ENGINE
         function generateSegments(isQuickAdd = false) {
-            let area, direction, routeSelect, selectedRouteKey;
+            let area, direction, selectedRouteKeys = [];
+
             if (isQuickAdd) {
                 area = currentActiveArea;
                 direction = currentActiveDirection;
-                routeSelect = document.getElementById('quick-add-select');
-                selectedRouteKey = routeSelect.value;
+                
+                const checkboxes = Array.from(document.querySelectorAll('#quick-add-checklist input[type="checkbox"]:checked'));
+                if (checkboxes.length === 0) {
+                    showSystemAlert('Please select at least one route to add.', 'SELECTION ERROR', true);
+                    return;
+                }
+                
+                // Forces sections to load in the exact physical order defined in the database
+                checkboxes.sort((a, b) => parseInt(a.dataset.index) - parseInt(b.dataset.index));
+                selectedRouteKeys = checkboxes.map(cb => cb.value);
+
             } else {
                 area = document.getElementById('general-area').value;
                 direction = document.getElementById('page-direction').value;
-                routeSelect = document.getElementById('global-section');
-                selectedRouteKey = routeSelect.value;
+                const routeSelect = document.getElementById('global-section');
+                
+                if (!area || !routeSelect.value) { 
+                    showSystemAlert('Invalid Selection. Ensure Area and Block are selected.', 'SELECTION ERROR', true); 
+                    return; 
+                }
+                selectedRouteKeys = [routeSelect.value];
             }
-            
-            if (!area || !selectedRouteKey) { showSystemAlert('Invalid Selection. Ensure Area and Block are selected.', 'SELECTION ERROR', true); return; }
-            if (loadedRoutes.has(selectedRouteKey)) { showSystemAlert('This section is already loaded in the workspace.', 'DUPLICATE LOAD'); return; }
-
-            const selectedRouteData = window.globalDatabase[area][direction][selectedRouteKey];
-            const container = document.getElementById('segments-container');
-            const mapContainer = document.getElementById('miniMap');
 
             toggleHelp(false);
-            const newCards = []; 
-            selectedRouteData.segments.forEach(range => {
-                const blockColor = range.color || 'var(--primary)'; 
-                if (range.start <= range.end) { for (let i = range.start; i <= range.end; i++) newCards.push({ num: i, color: blockColor }); } 
-                else { for (let i = range.start; i >= range.end; i--) newCards.push({ num: i, color: blockColor }); }
-            });
             
-            newCards.forEach((item, index) => {
-                const card = createSegmentCard(item.num, selectedRouteKey, selectedRouteData.name, direction, item.color, area);
-                card.style.animationDelay = `${index * 0.05}s`;
-                container.appendChild(card);
-                scrollObserver.observe(card);
+            let firstNewCardToScroll = null;
 
-                const mapBtn = document.createElement('div');
-                mapBtn.className = 'map-item';
-                mapBtn.setAttribute('data-map-segment', item.num);
-                mapBtn.setAttribute('data-route-key', selectedRouteKey); 
-                mapBtn.textContent = `TS-${item.num}`;
-                mapBtn.style.borderLeft = `4px solid ${item.color}`;
-                attachMapItemListeners(mapBtn, card, item.num, selectedRouteKey);
-                mapContainer.appendChild(mapBtn);
+            selectedRouteKeys.forEach(selectedRouteKey => {
+                if (loadedRoutes.has(selectedRouteKey)) return; 
+
+                const selectedRouteData = window.globalDatabase[area][direction][selectedRouteKey];
+                const container = document.getElementById('segments-container');
+                const mapContainer = document.getElementById('miniMap');
+
+                const newCards = []; 
+                selectedRouteData.segments.forEach(range => {
+                    const blockColor = range.color || 'var(--primary)'; 
+                    if (range.start <= range.end) { for (let i = range.start; i <= range.end; i++) newCards.push({ num: i, color: blockColor }); } 
+                    else { for (let i = range.start; i >= range.end; i--) newCards.push({ num: i, color: blockColor }); }
+                });
+                
+                newCards.forEach((item, index) => {
+                    const card = createSegmentCard(item.num, selectedRouteKey, selectedRouteData.name, direction, item.color, area);
+                    card.style.animationDelay = `${index * 0.05}s`;
+                    container.appendChild(card);
+                    scrollObserver.observe(card);
+
+                    const mapBtn = document.createElement('div');
+                    mapBtn.className = 'map-item';
+                    mapBtn.setAttribute('data-map-segment', item.num);
+                    mapBtn.setAttribute('data-route-key', selectedRouteKey); 
+                    mapBtn.textContent = `TS-${item.num}`;
+                    mapBtn.style.borderLeft = `4px solid ${item.color}`;
+                    attachMapItemListeners(mapBtn, card, item.num, selectedRouteKey);
+                    mapContainer.appendChild(mapBtn);
+                    
+                    if (!firstNewCardToScroll) firstNewCardToScroll = card;
+                });
+                
+                loadedRoutes.add(selectedRouteKey);
             });
+
+            // Push the entire batch as a single transaction for Undo
+            routeLoadHistory.push(selectedRouteKeys);
             
-            loadedRoutes.add(selectedRouteKey);
-            routeLoadHistory.push(selectedRouteKey);
             currentActiveArea = area;
             currentActiveDirection = direction;
             
             document.getElementById('quickAddGroup').style.display = 'flex';
             
-            routeSelect.value = '';
-            if (isQuickAdd) { toggleQuickAddModal(false); updateRouteDropdown(); } 
-            else { updateRouteDropdown(); toggleMenu(true); }
+            if (!isQuickAdd) document.getElementById('global-section').value = '';
+            
+            if (isQuickAdd) { 
+                toggleQuickAddModal(false); 
+                updateRouteDropdown(); 
+            } else { 
+                updateRouteDropdown(); 
+                toggleMenu(true); 
+            }
             
             updateCommandBar();
             document.getElementById('mainCommandBar').classList.add('collapsed');
+            
+            if(firstNewCardToScroll) {
+                isAutoScrolling = true;
+                scrollToCard(firstNewCardToScroll);
+                firstNewCardToScroll.classList.add('search-highlight');
+                setTimeout(() => { firstNewCardToScroll.classList.remove('search-highlight'); isAutoScrolling = false; }, 1200);
+            }
         }
 
         async function undoLastLoad() {
             if (routeLoadHistory.length === 0) { showSystemAlert("No actions to undo.", "SYSTEM NOTICE"); return; }
-            const lastRouteKey = routeLoadHistory[routeLoadHistory.length - 1];
-            const cardsToRemove = document.querySelectorAll(`.segment-card[data-route-key="${lastRouteKey}"]`);
+            
+            const lastTransactionKeys = routeLoadHistory[routeLoadHistory.length - 1];
+            const keysToUndo = Array.isArray(lastTransactionKeys) ? lastTransactionKeys : [lastTransactionKeys];
             
             let hasData = false;
             let conflictTS = "";
             let conflictRoute = "";
+            let cardsToRemove = [];
 
-            cardsToRemove.forEach(card => {
-                if (hasData) return; 
-                if (card.querySelector('.segment-notes').value.trim() !== '') hasData = true;
-                card.querySelectorAll('.defect-row').forEach(row => {
-                    const images = JSON.parse(row.dataset.images || "[]");
-                    const isCustom = row.dataset.isCustom === "true";
-                    const compVal = isCustom ? row.querySelector('.custom-comp').value : row.querySelector('.component-select').value;
-                    const defVal = isCustom ? row.querySelector('.custom-def').value : row.querySelector('.defect-select').value;
-                    if (compVal || defVal || images.length > 0) hasData = true;
+            keysToUndo.forEach(key => {
+                const cards = document.querySelectorAll(`.segment-card[data-route-key="${key}"]`);
+                cards.forEach(card => {
+                    cardsToRemove.push(card);
+                    if (hasData) return; 
+                    if (card.querySelector('.segment-notes').value.trim() !== '') hasData = true;
+                    card.querySelectorAll('.defect-row').forEach(row => {
+                        const images = JSON.parse(row.dataset.images || "[]");
+                        const isCustom = row.dataset.isCustom === "true";
+                        const compVal = isCustom ? row.querySelector('.custom-comp').value : row.querySelector('.component-select').value;
+                        const defVal = isCustom ? row.querySelector('.custom-def').value : row.querySelector('.defect-select').value;
+                        if (compVal || defVal || images.length > 0) hasData = true;
+                    });
+                    if (hasData) { conflictTS = card.getAttribute('data-segment'); conflictRoute = card.getAttribute('data-route-name'); }
                 });
-                if (hasData) { conflictTS = card.getAttribute('data-segment'); conflictRoute = card.getAttribute('data-route-name'); }
             });
 
             if (hasData) {
-                const proceed = await showSystemConfirm(`TS-${conflictTS} has data.\n\nUndoing this will erase the "${conflictRoute}" and details.\n\nAre you sure you want to cancel?`);
+                const proceed = await showSystemConfirm(`TS-${conflictTS} has data.\n\nUndoing this will erase "${conflictRoute}" and details.\n\nAre you sure you want to cancel?`);
                 if (!proceed) return; 
             }
             
             routeLoadHistory.pop();
             cardsToRemove.forEach(el => el.remove());
-            document.querySelectorAll(`.map-item[data-route-key="${lastRouteKey}"]`).forEach(el => el.remove());
-            loadedRoutes.delete(lastRouteKey);
+            keysToUndo.forEach(key => {
+                document.querySelectorAll(`.map-item[data-route-key="${key}"]`).forEach(el => el.remove());
+                loadedRoutes.delete(key);
+            });
             
             if (loadedRoutes.size === 0) {
                 document.getElementById('quickAddGroup').style.display = 'none';
@@ -1961,7 +2055,8 @@
 
                         if (activeKey && !loadedRoutes.has(activeKey)) {
                             loadedRoutes.add(activeKey);
-                            routeLoadHistory.push(activeKey);
+                            // Store as array for uniform undo support
+                            routeLoadHistory.push([activeKey]);
                         }
                         currentActiveArea = safeAreaName;
                         currentActiveDirection = segData.direction;
