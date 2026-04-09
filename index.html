@@ -436,6 +436,7 @@
         }
         .photo-status-badge:active { background: var(--primary); }
         
+        /* CLONE ENGINE BUTTON */
         .clone-btn {
             background-color: transparent; 
             color: #0A84FF; 
@@ -943,7 +944,10 @@
             const btn = document.getElementById('dynamicSaveLoadBtn');
             if (loadedRoutes.size === 0) {
                 btn.innerHTML = iconLoad;
-                btn.onclick = () => { document.getElementById('importFile').click(); toggleCommandBar(); };
+                btn.onclick = () => { 
+                    // Let loadProject handle closing the bar upon success
+                    document.getElementById('importFile').click(); 
+                };
             } else {
                 btn.innerHTML = iconSave;
                 btn.onclick = () => saveProject();
@@ -1546,7 +1550,12 @@
 
                     const routeDisplay = document.getElementById('active-route-display');
                     const areaDisplay = document.getElementById('active-area-display');
-                    routeDisplay.textContent = routeName ? routeName : 'AWAITING...';
+                    
+                    if (routeName) {
+                        routeDisplay.innerHTML = `<span style="display:inline-block; width:10px; height:10px; border-radius:50%; background-color:${routeColor}; margin-right:6px; border: 1px solid rgba(255,255,255,0.3); vertical-align: middle; margin-bottom: 2px;"></span>${routeName}`;
+                    } else {
+                        routeDisplay.textContent = 'AWAITING...';
+                    }
                     
                     if (areaName) {
                         areaDisplay.textContent = areaName;
@@ -1918,12 +1927,14 @@
                             row.dataset.images = JSON.stringify(currentImages);
                             updatePhotoUI(row, cameraLabel, badgeContainer);
                             checkSegmentData(row.closest('.segment-card'));
+                            fileInput.value = ''; // SAFE CLEAR AFTER PROCESSING
                         };
                         img.src = event.target.result;
                     };
                     reader.readAsDataURL(file);
+                } else {
+                    fileInput.value = ''; 
                 }
-                this.value = ''; 
             });
 
             photoWrapper.appendChild(cameraLabel);
@@ -1959,6 +1970,103 @@
                     updatePhotoUI(row, cameraLabel, badgeContainer);
                 }
             }
+        }
+
+        function loadProject(event) {
+            const fileInput = event.target;
+            const file = fileInput.files[0];
+            if (!file) return;
+
+            currentFileName = file.name;
+            toggleHelp(false);
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const projectData = JSON.parse(e.target.result);
+                    if (!Array.isArray(projectData)) throw new Error("Invalid format");
+
+                    const container = document.getElementById('segments-container');
+                    const mapContainer = document.getElementById('miniMap');
+                    container.innerHTML = '';
+                    mapContainer.innerHTML = '';
+                    
+                    loadedRoutes.clear(); 
+                    routeLoadHistory = [];
+
+                    toggleHelp(false);
+
+                    projectData.forEach((segData, index) => {
+                        const safeAreaName = segData.areaName || '';
+                        const activeKey = segData.routeKey || segData.routeName; 
+                        
+                        const card = createSegmentCard(segData.segmentNum, activeKey, segData.routeName, segData.direction, segData.color, safeAreaName);
+                        card.style.animationDelay = `${index * 0.05}s`;
+                        
+                        card.querySelector('.segment-notes').value = segData.notes || '';
+                        const defectList = card.querySelector('.defect-list');
+                        defectList.innerHTML = '';
+                        
+                        if (!segData.defects || segData.defects.length === 0) { 
+                            addDefectRow(defectList, null, safeAreaName); 
+                        } else { 
+                            segData.defects.forEach(defData => { 
+                                if (defData.photoBase64 && (!defData.images || defData.images.length === 0)) {
+                                    defData.images = [{ img: defData.photoBase64, w: defData.imgW, h: defData.imgH }];
+                                }
+                                addDefectRow(defectList, defData, safeAreaName); 
+                            }); 
+                        }
+
+                        container.appendChild(card);
+                        scrollObserver.observe(card);
+
+                        const mapBtn = document.createElement('div');
+                        mapBtn.className = 'map-item';
+                        mapBtn.setAttribute('data-map-segment', segData.segmentNum);
+                        mapBtn.setAttribute('data-route-key', activeKey);
+                        mapBtn.textContent = `TS-${segData.segmentNum}`;
+                        mapBtn.style.borderLeft = `4px solid ${segData.color || '#ccc'}`;
+                        
+                        attachMapItemListeners(mapBtn, card, segData.segmentNum, activeKey);
+                        
+                        mapContainer.appendChild(mapBtn);
+                        
+                        checkSegmentData(card);
+
+                        if (activeKey && !loadedRoutes.has(activeKey)) {
+                            loadedRoutes.add(activeKey);
+                            routeLoadHistory.push([activeKey]);
+                        }
+                        currentActiveArea = safeAreaName;
+                        currentActiveDirection = segData.direction;
+                    });
+
+                    if (loadedRoutes.size > 0) {
+                        document.getElementById('quickAddGroup').style.display = 'flex';
+                        updateRouteDropdown(); 
+                    }
+
+                    showSystemAlert('Backup file imported successfully.', 'DATA LOADED');
+                    toggleMenu(true);
+                    updateCommandBar();
+                    document.getElementById('mainCommandBar').classList.add('collapsed');
+
+                } catch (err) {
+                    showSystemAlert('Corrupt or invalid JSON file.', 'SYSTEM ERROR', true);
+                    console.error(err);
+                }
+                
+                // SAFE CACHE WIPE AFTER PROCESSING IS FULLY COMPLETE
+                fileInput.value = ''; 
+            };
+            
+            reader.onerror = function() {
+                showSystemAlert('Could not read file from device.', 'FILE ERROR', true);
+                fileInput.value = ''; // Wipe on error as well
+            };
+
+            reader.readAsText(file);
         }
 
         async function saveProject() {
