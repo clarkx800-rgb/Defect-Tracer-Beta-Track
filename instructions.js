@@ -28,5 +28,11 @@ const systemInstructions = `
             <li>System does not auto-save. Open menu and tap <b style="color: var(--warning)">💾 SAVE DATA</b> frequently.</li>
             <li>Tap <b style="color: var(--success)">📊 EXPORT REPORT</b> at the end of inspection to generate your data collected to Excel & PDF picture files.</li>
         </ul>
+
+        <p style="color: var(--text-color); font-weight: bold; text-transform: uppercase;">EXTRAS: STYLES & TEXT SIZES</p>
+        <ul style="margin-top: 5px; padding-left: 20px; margin-bottom: 20px;">
+            <b>FONT SIZE</b> Open the top right menu (✖/⚙) to choose font sizes: STANDARD, MEDIUM, LARGE.
+            <b>UI THEME</b> Open the top right menu (✖/⚙) to choose styles: TACTICAL (DARK), WINDOWS11 (LIGHT), FIELD TRAINER (LIGHT)
+        </ul>
     </div>
 `;
