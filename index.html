@@ -416,60 +416,38 @@
         .add-defect-btn { background-color: transparent; color: var(--text-muted); border: 1px dashed var(--text-muted); margin-top: 10px; width: 100%; transition: all 0.2s;}
         .add-defect-btn:active { border-color: var(--primary); color: var(--primary); }
 
-        /* QUICK ADD FAB (BOTTOM LEFT) */
-        .quick-add-fab {
-            position: fixed;
-            bottom: 20px;
-            left: 20px;
-            width: 56px;
-            height: 56px;
-            background-color: var(--card-bg);
-            color: var(--primary);
-            border: 2px solid var(--primary);
-            border-radius: 50% !important; 
-            font-size: 32px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.8), var(--hud-glow);
-            cursor: pointer;
-            z-index: 1000;
-            display: none; 
-            transition: transform 0.1s ease, background-color 0.2s ease;
-        }
-        .quick-add-fab:active { transform: scale(0.9); background-color: var(--primary-dark); color: #fff; }
-
-        /* NEW UNIFIED COMMAND BAR (BOTTOM RIGHT) */
+        /* NEW UNIFIED COMMAND BAR (BOTTOM LEFT) */
         .command-bar {
             position: fixed;
             bottom: 20px;
-            right: 20px;
+            left: 20px;
             display: flex;
             align-items: center;
             background-color: var(--card-bg);
             border: 2px solid var(--primary);
-            border-radius: 16px; /* Smooth rounded rectangle */
-            height: 56px; /* Matches the FAB height */
+            border-radius: 16px; 
+            height: 56px; 
             box-shadow: 0 4px 10px rgba(0,0,0,0.8), var(--hud-glow);
             z-index: 1000;
             overflow: hidden;
+            transition: width 0.3s ease;
         }
         
         .command-btn {
             background: transparent;
             border: none;
-            color: var(--text-color); /* Automatically adapts to Light/Dark theme */
+            color: var(--text-color); 
             width: 56px;
             height: 100%;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            transition: background-color 0.2s ease;
+            transition: background-color 0.2s ease, transform 0.1s ease;
             padding: 0;
             border-radius: 0 !important;
         }
-        .command-btn:active { background-color: var(--border-color); }
+        .command-btn:active { background-color: var(--border-color); transform: scale(0.9); }
         
         .command-divider {
             width: 2px;
@@ -694,14 +672,18 @@
         <div id="segments-container"></div>
     </div>
 
-    <button class="quick-add-fab" id="quickAddBtn" onclick="toggleQuickAddModal(event)">
-        <span style="transform: translateY(-2px); pointer-events: none;">+</span>
-    </button>
-    
     <div class="command-bar">
+        <div id="quickAddGroup" style="display: none; height: 100%; align-items: center;">
+            <button class="command-btn" id="quickAddBtn" onclick="toggleQuickAddModal(event)" title="Add Route / Search">
+                <span style="font-size: 28px; font-weight: bold; transform: translateY(-2px); pointer-events: none;">+</span>
+            </button>
+            <div class="command-divider"></div>
+        </div>
+        
         <button class="command-btn" id="dynamicSaveLoadBtn" title="Command Action">
             </button>
         <div class="command-divider"></div>
+        
         <button class="command-btn" onclick="toggleHelp()" title="Help">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="12" cy="12" r="10"></circle>
@@ -779,10 +761,10 @@
         let confirmResolve = null;
 
         // COMMAND BAR ICONS (Scalable Vectors)
-        const iconLoad = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>`;
-        const iconSave = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>`;
+        const iconLoad = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>`;
+        const iconSave = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>`;
 
-        // COMMAND BAR LOGIC
+        // DYNAMIC COMMAND BAR LOGIC
         function updateCommandBar() {
             const btn = document.getElementById('dynamicSaveLoadBtn');
             if (loadedRoutes.size === 0) {
@@ -957,7 +939,7 @@
             }
             
             if (loadedRoutes.size === 0) toggleHelp(true);
-            updateCommandBar(); // Init the button state
+            updateCommandBar(); 
         });
 
         document.addEventListener('click', (e) => {
@@ -1389,9 +1371,11 @@
             routeLoadHistory.push(selectedRouteKey);
             currentActiveArea = area;
             currentActiveDirection = direction;
-            document.getElementById('quickAddBtn').style.display = 'flex';
-            routeSelect.value = '';
             
+            // SHOW THE + BUTTON IN THE COMMAND PILL
+            document.getElementById('quickAddGroup').style.display = 'flex';
+            
+            routeSelect.value = '';
             if (isQuickAdd) { toggleQuickAddModal(false); updateRouteDropdown(); } 
             else { updateRouteDropdown(); toggleMenu(true); }
             
@@ -1431,7 +1415,7 @@
             loadedRoutes.delete(lastRouteKey);
             
             if (loadedRoutes.size === 0) {
-                document.getElementById('quickAddBtn').style.display = 'none';
+                document.getElementById('quickAddGroup').style.display = 'none';
                 currentActiveArea = "";
                 currentActiveDirection = "";
                 document.getElementById('active-area-display').style.display = 'none';
@@ -1738,92 +1722,6 @@
             }
             toggleMenu(true);
         }
-
-        function loadProject(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            currentFileName = file.name;
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const projectData = JSON.parse(e.target.result);
-                    const container = document.getElementById('segments-container');
-                    const mapContainer = document.getElementById('miniMap');
-                    container.innerHTML = '';
-                    mapContainer.innerHTML = '';
-                    
-                    loadedRoutes.clear(); 
-                    routeLoadHistory = [];
-
-                    toggleHelp(false);
-
-                    projectData.forEach((segData, index) => {
-                        const safeAreaName = segData.areaName || '';
-                        const activeKey = segData.routeKey || segData.routeName; 
-                        
-                        const card = createSegmentCard(segData.segmentNum, activeKey, segData.routeName, segData.direction, segData.color, safeAreaName);
-                        card.style.animationDelay = `${index * 0.05}s`;
-                        
-                        card.querySelector('.segment-notes').value = segData.notes;
-                        const defectList = card.querySelector('.defect-list');
-                        defectList.innerHTML = '';
-                        
-                        if (segData.defects.length === 0) { 
-                            addDefectRow(defectList, null, safeAreaName); 
-                        } else { 
-                            segData.defects.forEach(defData => { 
-                                if (defData.photoBase64 && (!defData.images || defData.images.length === 0)) {
-                                    defData.images = [{ img: defData.photoBase64, w: defData.imgW, h: defData.imgH }];
-                                }
-                                addDefectRow(defectList, defData, safeAreaName); 
-                            }); 
-                        }
-
-                        container.appendChild(card);
-                        scrollObserver.observe(card);
-
-                        const mapBtn = document.createElement('div');
-                        mapBtn.className = 'map-item';
-                        mapBtn.setAttribute('data-map-segment', segData.segmentNum);
-                        mapBtn.setAttribute('data-route-key', activeKey);
-                        mapBtn.textContent = `TS-${segData.segmentNum}`;
-                        mapBtn.style.borderLeft = `4px solid ${segData.color || '#ccc'}`;
-                        
-                        attachMapItemListeners(mapBtn, card, segData.segmentNum, activeKey);
-                        
-                        mapContainer.appendChild(mapBtn);
-                        
-                        checkSegmentData(card);
-
-                        if (activeKey && !loadedRoutes.has(activeKey)) {
-                            loadedRoutes.add(activeKey);
-                            routeLoadHistory.push(activeKey);
-                        }
-                        currentActiveArea = safeAreaName;
-                        currentActiveDirection = segData.direction;
-                    });
-
-                    if (loadedRoutes.size > 0) {
-                        document.getElementById('quickAddBtn').style.display = 'flex';
-                        updateRouteDropdown(); 
-                    }
-
-                    showSystemAlert('Backup file imported successfully.', 'DATA LOADED');
-                    toggleMenu(true);
-                    updateCommandBar();
-
-                } catch (err) {
-                    showSystemAlert('Corrupt or invalid JSON file.', 'SYSTEM ERROR', true);
-                    console.error(err);
-                }
-                document.getElementById('importFile').value = '';
-            };
-            reader.readAsText(file);
-        }
-
-        const delay = ms => new Promise(res => setTimeout(res, ms));
 
         async function exportData() {
             if (typeof ExcelJS === 'undefined' || typeof window.jspdf === 'undefined') {
