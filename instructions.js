@@ -27,7 +27,8 @@ const systemInstructions = `
         <ul style="margin-top: 5px; padding-left: 20px;">
             <li>System does not auto-save. Open menu and tap <b style="color: var(--warning)">💾 SAVE DATA</b> frequently.</li>
             <li>Tap <b style="color: var(--success)">📊 EXPORT REPORT</b> at the end of inspection to generate your data collected to Excel & PDF picture files.</li>
-            <li>The exported file can then be saved in your <b>One Drive</b> via phone upload or send via email.</li>
+            <li>After exporting, files are found in <b>DOWNLOADS</b> folder in the device/phone and can then be uploaded in your <b>One Drive</b> or send via email.</li>
+            It will look like: <b>DEFECT_REPORT_2026-04-08.xlsx</b> for excel file, and <b>TS-XXXX_Lim_Rail_DEFECT.pdf</b> for PDF unless names were changed.
         </ul>
 
         <p style="color: var(--text-color); font-weight: bold; text-transform: uppercase;">EXTRA: STYLES & TEXT SIZES</p>
