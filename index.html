@@ -1196,15 +1196,32 @@
             if (currentActiveArea && currentActiveDirection && window.globalDatabase[currentActiveArea] && window.globalDatabase[currentActiveArea][currentActiveDirection]) {
                 const routes = window.globalDatabase[currentActiveArea][currentActiveDirection];
                 let hasOptions = false;
+                
                 for (let key in routes) {
-                    if (!loadedRoutes.has(key) && (key.includes('-X') || key.includes('-ST') || key.includes('Pocket') || key.includes('Cross'))) {
+                    const routeName = routes[key].name;
+                    
+                    // STRICT FILTER: 
+                    // 1. includes '-X'
+                    // 2. specifically ENDS WITH '-ST' (prevents grabbing "STZ" mainline tracks)
+                    // 3. Checks the actual display name for switch terminology
+                    const isSwitchOrPocket = key.includes('-X') || key.endsWith('-ST') || routeName.includes('Pocket') || routeName.includes('Cross') || routeName.includes('Spur');
+                    
+                    if (!loadedRoutes.has(key) && isSwitchOrPocket) {
                         let opt = document.createElement('option');
                         opt.value = key;
-                        opt.textContent = routes[key].name;
+                        opt.textContent = routeName;
                         dropdown.appendChild(opt);
                         hasOptions = true;
                     }
                 }
+                
+                if (!hasOptions) {
+                    dropdown.innerHTML = '<option value="">ALL SWITCHES LOADED</option>';
+                }
+            } else {
+                dropdown.innerHTML = '<option value="">NO AREA LOADED</option>';
+            }
+        }
                 if (!hasOptions) {
                     dropdown.innerHTML = '<option value="">ALL SWITCHES LOADED</option>';
                 }
