@@ -248,7 +248,6 @@
         .control-panel label { font-size: var(--base-font); letter-spacing: 1px; color: var(--text-muted); margin-top: 5px; }
         .input-group { display: flex; gap: 8px; }
         
-        /* SHARED INPUT STYLES */
         select, .segment-notes, .custom-comp, .custom-def {
             flex: 1;
             padding: 12px;
@@ -437,7 +436,6 @@
         }
         .photo-status-badge:active { background: var(--primary); }
         
-        /* CLONE ENGINE BUTTON */
         .clone-btn {
             background-color: transparent; 
             color: #0A84FF; 
@@ -471,7 +469,7 @@
         .add-defect-btn { background-color: transparent; color: var(--text-muted); border: 1px dashed var(--text-muted); margin-top: 10px; width: 100%; transition: all 0.2s;}
         .add-defect-btn:active { border-color: var(--primary); color: var(--primary); }
 
-        /* COMMAND BAR SHEATH (CENTERED BOTTOM) */
+        /* COMMAND BAR SHEATH (GLIDING EXPANSION) */
         .command-bar {
             position: fixed;
             bottom: 20px;
@@ -486,7 +484,7 @@
             box-shadow: 0 4px 10px rgba(0,0,0,0.8), var(--hud-glow);
             z-index: 980; 
             overflow: hidden;
-            transition: width 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
             width: 440px; 
             max-width: 95vw; 
             white-space: nowrap;
@@ -494,6 +492,8 @@
         
         .command-bar.collapsed {
             width: 56px; 
+            left: 20px; /* Tucks back to the left */
+            transform: translateX(0); /* Removes centering transform */
         }
         
         .command-btn {
@@ -794,7 +794,7 @@
             </div>
             
             <button class="command-btn" id="dynamicSaveLoadBtn" title="Command Action">
-                </button>
+            </button>
             <div class="command-divider"></div>
             
             <button class="command-btn" onclick="togglePageScroll()" title="Scroll Page">
@@ -890,7 +890,6 @@
         const iconLoad = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="pointer-events: none;"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>`;
         const iconSave = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="pointer-events: none;"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>`;
 
-        // TACTICAL SCROLL ENGINE
         let isPageScrolling = false;
         function togglePageScroll() {
             const btnIcon = document.getElementById('scrollToggleIcon');
@@ -927,7 +926,6 @@
             else { btnIcon.style.transform = 'rotate(0deg)'; btnIcon.dataset.dir = 'up'; }
         }, { passive: true });
 
-        // HIGHLANDER RULE MUTUALLY EXCLUSIVE TOGGLE LOGIC
         function toggleCommandBar(e) {
             if (e) e.stopPropagation();
             const bar = document.getElementById('mainCommandBar');
@@ -971,7 +969,6 @@
             }
         }
 
-        // CLONE ENGINE
         function openCloneModal(row) {
             currentRowToClone = row;
             document.getElementById('cloneTsInput').value = '';
@@ -980,7 +977,6 @@
             toggleQuickAddModal(false);
             toggleHelp(false);
             document.getElementById('mainCommandBar').classList.add('collapsed');
-            
             setTimeout(() => document.getElementById('cloneTsInput').focus(), 100);
         }
 
@@ -992,8 +988,7 @@
         function executeClone() {
             if (!currentRowToClone) return;
             const targetTS = document.getElementById('cloneTsInput').value.trim();
-            
-            document.getElementById('cloneTsInput').blur(); // Close keyboard
+            document.getElementById('cloneTsInput').blur(); 
 
             if (!targetTS) { closeCloneModal(); return; }
 
@@ -1176,7 +1171,7 @@
             updateCommandBar(); 
         });
 
-        // GLOBAL CLICK DETECTOR (AUTO HIDE ENGINE)
+        // GLOBAL CLICK DETECTOR
         document.addEventListener('click', (e) => {
             const menu = document.getElementById('collapsible-menu');
             const fabModal = document.getElementById('quickAddModal');
@@ -1194,7 +1189,6 @@
             if (cloneModal && !cloneModal.contains(e.target) && !e.target.closest('.clone-btn') && cloneModal.style.display === 'flex') closeCloneModal();
             if (helpOverlay.style.display === 'flex' && e.target === helpOverlay) toggleHelp(false);
             
-            // COMMAND BAR OUTSIDE CLICK AUTO-HIDE
             if (cmdBar && !cmdBar.classList.contains('collapsed') && !cmdBar.contains(e.target) && (!fabModal || !fabModal.contains(e.target))) {
                 cmdBar.classList.add('collapsed');
                 toggleQuickAddModal(false);
@@ -1217,7 +1211,6 @@
             }
         }
 
-        // PILL SEARCH ENGINE WITH AUTO-BLUR
         function searchTSFromPill() {
             const input = document.getElementById('pillSearchInput');
             const tsNumber = input.value.trim();
@@ -1461,7 +1454,6 @@
             }
         }
 
-        // CHECKLIST ENGINE
         function updateQuickAddChecklist() {
             const container = document.getElementById('quick-add-checklist');
             container.innerHTML = '';
@@ -1476,7 +1468,6 @@
                         const cb = document.createElement('input');
                         cb.type = 'checkbox';
                         cb.value = routeKey;
-                        // Store index for precise physical sorting
                         cb.dataset.index = Object.keys(routes).indexOf(routeKey);
                         
                         const text = document.createTextNode(routes[routeKey].name);
@@ -1555,12 +1546,7 @@
 
                     const routeDisplay = document.getElementById('active-route-display');
                     const areaDisplay = document.getElementById('active-area-display');
-                    
-                    if (routeName) {
-                        routeDisplay.innerHTML = `<span style="display:inline-block; width:10px; height:10px; border-radius:50%; background-color:${routeColor}; margin-right:6px; border: 1px solid rgba(255,255,255,0.3); vertical-align: middle; margin-bottom: 2px;"></span>${routeName}`;
-                    } else {
-                        routeDisplay.textContent = 'AWAITING...';
-                    }
+                    routeDisplay.textContent = routeName ? routeName : 'AWAITING...';
                     
                     if (areaName) {
                         areaDisplay.textContent = areaName;
@@ -1598,24 +1584,19 @@
             window.scrollTo({ top: elementPosition - headerHeight - 15, behavior: "smooth" });
         }
 
-        // BATCH LOADING ENGINE
         function generateSegments(isQuickAdd = false) {
             let area, direction, selectedRouteKeys = [];
 
             if (isQuickAdd) {
                 area = currentActiveArea;
                 direction = currentActiveDirection;
-                
                 const checkboxes = Array.from(document.querySelectorAll('#quick-add-checklist input[type="checkbox"]:checked'));
                 if (checkboxes.length === 0) {
                     showSystemAlert('Please select at least one route to add.', 'SELECTION ERROR', true);
                     return;
                 }
-                
-                // Forces sections to load in the exact physical order defined in the database
                 checkboxes.sort((a, b) => parseInt(a.dataset.index) - parseInt(b.dataset.index));
                 selectedRouteKeys = checkboxes.map(cb => cb.value);
-
             } else {
                 area = document.getElementById('general-area').value;
                 direction = document.getElementById('page-direction').value;
@@ -1629,7 +1610,6 @@
             }
 
             toggleHelp(false);
-            
             let firstNewCardToScroll = null;
 
             selectedRouteKeys.forEach(selectedRouteKey => {
@@ -1667,23 +1647,13 @@
                 loadedRoutes.add(selectedRouteKey);
             });
 
-            // Push the entire batch as a single transaction for Undo
             routeLoadHistory.push(selectedRouteKeys);
-            
             currentActiveArea = area;
             currentActiveDirection = direction;
-            
             document.getElementById('quickAddGroup').style.display = 'flex';
-            
             if (!isQuickAdd) document.getElementById('global-section').value = '';
-            
-            if (isQuickAdd) { 
-                toggleQuickAddModal(false); 
-                updateRouteDropdown(); 
-            } else { 
-                updateRouteDropdown(); 
-                toggleMenu(true); 
-            }
+            if (isQuickAdd) { toggleQuickAddModal(false); updateRouteDropdown(); } 
+            else { updateRouteDropdown(); toggleMenu(true); }
             
             updateCommandBar();
             document.getElementById('mainCommandBar').classList.add('collapsed');
@@ -1989,100 +1959,6 @@
                     updatePhotoUI(row, cameraLabel, badgeContainer);
                 }
             }
-        }
-
-        function loadProject(event) {
-            const fileInput = event.target;
-            const file = fileInput.files[0];
-            if (!file) return;
-
-            currentFileName = file.name;
-            toggleHelp(false);
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const projectData = JSON.parse(e.target.result);
-                    if (!Array.isArray(projectData)) throw new Error("Invalid format");
-
-                    const container = document.getElementById('segments-container');
-                    const mapContainer = document.getElementById('miniMap');
-                    container.innerHTML = '';
-                    mapContainer.innerHTML = '';
-                    
-                    loadedRoutes.clear(); 
-                    routeLoadHistory = [];
-
-                    toggleHelp(false);
-
-                    projectData.forEach((segData, index) => {
-                        const safeAreaName = segData.areaName || '';
-                        const activeKey = segData.routeKey || segData.routeName; 
-                        
-                        const card = createSegmentCard(segData.segmentNum, activeKey, segData.routeName, segData.direction, segData.color, safeAreaName);
-                        card.style.animationDelay = `${index * 0.05}s`;
-                        
-                        card.querySelector('.segment-notes').value = segData.notes || '';
-                        const defectList = card.querySelector('.defect-list');
-                        defectList.innerHTML = '';
-                        
-                        if (!segData.defects || segData.defects.length === 0) { 
-                            addDefectRow(defectList, null, safeAreaName); 
-                        } else { 
-                            segData.defects.forEach(defData => { 
-                                if (defData.photoBase64 && (!defData.images || defData.images.length === 0)) {
-                                    defData.images = [{ img: defData.photoBase64, w: defData.imgW, h: defData.imgH }];
-                                }
-                                addDefectRow(defectList, defData, safeAreaName); 
-                            }); 
-                        }
-
-                        container.appendChild(card);
-                        scrollObserver.observe(card);
-
-                        const mapBtn = document.createElement('div');
-                        mapBtn.className = 'map-item';
-                        mapBtn.setAttribute('data-map-segment', segData.segmentNum);
-                        mapBtn.setAttribute('data-route-key', activeKey);
-                        mapBtn.textContent = `TS-${segData.segmentNum}`;
-                        mapBtn.style.borderLeft = `4px solid ${segData.color || '#ccc'}`;
-                        
-                        attachMapItemListeners(mapBtn, card, segData.segmentNum, activeKey);
-                        
-                        mapContainer.appendChild(mapBtn);
-                        
-                        checkSegmentData(card);
-
-                        if (activeKey && !loadedRoutes.has(activeKey)) {
-                            loadedRoutes.add(activeKey);
-                            // Store as array for uniform undo support
-                            routeLoadHistory.push([activeKey]);
-                        }
-                        currentActiveArea = safeAreaName;
-                        currentActiveDirection = segData.direction;
-                    });
-
-                    if (loadedRoutes.size > 0) {
-                        document.getElementById('quickAddGroup').style.display = 'flex';
-                        updateRouteDropdown(); 
-                    }
-
-                    showSystemAlert('Backup file imported successfully.', 'DATA LOADED');
-                    toggleMenu(true);
-                    updateCommandBar();
-
-                } catch (err) {
-                    showSystemAlert('Corrupt or invalid JSON file.', 'SYSTEM ERROR', true);
-                    console.error(err);
-                }
-            };
-            
-            reader.onerror = function() {
-                showSystemAlert('Could not read file from device.', 'FILE ERROR', true);
-            };
-
-            reader.readAsText(file);
-            fileInput.value = ''; 
         }
 
         async function saveProject() {
