@@ -144,7 +144,7 @@
             margin: 0;
         }
         .sts-header-btn:active { background-color: var(--border-color); }
-        .sts-header-btn span#active-route-display { color: var(--text-color); }
+        .sts-header-btn span#active-route-display { color: var(--text-color); display: flex; align-items: center; }
 
         .sts-shortcut-menu {
             position: absolute;
@@ -174,6 +174,8 @@
             text-align: left;
             letter-spacing: 1px;
             transition: background 0.2s;
+            display: flex;
+            align-items: center;
         }
         .sts-menu-item:active { background: var(--primary-dark); border-color: var(--primary); color: #fff;}
 
@@ -246,6 +248,7 @@
         .control-panel label { font-size: var(--base-font); letter-spacing: 1px; color: var(--text-muted); margin-top: 5px; }
         .input-group { display: flex; gap: 8px; }
         
+        /* SHARED INPUT STYLES */
         select, .segment-notes, .custom-comp, .custom-def {
             flex: 1;
             padding: 12px;
@@ -432,12 +435,12 @@
         .add-defect-btn { background-color: transparent; color: var(--text-muted); border: 1px dashed var(--text-muted); margin-top: 10px; width: 100%; transition: all 0.2s;}
         .add-defect-btn:active { border-color: var(--primary); color: var(--primary); }
 
-        /* CENTERED COMMAND BAR SHEATH (BOTTOM) */
+        /* COMMAND BAR SHEATH (BOTTOM LEFT) */
         .command-bar {
             position: fixed;
             bottom: 20px;
             left: 50%;
-            transform: translateX(-50%); /* Auto centers on all screens */
+            transform: translateX(-50%); 
             display: flex;
             align-items: center;
             background-color: var(--card-bg);
@@ -448,8 +451,8 @@
             z-index: 980; 
             overflow: hidden;
             transition: width 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-            width: 440px; /* Reduced max width to fit smaller screens better */
-            max-width: 95vw; /* Failsafe for extremely narrow screens */
+            width: 440px; 
+            max-width: 95vw; 
             white-space: nowrap;
         }
         
@@ -487,8 +490,8 @@
             height: 100%;
             opacity: 1;
             transition: opacity 0.2s ease 0.1s;
-            width: calc(100% - 56px); /* Take up remaining space */
-            justify-content: space-evenly; /* Evenly space items */
+            width: calc(100% - 56px); 
+            justify-content: space-evenly; 
         }
         
         .command-bar.collapsed .command-items {
@@ -509,7 +512,7 @@
             position: fixed;
             bottom: 85px;
             left: 50%;
-            transform: translateX(-50%); /* Centered above pill */
+            transform: translateX(-50%); 
             width: 280px;
             background-color: var(--bg-color);
             border: 1px solid var(--primary);
@@ -1100,6 +1103,7 @@
             const badgeContainer = wrapper.querySelector('.status-badge-container');
             updatePhotoUI(currentRowForGallery, cameraBtn, badgeContainer);
             checkSegmentData(currentRowForGallery.closest('.segment-card'));
+
             if (images.length === 0) closeGallery();
             else openGallery(currentRowForGallery); 
         }
@@ -1152,6 +1156,7 @@
             if (cloneModal && !cloneModal.contains(e.target) && !e.target.closest('.clone-btn') && cloneModal.style.display === 'flex') closeCloneModal();
             if (helpOverlay.style.display === 'flex' && e.target === helpOverlay) toggleHelp(false);
             
+            // COMMAND BAR OUTSIDE CLICK AUTO-HIDE
             if (cmdBar && !cmdBar.classList.contains('collapsed') && !cmdBar.contains(e.target) && (!fabModal || !fabModal.contains(e.target))) {
                 cmdBar.classList.add('collapsed');
                 toggleQuickAddModal(false);
@@ -1237,12 +1242,19 @@
             cards.forEach(card => {
                 const key = card.getAttribute('data-route-key');
                 const name = card.getAttribute('data-route-name');
-                if (!orderedRoutes.find(r => r.key === key)) orderedRoutes.push({ key, name });
+                const color = card.getAttribute('data-color') || 'var(--primary)';
+                if (!orderedRoutes.find(r => r.key === key)) orderedRoutes.push({ key, name, color });
             });
             orderedRoutes.forEach((route, index) => {
                 const btn = document.createElement('button');
                 btn.className = 'sts-menu-item';
-                btn.innerHTML = `<span style="color:var(--primary); margin-right:8px;">${index + 1}.</span> ${route.name}`;
+                btn.style.display = 'flex';
+                btn.style.alignItems = 'center';
+                btn.innerHTML = `
+                    <span style="display:inline-block; width:12px; height:12px; border-radius:50%; background-color:${route.color}; margin-right:10px; flex-shrink:0; border:1px solid rgba(255,255,255,0.2);"></span>
+                    <span style="color:var(--primary); margin-right:8px;">${index + 1}.</span> 
+                    <span>${route.name}</span>
+                `;
                 btn.onclick = () => jumpToRoute(route.key);
                 menu.appendChild(btn);
             });
@@ -1486,10 +1498,16 @@
                     const segNum = entry.target.getAttribute('data-segment');
                     const routeName = entry.target.getAttribute('data-route-name');
                     const areaName = entry.target.getAttribute('data-area-name');
+                    const routeColor = entry.target.getAttribute('data-color') || 'var(--primary)';
 
                     const routeDisplay = document.getElementById('active-route-display');
                     const areaDisplay = document.getElementById('active-area-display');
-                    routeDisplay.textContent = routeName ? routeName : 'AWAITING...';
+                    
+                    if (routeName) {
+                        routeDisplay.innerHTML = `<span style="display:inline-block; width:10px; height:10px; border-radius:50%; background-color:${routeColor}; margin-right:6px; border: 1px solid rgba(255,255,255,0.3); vertical-align: middle; margin-bottom: 2px;"></span>${routeName}`;
+                    } else {
+                        routeDisplay.textContent = 'AWAITING...';
+                    }
                     
                     if (areaName) {
                         areaDisplay.textContent = areaName;
@@ -1625,6 +1643,7 @@
                 currentActiveDirection = "";
                 document.getElementById('active-area-display').style.display = 'none';
                 document.getElementById('stsDropdownBtn').style.display = 'none';
+                document.getElementById('active-route-display').innerHTML = 'AWAITING...';
                 toggleHelp(true);
             }
             toggleQuickAddModal(false);
