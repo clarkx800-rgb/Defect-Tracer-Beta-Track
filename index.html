@@ -440,37 +440,50 @@
         }
         .quick-add-fab:active { transform: scale(0.9); background-color: var(--primary-dark); color: #fff; }
 
-        /* NEW BOTTOM RIGHT COMMAND CENTER (SAVE + HELP) */
-        .bottom-right-group {
+        /* UNIFIED ACTION BAR (BOTTOM RIGHT) */
+        .unified-action-bar {
             position: fixed;
             bottom: 20px;
             right: 20px;
-            display: flex;
-            gap: 12px;
-            z-index: 1000;
-        }
-        
-        .action-fab-rect {
             background-color: var(--card-bg);
-            color: var(--text-color);
             border: 2px solid var(--primary);
-            border-radius: var(--border-radius); /* Rounded rectangular */
-            height: 48px;
-            padding: 0 16px;
-            font-size: var(--btn-font);
-            font-weight: bold;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.8), var(--hud-glow);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            overflow: hidden;
+            /* Make sure it's a unified rounded rect */
+            border-radius: 10px !important;
+        }
+
+        .action-bar-seg {
+            background: transparent;
+            color: #fff; /* Icons are White by default (Tactical/MacDark) */
+            border: none;
+            padding: 0;
+            margin: 0;
+            height: 56px;
+            width: 60px;
+            font-size: 24px;
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.8), var(--hud-glow);
             cursor: pointer;
-            transition: transform 0.1s ease, background-color 0.2s ease;
-            letter-spacing: 1px;
+            transition: background-color 0.2s ease;
         }
-        .action-fab-rect:active { 
-            transform: scale(0.95); 
-            background-color: var(--primary-dark); 
-            color: #fff; 
+
+        /* Adjust icon colors based on theme if needed (Black on Light, White on Dark) */
+        :root[style*="--bg-color: #f3f2f1"] .action-bar-seg { color: #000; } /* Windows11 Light */
+        :root[style*="--bg-color: #f7f7f7"] .action-bar-seg { color: #000; } /* PokeGO Light */
+
+        .action-bar-seg:active { background-color: rgba(139, 195, 74, 0.2); } /* Primary tint on press */
+
+        .action-bar-splitter {
+            width: 1px;
+            height: 36px;
+            background-color: var(--primary);
+            opacity: 0.8;
+            flex-shrink: 0;
         }
 
         .quick-add-modal {
@@ -554,7 +567,6 @@
         }
         .remove-img-btn:active { transform: translateX(-50%) scale(0.9); }
 
-        /* PERFECTLY CENTERED HOW TO USE OVERLAY */
         .help-overlay {
             position: fixed;
             left: 0; width: 100%;
@@ -695,9 +707,14 @@
         <span style="transform: translateY(-2px); pointer-events: none;">+</span>
     </button>
     
-    <div class="bottom-right-group">
-        <button class="action-fab-rect" onclick="saveProject()">💾 SAVE</button>
-        <button class="action-fab-rect" id="helpFabBtn" onclick="toggleHelp()">? HELP</button>
+    <div class="unified-action-bar" id="unifiedActionBar">
+        <button class="action-bar-seg" onclick="saveProject()" title="Save Data">
+            💾
+        </button>
+        <div class="action-bar-splitter"></div>
+        <button class="action-bar-seg" id="helpFabBtn" onclick="toggleHelp()" title="How To Use">
+            ?
+        </button>
     </div>
 
     <div class="quick-add-modal" id="quickAddModal">
@@ -939,13 +956,13 @@
             const menuBtn = document.getElementById('menuBtn');
             const fabBtn = document.getElementById('quickAddBtn');
             const stsBtn = document.getElementById('stsDropdownBtn');
-            const helpFab = document.getElementById('helpFabBtn');
             const helpOverlay = document.getElementById('helpOverlay');
+            const actionBar = document.getElementById('unifiedActionBar');
 
             if (!menu.contains(e.target) && !menuBtn.contains(e.target) && menu.classList.contains('expanded')) toggleMenu(true);
             if (stsMenu && stsBtn && !stsMenu.contains(e.target) && !stsBtn.contains(e.target) && stsMenu.style.display === 'flex') stsMenu.style.display = 'none';
             if (insertModal && !insertModal.contains(e.target) && !e.target.closest('.map-item') && insertModal.style.display === 'flex') closeInsertModal();
-            if (helpOverlay.style.display === 'flex' && e.target === helpOverlay && !helpFab.contains(e.target)) toggleHelp(false);
+            if (helpOverlay.style.display === 'flex' && e.target === helpOverlay && !actionBar.contains(e.target)) toggleHelp(false);
             if (!fabModal.contains(e.target) && !fabBtn.contains(e.target) && fabModal.style.display === 'flex') toggleQuickAddModal(false);
         });
 
