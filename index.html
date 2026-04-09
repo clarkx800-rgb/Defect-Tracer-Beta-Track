@@ -246,7 +246,6 @@
         .control-panel label { font-size: var(--base-font); letter-spacing: 1px; color: var(--text-muted); margin-top: 5px; }
         .input-group { display: flex; gap: 8px; }
         
-        /* SHARED INPUT STYLES */
         select, .segment-notes, .custom-comp, .custom-def {
             flex: 1;
             padding: 12px;
@@ -417,7 +416,7 @@
         .add-defect-btn { background-color: transparent; color: var(--text-muted); border: 1px dashed var(--text-muted); margin-top: 10px; width: 100%; transition: all 0.2s;}
         .add-defect-btn:active { border-color: var(--primary); color: var(--primary); }
 
-        /* COMMAND BAR SHEATH (BOTTOM LEFT) */
+        /* UNIFIED COMMAND BAR SHEATH */
         .command-bar {
             position: fixed;
             bottom: 20px;
@@ -432,7 +431,7 @@
             z-index: 980; 
             overflow: hidden;
             transition: max-width 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-            max-width: 450px; 
+            max-width: 520px; 
             white-space: nowrap;
         }
         
@@ -575,7 +574,7 @@
             backdrop-filter: blur(4px);
             z-index: 990; 
             display: flex;
-            align-items: center; 
+            align-items: flex-start; 
             justify-content: center;
             padding: 20px;
             animation: cascadingFadeIn 0.2s ease-out;
@@ -738,6 +737,13 @@
                 </button>
             <div class="command-divider"></div>
             
+            <button class="command-btn" onclick="togglePageScroll()" title="Scroll Page">
+                <svg id="scrollToggleIcon" data-dir="down" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="pointer-events: none; transition: transform 0.3s ease; transform: rotate(180deg);">
+                    <polyline points="18 15 12 9 6 15"></polyline>
+                </svg>
+            </button>
+            <div class="command-divider"></div>
+
             <button class="command-btn" onclick="toggleHelp(true)" title="Help">
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="pointer-events: none;">
                     <circle cx="12" cy="12" r="10"></circle>
@@ -809,13 +815,80 @@
         const iconLoad = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="pointer-events: none;"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>`;
         const iconSave = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="pointer-events: none;"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>`;
 
-        // NEW TOGGLE COMMAND BAR 
+        // NEW TACTICAL SCROLL ENGINE
+        let isPageScrolling = false;
+
+        function togglePageScroll() {
+            const btnIcon = document.getElementById('scrollToggleIcon');
+            const dir = btnIcon.dataset.dir || 'down'; 
+            
+            const maxScroll = Math.max(
+                document.body.scrollHeight, document.body.offsetHeight, 
+                document.documentElement.clientHeight, document.documentElement.scrollHeight, document.documentElement.offsetHeight
+            ) - window.innerHeight;
+
+            if (dir === 'up') {
+                doSmoothScroll(0, 800); // 800ms moderate speed
+            } else {
+                doSmoothScroll(maxScroll, 800);
+            }
+        }
+
+        function doSmoothScroll(targetY, duration) {
+            isPageScrolling = true;
+            const startY = window.scrollY;
+            const diff = targetY - startY;
+            let startTime = null;
+
+            function step(timestamp) {
+                if (!isPageScrolling) return; // Instantly stops if interrupted
+                if (!startTime) startTime = timestamp;
+                const time = timestamp - startTime;
+                let percent = Math.min(time / duration, 1);
+                
+                // Ease-in-out curve for smooth visual
+                percent = percent < 0.5 ? 2 * percent * percent : -1 + (4 - 2 * percent) * percent;
+                
+                window.scrollTo(0, startY + diff * percent);
+                
+                if (time < duration) {
+                    requestAnimationFrame(step);
+                } else {
+                    isPageScrolling = false;
+                }
+            }
+            requestAnimationFrame(step);
+        }
+
+        // Tap screen to stop scrolling
+        ['touchstart', 'mousedown', 'wheel'].forEach(evt => {
+            window.addEventListener(evt, () => {
+                if (isPageScrolling) isPageScrolling = false;
+            }, { passive: true });
+        });
+
+        // Auto-flip icon based on position
+        window.addEventListener('scroll', () => {
+            const btnIcon = document.getElementById('scrollToggleIcon');
+            if (!btnIcon) return;
+            
+            if (window.scrollY < 100) {
+                btnIcon.style.transform = 'rotate(180deg)'; // Point Down
+                btnIcon.dataset.dir = 'down';
+            } else {
+                btnIcon.style.transform = 'rotate(0deg)'; // Point Up
+                btnIcon.dataset.dir = 'up';
+            }
+        }, { passive: true });
+
+
+        // HIGHLANDER RULE MUTUALLY EXCLUSIVE TOGGLE LOGIC
         function toggleCommandBar(e) {
             if (e) e.stopPropagation();
             const bar = document.getElementById('mainCommandBar');
             if (bar.classList.contains('collapsed')) {
                 bar.classList.remove('collapsed');
-                toggleHelp(false); // Close Help if opening Sheath
+                toggleHelp(false); 
             } else {
                 bar.classList.add('collapsed');
                 toggleQuickAddModal(false); 
@@ -828,7 +901,7 @@
                 btn.innerHTML = iconLoad;
                 btn.onclick = () => {
                     document.getElementById('importFile').click();
-                    toggleCommandBar(); // Auto hide after clicking
+                    toggleCommandBar(); 
                 };
             } else {
                 btn.innerHTML = iconSave;
@@ -1043,7 +1116,7 @@
             }
         }
 
-        // NEW PILL SEARCH ENGINE WITH AUTO-BLUR
+        // PILL SEARCH ENGINE WITH AUTO-BLUR
         function searchTSFromPill() {
             const input = document.getElementById('pillSearchInput');
             const tsNumber = input.value.trim();
