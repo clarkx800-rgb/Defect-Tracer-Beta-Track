@@ -416,7 +416,7 @@
         .add-defect-btn { background-color: transparent; color: var(--text-muted); border: 1px dashed var(--text-muted); margin-top: 10px; width: 100%; transition: all 0.2s;}
         .add-defect-btn:active { border-color: var(--primary); color: var(--primary); }
 
-        /* NEW UNIFIED COMMAND BAR (BOTTOM LEFT) */
+        /* COMMAND BAR (BOTTOM LEFT) */
         .command-bar {
             position: fixed;
             bottom: 20px;
@@ -577,7 +577,7 @@
         <div class="header-top-bar">
             <div class="header-title-container">
                 <span id="active-area-display"></span>
-                <button id="stsDropdownBtn" class="sts-header-btn" onclick="toggleStsMenu(event)">
+                <button id="stsDropdownBtn" class="sts-header-btn" onclick="toggleStsMenu(event)" style="display: none;">
                     <span style="color:var(--text-muted); font-weight:normal; margin-right:4px;">Sub RANGE:</span> 
                     <span id="active-route-display">AWAITING...</span> 
                     <span style="font-size:10px; margin-left:6px; color:var(--primary);">▼</span>
@@ -620,7 +620,7 @@
             <div class="save-load-grid">
                 <button class="btn-warning" onclick="saveProject()">💾 SAVE DATA</button>
                 <button class="btn-info" onclick="document.getElementById('importFile').click()">📂 LOAD DATA</button>
-                <input type="file" id="importFile" accept=".json, application/json, text/plain, */*" style="display: none;" onchange="loadProject(event)">
+                <input type="file" id="importFile" accept=".json,application/json" style="display: none;" onchange="loadProject(event)">
             </div>
 
             <div class="control-panel">
@@ -672,7 +672,7 @@
         <div id="segments-container"></div>
     </div>
 
-    <div class="command-bar">
+    <div class="command-bar" id="mainCommandBar">
         <div id="quickAddGroup" style="display: none; height: 100%; align-items: center;">
             <button class="command-btn" id="quickAddBtn" onclick="toggleQuickAddModal(event)" title="Add Route / Search">
                 <span style="font-size: 28px; font-weight: bold; transform: translateY(-2px); pointer-events: none;">+</span>
@@ -685,7 +685,7 @@
         <div class="command-divider"></div>
         
         <button class="command-btn" onclick="toggleHelp()" title="Help">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="pointer-events: none;">
                 <circle cx="12" cy="12" r="10"></circle>
                 <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
                 <line x1="12" y1="17" x2="12.01" y2="17"></line>
@@ -760,11 +760,9 @@
         let currentInsertTargetTS = null;
         let confirmResolve = null;
 
-        // COMMAND BAR ICONS (Scalable Vectors)
-        const iconLoad = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>`;
-        const iconSave = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>`;
+        const iconLoad = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="pointer-events: none;"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>`;
+        const iconSave = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="pointer-events: none;"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>`;
 
-        // DYNAMIC COMMAND BAR LOGIC
         function updateCommandBar() {
             const btn = document.getElementById('dynamicSaveLoadBtn');
             if (loadedRoutes.size === 0) {
@@ -948,16 +946,15 @@
             const stsMenu = document.getElementById('stsShortcutMenu');
             const insertModal = document.getElementById('insertModal');
             const menuBtn = document.getElementById('menuBtn');
-            const fabBtn = document.getElementById('quickAddBtn');
             const stsBtn = document.getElementById('stsDropdownBtn');
             const helpOverlay = document.getElementById('helpOverlay');
-            const cmdBar = document.querySelector('.command-bar');
+            const cmdBar = document.getElementById('mainCommandBar');
 
             if (!menu.contains(e.target) && !menuBtn.contains(e.target) && menu.classList.contains('expanded')) toggleMenu(true);
             if (stsMenu && stsBtn && !stsMenu.contains(e.target) && !stsBtn.contains(e.target) && stsMenu.style.display === 'flex') stsMenu.style.display = 'none';
             if (insertModal && !insertModal.contains(e.target) && !e.target.closest('.map-item') && insertModal.style.display === 'flex') closeInsertModal();
             if (helpOverlay.style.display === 'flex' && e.target === helpOverlay && !cmdBar.contains(e.target)) toggleHelp(false);
-            if (!fabModal.contains(e.target) && !fabBtn.contains(e.target) && fabModal.style.display === 'flex') toggleQuickAddModal(false);
+            if (!fabModal.contains(e.target) && !cmdBar.contains(e.target) && fabModal.style.display === 'flex') toggleQuickAddModal(false);
         });
 
         function toggleMenu(forceClose = false) {
@@ -1372,7 +1369,6 @@
             currentActiveArea = area;
             currentActiveDirection = direction;
             
-            // SHOW THE + BUTTON IN THE COMMAND PILL
             document.getElementById('quickAddGroup').style.display = 'flex';
             
             routeSelect.value = '';
@@ -1659,6 +1655,97 @@
                     updatePhotoUI(row, cameraLabel, badgeContainer);
                 }
             }
+        }
+
+        function loadProject(event) {
+            const fileInput = event.target;
+            const file = fileInput.files[0];
+            if (!file) return;
+
+            currentFileName = file.name;
+            toggleHelp(false);
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const projectData = JSON.parse(e.target.result);
+                    if (!Array.isArray(projectData)) throw new Error("Invalid format");
+
+                    const container = document.getElementById('segments-container');
+                    const mapContainer = document.getElementById('miniMap');
+                    container.innerHTML = '';
+                    mapContainer.innerHTML = '';
+                    
+                    loadedRoutes.clear(); 
+                    routeLoadHistory = [];
+
+                    projectData.forEach((segData, index) => {
+                        const safeAreaName = segData.areaName || '';
+                        const activeKey = segData.routeKey || segData.routeName; 
+                        
+                        const card = createSegmentCard(segData.segmentNum, activeKey, segData.routeName, segData.direction, segData.color, safeAreaName);
+                        card.style.animationDelay = `${index * 0.05}s`;
+                        
+                        card.querySelector('.segment-notes').value = segData.notes || '';
+                        const defectList = card.querySelector('.defect-list');
+                        defectList.innerHTML = '';
+                        
+                        if (!segData.defects || segData.defects.length === 0) { 
+                            addDefectRow(defectList, null, safeAreaName); 
+                        } else { 
+                            segData.defects.forEach(defData => { 
+                                if (defData.photoBase64 && (!defData.images || defData.images.length === 0)) {
+                                    defData.images = [{ img: defData.photoBase64, w: defData.imgW, h: defData.imgH }];
+                                }
+                                addDefectRow(defectList, defData, safeAreaName); 
+                            }); 
+                        }
+
+                        container.appendChild(card);
+                        scrollObserver.observe(card);
+
+                        const mapBtn = document.createElement('div');
+                        mapBtn.className = 'map-item';
+                        mapBtn.setAttribute('data-map-segment', segData.segmentNum);
+                        mapBtn.setAttribute('data-route-key', activeKey);
+                        mapBtn.textContent = `TS-${segData.segmentNum}`;
+                        mapBtn.style.borderLeft = `4px solid ${segData.color || '#ccc'}`;
+                        
+                        attachMapItemListeners(mapBtn, card, segData.segmentNum, activeKey);
+                        
+                        mapContainer.appendChild(mapBtn);
+                        
+                        checkSegmentData(card);
+
+                        if (activeKey && !loadedRoutes.has(activeKey)) {
+                            loadedRoutes.add(activeKey);
+                            routeLoadHistory.push(activeKey);
+                        }
+                        currentActiveArea = safeAreaName;
+                        currentActiveDirection = segData.direction;
+                    });
+
+                    if (loadedRoutes.size > 0) {
+                        document.getElementById('quickAddGroup').style.display = 'flex';
+                        updateRouteDropdown(); 
+                    }
+
+                    showSystemAlert('Backup file imported successfully.', 'DATA LOADED');
+                    toggleMenu(true);
+                    updateCommandBar();
+
+                } catch (err) {
+                    showSystemAlert('Corrupt or invalid JSON file.', 'SYSTEM ERROR', true);
+                    console.error(err);
+                }
+            };
+            
+            reader.onerror = function() {
+                showSystemAlert('Could not read file from device.', 'FILE ERROR', true);
+            };
+
+            reader.readAsText(file);
+            fileInput.value = ''; 
         }
 
         async function saveProject() {
