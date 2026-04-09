@@ -432,11 +432,12 @@
         .add-defect-btn { background-color: transparent; color: var(--text-muted); border: 1px dashed var(--text-muted); margin-top: 10px; width: 100%; transition: all 0.2s;}
         .add-defect-btn:active { border-color: var(--primary); color: var(--primary); }
 
-        /* COMMAND BAR SHEATH (BOTTOM LEFT) */
+        /* CENTERED COMMAND BAR SHEATH (BOTTOM) */
         .command-bar {
             position: fixed;
             bottom: 20px;
-            left: 20px;
+            left: 50%;
+            transform: translateX(-50%); /* Auto centers on all screens */
             display: flex;
             align-items: center;
             background-color: var(--card-bg);
@@ -446,13 +447,14 @@
             box-shadow: 0 4px 10px rgba(0,0,0,0.8), var(--hud-glow);
             z-index: 980; 
             overflow: hidden;
-            transition: max-width 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-            max-width: 520px; 
+            transition: width 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            width: 440px; /* Reduced max width to fit smaller screens better */
+            max-width: 95vw; /* Failsafe for extremely narrow screens */
             white-space: nowrap;
         }
         
         .command-bar.collapsed {
-            max-width: 56px; 
+            width: 56px; 
         }
         
         .command-btn {
@@ -485,6 +487,8 @@
             height: 100%;
             opacity: 1;
             transition: opacity 0.2s ease 0.1s;
+            width: calc(100% - 56px); /* Take up remaining space */
+            justify-content: space-evenly; /* Evenly space items */
         }
         
         .command-bar.collapsed .command-items {
@@ -504,7 +508,8 @@
         .quick-add-modal {
             position: fixed;
             bottom: 85px;
-            left: 20px;
+            left: 50%;
+            transform: translateX(-50%); /* Centered above pill */
             width: 280px;
             background-color: var(--bg-color);
             border: 1px solid var(--primary);
@@ -514,7 +519,7 @@
             display: none; 
             flex-direction: column;
             gap: 10px;
-            will-change: opacity, transform;
+            will-change: opacity;
         }
         .quick-add-modal h4 { margin: 0 0 5px 0; color: var(--text-color); font-size: var(--base-font); letter-spacing: 1px; border-bottom: 1px solid var(--border-color); padding-bottom: 8px;}
         
@@ -730,11 +735,11 @@
         <div class="command-items" id="cmdItems">
             <div class="command-divider"></div>
             
-            <div style="display:flex; align-items:center; padding: 0 5px 0 12px; height: 100%;">
+            <div style="display:flex; align-items:center; padding: 0 5px 0 10px; height: 100%;">
                 <span style="font-size: 18px; font-weight:bold; color:var(--primary); margin-right:2px;">TS-</span>
-                <input type="tel" id="pillSearchInput" style="width: 85px; background:transparent; border:none; color:var(--text-color); font-weight:bold; outline:none; font-size:16px; padding:0;" placeholder="(SEARCH)" onkeypress="if(event.key === 'Enter') searchTSFromPill()" onfocus="toggleHelp(false); toggleQuickAddModal(false); closeCloneModal();">
+                <input type="tel" id="pillSearchInput" style="width: 70px; background:transparent; border:none; color:var(--text-color); font-weight:bold; outline:none; font-size:16px; padding:0;" placeholder="(SEARCH)" onkeypress="if(event.key === 'Enter') searchTSFromPill()" onfocus="toggleHelp(false); toggleQuickAddModal(false); closeCloneModal();">
             </div>
-            <button class="command-btn" onclick="searchTSFromPill()" title="Search">
+            <button class="command-btn" onclick="searchTSFromPill()" title="Search" style="width: 40px;">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="pointer-events: none;">
                     <circle cx="11" cy="11" r="8"></circle>
                     <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
@@ -838,7 +843,7 @@
         let isAutoScrolling = false;
         let currentRowForGallery = null; 
         let currentInsertTargetTS = null;
-        let currentRowToClone = null; // Used for Clone Engine
+        let currentRowToClone = null; 
         let confirmResolve = null;
 
         const iconLoad = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="pointer-events: none;"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>`;
@@ -935,7 +940,6 @@
             toggleHelp(false);
             document.getElementById('mainCommandBar').classList.add('collapsed');
             
-            // Focus the input safely
             setTimeout(() => document.getElementById('cloneTsInput').focus(), 100);
         }
 
@@ -960,7 +964,6 @@
                 return;
             }
 
-            // Extract data from the source row
             const isCustom = currentRowToClone.dataset.isCustom === "true";
             const comp = isCustom ? currentRowToClone.querySelector('.custom-comp').value : currentRowToClone.querySelector('.component-select').value;
             const def = isCustom ? currentRowToClone.querySelector('.custom-def').value : currentRowToClone.querySelector('.defect-select').value;
@@ -981,13 +984,12 @@
             let clonedCount = 0;
 
             for (let i = minIdx; i <= maxIdx; i++) {
-                if (i === startIdx) continue; // Skip source
+                if (i === startIdx) continue; 
 
                 const targetCard = allCards[i];
                 const areaName = targetCard.getAttribute('data-area-name');
                 const defectList = targetCard.querySelector('.defect-list');
 
-                // Smart Cleanup: If target TS only has 1 completely empty default row, remove it first
                 const existingRows = defectList.querySelectorAll('.defect-row');
                 if (existingRows.length === 1) {
                     const r = existingRows[0];
@@ -1001,7 +1003,6 @@
                     }
                 }
 
-                // Add the cloned row
                 addDefectRow(defectList, { isCustom, comp, def, images }, areaName);
                 checkSegmentData(targetCard);
                 clonedCount++;
@@ -1151,7 +1152,6 @@
             if (cloneModal && !cloneModal.contains(e.target) && !e.target.closest('.clone-btn') && cloneModal.style.display === 'flex') closeCloneModal();
             if (helpOverlay.style.display === 'flex' && e.target === helpOverlay) toggleHelp(false);
             
-            // COMMAND BAR OUTSIDE CLICK AUTO-HIDE
             if (cmdBar && !cmdBar.classList.contains('collapsed') && !cmdBar.contains(e.target) && (!fabModal || !fabModal.contains(e.target))) {
                 cmdBar.classList.add('collapsed');
                 toggleQuickAddModal(false);
@@ -1179,7 +1179,7 @@
             const input = document.getElementById('pillSearchInput');
             const tsNumber = input.value.trim();
             if(tsNumber) {
-                input.blur(); // Drops Mobile Keyboard instantly
+                input.blur(); 
                 searchTS(tsNumber); 
                 input.value = ''; 
                 document.getElementById('mainCommandBar').classList.add('collapsed');
@@ -1798,7 +1798,6 @@
             const badgeContainer = document.createElement('div');
             badgeContainer.className = 'status-badge-container';
 
-            // CLONE BUTTON
             const cloneBtn = document.createElement('button');
             cloneBtn.className = 'clone-btn';
             cloneBtn.innerHTML = '⇊';
