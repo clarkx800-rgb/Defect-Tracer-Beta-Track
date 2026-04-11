@@ -107,6 +107,21 @@ function doSmoothScroll(targetY, duration) {
     requestAnimationFrame(step);
 }
 
+// BUG FIXED: Restored Scroll Listener for the Toggle Button
+['touchstart', 'mousedown', 'wheel'].forEach(evt => { window.addEventListener(evt, () => { if (window.isPageScrolling) window.isPageScrolling = false; }, { passive: true }); });
+
+window.addEventListener('scroll', () => {
+    const btnIcon = document.getElementById('scrollToggleIcon');
+    if (!btnIcon) return;
+    if (window.scrollY < 100) { 
+        btnIcon.style.transform = 'rotate(180deg)'; 
+        btnIcon.dataset.dir = 'down'; 
+    } else { 
+        btnIcon.style.transform = 'rotate(0deg)'; 
+        btnIcon.dataset.dir = 'up'; 
+    }
+}, { passive: true });
+
 function toggleCommandBar(e) {
     if (e) e.stopPropagation();
     const bar = document.getElementById('mainCommandBar');
