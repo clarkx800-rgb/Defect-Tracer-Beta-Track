@@ -18,6 +18,7 @@ const systemInstructions = `
             <div>
                 <h4 style="margin: 0 0 8px 0; color: var(--primary); text-transform: uppercase; letter-spacing: 1px; font-size: 18px;">Load Your Track</h4>
                 <p style="margin: 0 0 8px 0; font-size: 15px; font-weight: 500;">Tap the top-right <b>⚙ menu</b>. Pick your LINE (EX, MI, EV), Direction (IB/OB), and Sub Range. Tap <b style="color: var(--primary);">LOAD AREA</b>.</p>
+                <p style="margin: 0 0 8px 0; font-size: 15px; font-weight: 500;"><b>ALTERNATIVE:</b> Tap <b style="color: var(--primary);">📂 BROWSE TEMPLATES</b> on the empty workspace screen to instantly download and load a pre-built inspection route.</p>
                 <div style="background: var(--bg-color); padding: 10px; border-radius: 4px; border-left: 3px solid var(--primary); font-size: 14px;">
                     <b>TIP:</b> Walking the other way? Hit <b>🔃 FLIP DIR</b> to reverse the track order. Load all needed sub to subs first though.
                 </div>
