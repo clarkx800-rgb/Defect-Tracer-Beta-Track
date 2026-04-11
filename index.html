@@ -23,7 +23,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
     <script>
-        const APP_VERSION = "2.0.94"; // Folder Template Engine
+        const APP_VERSION = "2.0.95"; // Centered Template Grid & Load Fix
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
@@ -251,7 +251,6 @@
         .control-panel label { font-size: var(--base-font); letter-spacing: 1px; color: var(--text-muted); margin-top: 5px; }
         .input-group { display: flex; gap: 8px; }
         
-        /* SHARED INPUT STYLES */
         select, .segment-notes, .custom-comp, .custom-def {
             flex: 1;
             padding: 12px;
@@ -273,7 +272,6 @@
         
         .custom-comp, .custom-def { flex: 1 1 35%; min-width: 100px; }
 
-        /* MULTI-SELECT CHECKBOX STYLES */
         .checkbox-list {
             display: flex;
             flex-direction: column;
@@ -440,7 +438,6 @@
         }
         .photo-status-badge:active { background: var(--primary); }
         
-        /* CLONE ENGINE BUTTON */
         .clone-btn {
             background-color: transparent; 
             color: #0A84FF; 
@@ -474,7 +471,7 @@
         .add-defect-btn { background-color: transparent; color: var(--text-muted); border: 1px dashed var(--text-muted); margin-top: 10px; width: 100%; transition: all 0.2s;}
         .add-defect-btn:active { border-color: var(--primary); color: var(--primary); }
 
-        /* COMMAND BAR SHEATH (GLIDING EXPANSION) */
+        /* GLIDING COMMAND BAR SHEATH */
         .command-bar {
             position: fixed;
             bottom: 20px;
@@ -497,8 +494,8 @@
         
         .command-bar.collapsed {
             width: 56px; 
-            left: 20px; /* Tucks back to the left */
-            transform: translateX(0); /* Removes centering transform */
+            left: 20px; 
+            transform: translateX(0); 
         }
         
         .command-btn {
@@ -663,22 +660,18 @@
         #helpBodyContent {
             overflow-y: auto;
             padding: 20px;
-            /* Support for CSS zoom scaling */
             transition: zoom 0.2s ease, transform 0.2s ease;
         }
 
-        /* TACTICAL TEMPLATE FOLDER UI */
+        /* PERFECTLY CENTERED TEMPLATE GRID */
         #empty-workspace-state {
-            position: absolute; 
-            top: 35vh; 
-            left: calc(50% + 40px); /* accounts for minimap */
-            transform: translate(-50%, -50%); 
-            text-align: center; 
-            width: 85%; 
-            max-width: 500px; 
-            padding: 20px; 
-            box-sizing: border-box; 
-            z-index: 10;
+            flex: 1;
+            display: none; /* Toggled by JS */
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            text-align: center;
         }
         
         .template-grid {
@@ -686,6 +679,8 @@
             grid-template-columns: repeat(2, 1fr);
             gap: 15px;
             margin-top: 20px;
+            width: 100%;
+            max-width: 400px;
         }
         
         .folder-card {
@@ -786,7 +781,7 @@
             <div class="save-load-grid">
                 <button class="btn-warning" onclick="saveProject()">💾 SAVE DATA</button>
                 <button class="btn-info" onclick="document.getElementById('importFile').click()">📂 LOAD DATA</button>
-                <input type="file" id="importFile" accept=".json,application/json" style="position: absolute; width: 0; height: 0; opacity: 0;" onchange="loadProject(event)">
+                <input type="file" id="importFile" accept=".json,application/json" style="position: absolute; left: -9999px; top: -9999px; opacity: 0;" onchange="loadProject(event)">
             </div>
 
             <div class="control-panel">
@@ -844,24 +839,24 @@
         
         <div id="empty-workspace-state">
             <h3 style="color: var(--text-muted); letter-spacing: 2px; margin: 0 0 5px 0;">WORKSPACE EMPTY</h3>
-            <p style="color: var(--text-muted); font-size: 14px; margin: 0 0 15px 0; line-height: 1.5;">Load a track section from the <b>⚙ top menu</b>, or select an inspection category below to load a GitHub template.</p>
+            <p style="color: var(--text-muted); font-size: 14px; margin: 0 0 15px 0; line-height: 1.5; max-width: 300px;">Load a track section from the <b>⚙ top menu</b>, or select an inspection category below to load a GitHub template.</p>
             
             <div class="template-grid">
-                <div class="folder-card" onclick="openTemplateModal('WALK', 'WALK INSPECTIONS')">
+                <div class="folder-card" onclick="openTemplateModal('LIM_WALKS', 'LIM WALKS')">
                     <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
-                    <span class="folder-label">WALK<br>INSPECTIONS</span>
+                    <span class="folder-label">LIM<br>WALKS</span>
                 </div>
-                <div class="folder-card" onclick="openTemplateModal('SWITCH', 'SWITCH & POCKETS')">
+                <div class="folder-card" onclick="openTemplateModal('SPEEDER_WALKS', 'SPEEDER WALKS')">
                     <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
-                    <span class="folder-label">SWITCH &<br>POCKETS</span>
+                    <span class="folder-label">SPEEDER<br>WALKS</span>
                 </div>
-                <div class="folder-card" onclick="openTemplateModal('SPECIAL', 'SPECIAL WORK')">
+                <div class="folder-card" onclick="openTemplateModal('POWER_RAIL', 'POWER RAIL INSPECTION')">
                     <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
-                    <span class="folder-label">SPECIAL<br>TRACKWORK</span>
+                    <span class="folder-label">POWER RAIL<br>INSPECTION</span>
                 </div>
-                <div class="folder-card" onclick="openTemplateModal('GEOMETRY', 'GEOMETRY / FLAW')">
+                <div class="folder-card" onclick="openTemplateModal('SWITCH', 'SWITCH INSPECTION')">
                     <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
-                    <span class="folder-label">GEOMETRY<br>& RAIL FLAW</span>
+                    <span class="folder-label">SWITCH<br>INSPECTION</span>
                 </div>
             </div>
         </div>
@@ -1011,32 +1006,38 @@
         const iconSave = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="pointer-events: none;"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>`;
 
         // THE TEMPLATE LIBRARY DATABASE
-        // To add a new template, just copy a line and change the name and URL!
         const templateLibrary = {
-            'WALK': [
-                { name: 'BW-MTS-SP-WALK', url: 'templates/BW-MTS-SP-WALK.json' }
+            'LIM_WALKS': [
+                { name: 'BW-MTS-SP-WALK', url: 'templates/lim_walks/BW-MTS-SP-WALK.json' }
+            ],
+            'SPEEDER_WALKS': [
+                { name: 'Placeholder Speeder Walk', url: 'templates/speeder_walks/SPEEDER-PLACEHOLDER.json' }
+            ],
+            'POWER_RAIL': [
+                { name: 'Placeholder Power Rail', url: 'templates/power_rail/POWER-PLACEHOLDER.json' }
             ],
             'SWITCH': [
-                { name: 'Placeholder Switch Route', url: 'templates/SWITCH-PLACEHOLDER.json' }
-            ],
-            'SPECIAL': [
-                { name: 'Placeholder Special Work', url: 'templates/SPECIAL-PLACEHOLDER.json' }
-            ],
-            'GEOMETRY': [
-                { name: 'Placeholder Geometry', url: 'templates/GEOMETRY-PLACEHOLDER.json' }
+                { name: 'Placeholder Switch', url: 'templates/switch/SWITCH-PLACEHOLDER.json' }
             ]
         };
 
         function toggleEmptyState() {
             const emptyState = document.getElementById('empty-workspace-state');
-            if (emptyState) {
-                emptyState.style.display = loadedRoutes.size === 0 ? 'block' : 'none';
+            const segmentsContainer = document.getElementById('segments-container');
+            if (emptyState && segmentsContainer) {
+                if (loadedRoutes.size === 0) {
+                    emptyState.style.display = 'flex';
+                    segmentsContainer.style.display = 'none';
+                } else {
+                    emptyState.style.display = 'none';
+                    segmentsContainer.style.display = 'flex';
+                }
             }
         }
 
         // CATEGORY DYNAMIC TEMPLATE MODAL
         function openTemplateModal(categoryKey, categoryName) {
-            document.getElementById('template-modal-title').textContent = categoryName + " TEMPLATES";
+            document.getElementById('template-modal-title').textContent = categoryName;
             
             const select = document.getElementById('template-select');
             select.innerHTML = '<option value="">SELECT TEMPLATE...</option>';
@@ -1082,7 +1083,7 @@
                 closeTemplateModal();
             } catch (err) {
                 console.error("Fetch error:", err);
-                showSystemAlert('Failed to load template. Ensure you have an internet connection and the file exists in the GitHub folder.', 'DOWNLOAD FAILED', true);
+                showSystemAlert('Failed to load template. Ensure you have an internet connection and the file exists in the correct GitHub folder.', 'DOWNLOAD FAILED', true);
             } finally {
                 btn.innerHTML = originalText;
                 btn.disabled = false;
@@ -2007,6 +2008,32 @@
                 showSystemAlert('Corrupt or invalid JSON data.', 'SYSTEM ERROR', true);
                 console.error(err);
             }
+        }
+
+        // PERFECT LOAD BUG FIX
+        function loadProject(event) {
+            const fileInput = event.target;
+            const file = fileInput.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const projectData = JSON.parse(e.target.result);
+                    injectProjectData(projectData, file.name);
+                } catch (err) {
+                    showSystemAlert('Corrupt or invalid JSON file.', 'SYSTEM ERROR', true);
+                    console.error(err);
+                }
+                fileInput.value = ''; // SAFE WIPE
+            };
+            
+            reader.onerror = function() {
+                showSystemAlert('Could not read file from device.', 'FILE ERROR', true);
+                fileInput.value = ''; // SAFE WIPE
+            };
+
+            reader.readAsText(file);
         }
 
         function generateSegments(isQuickAdd = false) {
