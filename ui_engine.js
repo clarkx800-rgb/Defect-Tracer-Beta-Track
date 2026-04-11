@@ -9,7 +9,7 @@ async function updateProgress(percent, text, title = "SYSTEM PROCESSING") {
     document.getElementById('exportProgressBar').style.width = percent + '%';
     document.getElementById('exportProgressText').textContent = percent + '%';
     document.getElementById('exportStatusText').textContent = text;
-    await delay(16); 
+    await window.delay(16); 
 }
 
 function closeProgress() {
@@ -32,19 +32,19 @@ function showSystemConfirm(message, title = "SYSTEM WARNING", confirmText = "PRO
         document.getElementById('systemModalTitle').style.borderColor = "var(--warning)";
         document.getElementById('systemModalMessage').textContent = message;
         document.getElementById('systemModalBtnGroup').innerHTML = `<button class="btn-danger" style="flex: 1;" onclick="resolveSystemConfirm(true)">${confirmText}</button><button class="btn-outline" style="flex: 1;" onclick="resolveSystemConfirm(false)">${cancelText}</button>`;
-        confirmResolve = resolve;
+        window.confirmResolve = resolve;
         document.getElementById('systemModalOverlay').style.display = 'flex';
     });
 }
 
-function resolveSystemConfirm(result) { closeSystemModal(); if (confirmResolve) confirmResolve(result); }
+function resolveSystemConfirm(result) { closeSystemModal(); if (window.confirmResolve) window.confirmResolve(result); }
 function closeSystemModal() { document.getElementById('systemModalOverlay').style.display = 'none'; }
 
 function toggleEmptyState() {
     const emptyState = document.getElementById('empty-workspace-state');
     const segmentsContainer = document.getElementById('segments-container');
     if (emptyState && segmentsContainer) {
-        if (loadedRoutes.size === 0) {
+        if (window.loadedRoutes.size === 0) {
             emptyState.style.display = 'flex';
             segmentsContainer.style.display = 'none';
         } else {
@@ -86,7 +86,6 @@ function zoomHelpModal(step) {
     else { helpBody.style.transform = `scale(${currentHelpZoom})`; helpBody.style.transformOrigin = 'top left'; helpBody.style.width = `${100 / currentHelpZoom}%`; }
 }
 
-let isPageScrolling = false;
 function togglePageScroll() {
     const btnIcon = document.getElementById('scrollToggleIcon');
     const dir = btnIcon.dataset.dir || 'down'; 
@@ -95,15 +94,15 @@ function togglePageScroll() {
 }
 
 function doSmoothScroll(targetY, duration) {
-    isPageScrolling = true;
+    window.isPageScrolling = true;
     const startY = window.scrollY; const diff = targetY - startY; let startTime = null;
     function step(timestamp) {
-        if (!isPageScrolling) return; 
+        if (!window.isPageScrolling) return; 
         if (!startTime) startTime = timestamp;
         const time = timestamp - startTime; let percent = Math.min(time / duration, 1);
         percent = percent < 0.5 ? 2 * percent * percent : -1 + (4 - 2 * percent) * percent;
         window.scrollTo(0, startY + diff * percent);
-        if (time < duration) requestAnimationFrame(step); else isPageScrolling = false;
+        if (time < duration) requestAnimationFrame(step); else window.isPageScrolling = false;
     }
     requestAnimationFrame(step);
 }
@@ -117,7 +116,7 @@ function toggleCommandBar(e) {
 
 function updateCommandBar() {
     const btn = document.getElementById('dynamicSaveLoadBtn');
-    if (loadedRoutes.size === 0) {
+    if (window.loadedRoutes.size === 0) {
         btn.innerHTML = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="pointer-events: none;"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>`;
         btn.onclick = () => { document.getElementById('importFile').click(); };
     } else {
@@ -164,12 +163,17 @@ function toggleMenu(forceClose = false) {
 }
 
 function openCloneModal(row) {
-    currentRowToClone = row; document.getElementById('cloneTsInput').value = ''; document.getElementById('cloneModal').style.display = 'flex';
+    window.currentRowToClone = row; 
+    document.getElementById('cloneTsInput').value = ''; 
+    document.getElementById('cloneModal').style.display = 'flex';
     toggleMenu(true); toggleQuickAddModal(false); toggleHelp(false); document.getElementById('mainCommandBar').classList.add('collapsed');
     setTimeout(() => document.getElementById('cloneTsInput').focus(), 100);
 }
 
-function closeCloneModal() { document.getElementById('cloneModal').style.display = 'none'; currentRowToClone = null; }
+function closeCloneModal() { 
+    document.getElementById('cloneModal').style.display = 'none'; 
+    window.currentRowToClone = null; 
+}
 
 function updatePhotoUI(row, cameraBtn, badgeContainer) {
     const images = JSON.parse(row.dataset.images || "[]");
@@ -182,7 +186,7 @@ function updatePhotoUI(row, cameraBtn, badgeContainer) {
 }
 
 async function openGallery(row) {
-    currentRowForGallery = row;
+    window.currentRowForGallery = row;
     const images = JSON.parse(row.dataset.images || "[]");
     const grid = document.getElementById('galleryGrid');
     grid.innerHTML = '<div style="text-align:center; padding:20px; color:var(--primary); font-weight:bold;">⏳ LOADING DB...</div>';
@@ -206,19 +210,19 @@ async function openGallery(row) {
 }
 
 function removeImageFromGallery(indexToRemove) {
-    if (!currentRowForGallery) return;
-    let images = JSON.parse(currentRowForGallery.dataset.images || "[]");
+    if (!window.currentRowForGallery) return;
+    let images = JSON.parse(window.currentRowForGallery.dataset.images || "[]");
     const imgToRemove = images[indexToRemove];
     if(imgToRemove && imgToRemove.id) deleteImageFromDB(imgToRemove.id); 
     images.splice(indexToRemove, 1); 
-    currentRowForGallery.dataset.images = JSON.stringify(images); 
-    const wrapper = currentRowForGallery.querySelector('.photo-wrapper');
-    updatePhotoUI(currentRowForGallery, wrapper.querySelector('.camera-btn'), wrapper.querySelector('.status-badge-container'));
-    checkSegmentData(currentRowForGallery.closest('.segment-card'));
-    if (images.length === 0) closeGallery(); else openGallery(currentRowForGallery); 
+    window.currentRowForGallery.dataset.images = JSON.stringify(images); 
+    const wrapper = window.currentRowForGallery.querySelector('.photo-wrapper');
+    updatePhotoUI(window.currentRowForGallery, wrapper.querySelector('.camera-btn'), wrapper.querySelector('.status-badge-container'));
+    checkSegmentData(window.currentRowForGallery.closest('.segment-card'));
+    if (images.length === 0) closeGallery(); else openGallery(window.currentRowForGallery); 
 }
 
-function closeGallery() { document.getElementById('galleryModalOverlay').style.display = 'none'; currentRowForGallery = null; }
+function closeGallery() { document.getElementById('galleryModalOverlay').style.display = 'none'; window.currentRowForGallery = null; }
 
 function changeTheme(themeName) { localStorage.setItem('appTheme', themeName); applySavedSettings(); }
 function changeFontSize(sizeName) { localStorage.setItem('appFontSize', sizeName); applySavedSettings(); }
@@ -233,14 +237,14 @@ function searchTS(passedTs = null) {
     const tsNumber = passedTs; if (!tsNumber) return;
     const targetCard = document.querySelector(`.segment-card[data-segment="${tsNumber}"]`);
     if (targetCard) {
-        isAutoScrolling = true; scrollToCard(targetCard);
+        window.isAutoScrolling = true; scrollToCard(targetCard);
         const targetMapItem = document.querySelector(`.map-item[data-map-segment="${tsNumber}"]`);
         if (targetMapItem) {
             const mapContainer = document.getElementById('miniMap');
             mapContainer.scrollTo({ top: mapContainer.scrollTop + (targetMapItem.getBoundingClientRect().top - mapContainer.getBoundingClientRect().top) - (mapContainer.getBoundingClientRect().height / 2) + (targetMapItem.getBoundingClientRect().height / 2), behavior: 'smooth' });
         }
         setTimeout(() => { targetCard.classList.add('search-highlight'); setTimeout(() => { targetCard.classList.remove('search-highlight'); }, 1200); }, 500);
-        setTimeout(() => { isAutoScrolling = false; }, 800);
+        setTimeout(() => { window.isAutoScrolling = false; }, 800);
     } else { showSystemAlert(`Could not find TS-${tsNumber}.\nSub to sub section may have not been loaded.`, "TS MISSING", true); }
 }
 
@@ -274,7 +278,7 @@ function populateStsMenu() {
 }
 
 function jumpToRoute(routeKey) {
-    isAutoScrolling = true; 
+    window.isAutoScrolling = true; 
     const firstCard = document.querySelector(`.segment-card[data-route-key="${routeKey}"]`);
     if (firstCard) scrollToCard(firstCard);
     const firstMapItem = document.querySelector(`.map-item[data-route-key="${routeKey}"]`);
@@ -283,38 +287,38 @@ function jumpToRoute(routeKey) {
         mapContainer.scrollTo({ top: mapContainer.scrollTop + (firstMapItem.getBoundingClientRect().top - mapContainer.getBoundingClientRect().top) - (mapContainer.getBoundingClientRect().height / 2) + (firstMapItem.getBoundingClientRect().height / 2), behavior: 'smooth' });
     }
     document.getElementById('stsShortcutMenu').style.display = 'none';
-    setTimeout(() => { isAutoScrolling = false; }, 800); 
+    setTimeout(() => { window.isAutoScrolling = false; }, 800); 
 }
 
 function openInitialQuickAdd() {
     const area = document.getElementById('general-area').value;
     const dir = document.getElementById('page-direction').value;
     if (!area || !dir) { showSystemAlert('Please select Line and Direction first.', 'MISSING INFO', true); return; }
-    currentActiveArea = area; currentActiveDirection = dir; toggleQuickAddModal(true);
+    window.currentActiveArea = area; window.currentActiveDirection = dir; toggleQuickAddModal(true);
 }
 
 function openInsertModal(tsNumber, baseRouteKey) {
-    currentInsertTargetTS = tsNumber; document.getElementById('insert-target-ts').textContent = tsNumber;
+    window.currentInsertTargetTS = tsNumber; document.getElementById('insert-target-ts').textContent = tsNumber;
     updateInsertDropdown(baseRouteKey); document.getElementById('insertModal').style.display = 'flex';
     toggleMenu(true); toggleQuickAddModal(false); closeCloneModal(); document.getElementById('stsShortcutMenu').style.display = 'none'; document.getElementById('mainCommandBar').classList.add('collapsed');
 }
 
-function closeInsertModal() { document.getElementById('insertModal').style.display = 'none'; currentInsertTargetTS = null; }
+function closeInsertModal() { document.getElementById('insertModal').style.display = 'none'; window.currentInsertTargetTS = null; }
 
 function updateInsertDropdown(baseRouteKey) {
     const dropdown = document.getElementById('insert-route-select'); dropdown.innerHTML = '<option value="">AWAITING INPUT...</option>';
-    if (currentActiveArea && currentActiveDirection && window.globalDatabase[currentActiveArea] && window.globalDatabase[currentActiveArea][currentActiveDirection]) {
-        const routes = window.globalDatabase[currentActiveArea][currentActiveDirection]; let hasOptions = false;
+    if (window.currentActiveArea && window.currentActiveDirection && window.globalDatabase[window.currentActiveArea] && window.globalDatabase[window.currentActiveArea][window.currentActiveDirection]) {
+        const routes = window.globalDatabase[window.currentActiveArea][window.currentActiveDirection]; let hasOptions = false;
         for (let key in routes) {
             const routeName = routes[key].name; const isSwitchOrPocket = key.includes('-X') || key.endsWith('-ST') || routeName.includes('Pocket') || routeName.includes('Cross') || routeName.includes('Spur');
-            if (!loadedRoutes.has(key) && isSwitchOrPocket) { let opt = document.createElement('option'); opt.value = key; opt.textContent = routeName; dropdown.appendChild(opt); hasOptions = true; }
+            if (!window.loadedRoutes.has(key) && isSwitchOrPocket) { let opt = document.createElement('option'); opt.value = key; opt.textContent = routeName; dropdown.appendChild(opt); hasOptions = true; }
         }
         if (!hasOptions) dropdown.innerHTML = '<option value="">ALL SWITCHES LOADED</option>';
     } else { dropdown.innerHTML = '<option value="">NO AREA LOADED</option>'; }
 }
 
 function attachMapItemListeners(mapBtn, card, itemNum, routeKey) {
-    mapBtn.onclick = () => { isAutoScrolling = true; scrollToCard(card); setTimeout(() => { isAutoScrolling = false; }, 800); };
+    mapBtn.onclick = () => { window.isAutoScrolling = true; scrollToCard(card); setTimeout(() => { window.isAutoScrolling = false; }, 800); };
     let pressTimer; const startPress = (e) => { if (e.type === 'mousedown' && e.button !== 0) return; pressTimer = setTimeout(() => openInsertModal(itemNum, routeKey), 600); }; const cancelPress = () => clearTimeout(pressTimer);
     mapBtn.addEventListener('touchstart', startPress, {passive: true}); mapBtn.addEventListener('touchend', cancelPress); mapBtn.addEventListener('touchmove', cancelPress); mapBtn.addEventListener('mousedown', startPress); mapBtn.addEventListener('mouseup', cancelPress); mapBtn.addEventListener('mouseleave', cancelPress); mapBtn.addEventListener('contextmenu', (e) => { e.preventDefault(); openInsertModal(itemNum, routeKey); });
 }
@@ -330,10 +334,10 @@ function getLineColors(lineName) {
 
 function updateQuickAddChecklist() {
     const container = document.getElementById('quick-add-checklist'); container.innerHTML = '';
-    if (currentActiveArea && currentActiveDirection && window.globalDatabase[currentActiveArea] && window.globalDatabase[currentActiveArea][currentActiveDirection]) {
-        const routes = window.globalDatabase[currentActiveArea][currentActiveDirection]; let hasOptions = false;
+    if (window.currentActiveArea && window.currentActiveDirection && window.globalDatabase[window.currentActiveArea] && window.globalDatabase[window.currentActiveArea][window.currentActiveDirection]) {
+        const routes = window.globalDatabase[window.currentActiveArea][window.currentActiveDirection]; let hasOptions = false;
         for (let routeKey in routes) {
-            if (!loadedRoutes.has(routeKey)) {
+            if (!window.loadedRoutes.has(routeKey)) {
                 const label = document.createElement('label'); label.className = 'checkbox-item';
                 const cb = document.createElement('input'); cb.type = 'checkbox'; cb.value = routeKey; cb.dataset.index = Object.keys(routes).indexOf(routeKey);
                 label.appendChild(cb); label.appendChild(document.createTextNode(routes[routeKey].name)); container.appendChild(label); hasOptions = true;
@@ -347,7 +351,7 @@ function toggleQuickAddModal(eventOrShow) {
     const modal = document.getElementById('quickAddModal'); let shouldShow;
     if (eventOrShow === true || eventOrShow === false) { shouldShow = eventOrShow; } else if (eventOrShow && typeof eventOrShow === 'object' && eventOrShow.stopPropagation) { eventOrShow.stopPropagation(); shouldShow = modal.style.display !== 'flex'; } else { shouldShow = modal.style.display !== 'flex'; }
     if (shouldShow) {
-        const dirCode = currentActiveDirection === "Inbound Track" ? "IB" : "OB"; document.getElementById('quick-add-title').textContent = `${currentActiveArea} [${dirCode}]`;
+        const dirCode = window.currentActiveDirection === "Inbound Track" ? "IB" : "OB"; document.getElementById('quick-add-title').textContent = `${window.currentActiveArea} [${dirCode}]`;
         updateQuickAddChecklist(); modal.style.display = 'flex'; toggleMenu(true); document.getElementById('stsShortcutMenu').style.display = 'none'; toggleHelp(false); closeCloneModal();
     } else { modal.style.display = 'none'; }
 }
@@ -382,7 +386,7 @@ const scrollObserver = new IntersectionObserver((entries) => {
             const activeMapItem = document.querySelector(`.map-item[data-map-segment="${segNum}"]`);
             if (activeMapItem) {
                 activeMapItem.classList.add('active-map');
-                if (!isAutoScrolling) {
+                if (!window.isAutoScrolling) {
                     const mapContainer = document.getElementById('miniMap');
                     mapContainer.scrollTo({ top: mapContainer.scrollTop + (activeMapItem.getBoundingClientRect().top - mapContainer.getBoundingClientRect().top) - (mapContainer.getBoundingClientRect().height / 2) + (activeMapItem.getBoundingClientRect().height / 2), behavior: 'smooth' });
                 }
@@ -451,6 +455,8 @@ function addDefectRow(container, prefill = null, areaName = '') {
                     saveImageToDB(canvas.toDataURL('image/jpeg', 0.85), width, height).then(imgRef => {
                         const currentImages = JSON.parse(row.dataset.images || "[]"); currentImages.push(imgRef); row.dataset.images = JSON.stringify(currentImages); updatePhotoUI(row, cameraLabel, badgeContainer); checkSegmentData(row.closest('.segment-card'));
                         canvas.width = 0; canvas.height = 0; img.src = ''; fileInput.value = ''; 
+                    }).catch(err => {
+                        cameraLabel.innerHTML = '📷 PHOTO'; console.error(err); showSystemAlert("Failed to save image. Device storage may be full.", "DATABASE ERROR", true);
                     });
                 };
                 img.src = event.target.result;
