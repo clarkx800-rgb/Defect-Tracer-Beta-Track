@@ -23,7 +23,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
     <script>
-        const APP_VERSION = "2.0.93"; // Template Engine Upgrade
+        const APP_VERSION = "2.0.94"; // Folder Template Engine
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
@@ -251,6 +251,7 @@
         .control-panel label { font-size: var(--base-font); letter-spacing: 1px; color: var(--text-muted); margin-top: 5px; }
         .input-group { display: flex; gap: 8px; }
         
+        /* SHARED INPUT STYLES */
         select, .segment-notes, .custom-comp, .custom-def {
             flex: 1;
             padding: 12px;
@@ -272,6 +273,7 @@
         
         .custom-comp, .custom-def { flex: 1 1 35%; min-width: 100px; }
 
+        /* MULTI-SELECT CHECKBOX STYLES */
         .checkbox-list {
             display: flex;
             flex-direction: column;
@@ -438,6 +440,7 @@
         }
         .photo-status-badge:active { background: var(--primary); }
         
+        /* CLONE ENGINE BUTTON */
         .clone-btn {
             background-color: transparent; 
             color: #0A84FF; 
@@ -471,7 +474,7 @@
         .add-defect-btn { background-color: transparent; color: var(--text-muted); border: 1px dashed var(--text-muted); margin-top: 10px; width: 100%; transition: all 0.2s;}
         .add-defect-btn:active { border-color: var(--primary); color: var(--primary); }
 
-        /* GLIDING COMMAND BAR SHEATH */
+        /* COMMAND BAR SHEATH (GLIDING EXPANSION) */
         .command-bar {
             position: fixed;
             bottom: 20px;
@@ -494,8 +497,8 @@
         
         .command-bar.collapsed {
             width: 56px; 
-            left: 20px; 
-            transform: translateX(0); 
+            left: 20px; /* Tucks back to the left */
+            transform: translateX(0); /* Removes centering transform */
         }
         
         .command-btn {
@@ -660,21 +663,68 @@
         #helpBodyContent {
             overflow-y: auto;
             padding: 20px;
+            /* Support for CSS zoom scaling */
             transition: zoom 0.2s ease, transform 0.2s ease;
         }
 
-        /* EMPTY WORKSPACE STATE */
+        /* TACTICAL TEMPLATE FOLDER UI */
         #empty-workspace-state {
             position: absolute; 
-            top: 40vh; 
+            top: 35vh; 
             left: calc(50% + 40px); /* accounts for minimap */
             transform: translate(-50%, -50%); 
             text-align: center; 
-            width: 80%; 
-            max-width: 400px; 
+            width: 85%; 
+            max-width: 500px; 
             padding: 20px; 
             box-sizing: border-box; 
             z-index: 10;
+        }
+        
+        .template-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .folder-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px !important;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+        
+        .folder-card:active {
+            transform: scale(0.95);
+            border-color: var(--primary);
+            box-shadow: var(--hud-glow);
+        }
+        
+        .folder-card svg {
+            color: var(--primary);
+            transition: transform 0.2s ease;
+        }
+        
+        .folder-card:active svg {
+            transform: scale(1.1);
+        }
+        
+        .folder-label {
+            font-size: 12px;
+            font-weight: bold;
+            color: var(--text-color);
+            text-align: center;
+            letter-spacing: 1px;
+            line-height: 1.3;
         }
 
         /* TEMPLATE MODAL */
@@ -793,16 +843,27 @@
         <div id="segments-container"></div>
         
         <div id="empty-workspace-state">
-            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="opacity: 0.5; margin-bottom: 15px;">
-                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                <line x1="9" y1="3" x2="9" y2="21"></line>
-            </svg>
             <h3 style="color: var(--text-muted); letter-spacing: 2px; margin: 0 0 5px 0;">WORKSPACE EMPTY</h3>
-            <p style="color: var(--text-muted); font-size: 14px; margin: 0 0 25px 0; line-height: 1.5;">Load a track section from the <b>⚙ top menu</b>, or start from a pre-built route.</p>
-            <button class="btn-primary" style="padding: 12px 24px; font-size: 14px; border-radius: 30px !important; box-shadow: var(--hud-glow); display: flex; align-items: center; justify-content: center; margin: 0 auto; gap: 8px;" onclick="openTemplateModal()">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>
-                BROWSE TEMPLATES
-            </button>
+            <p style="color: var(--text-muted); font-size: 14px; margin: 0 0 15px 0; line-height: 1.5;">Load a track section from the <b>⚙ top menu</b>, or select an inspection category below to load a GitHub template.</p>
+            
+            <div class="template-grid">
+                <div class="folder-card" onclick="openTemplateModal('WALK', 'WALK INSPECTIONS')">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+                    <span class="folder-label">WALK<br>INSPECTIONS</span>
+                </div>
+                <div class="folder-card" onclick="openTemplateModal('SWITCH', 'SWITCH & POCKETS')">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+                    <span class="folder-label">SWITCH &<br>POCKETS</span>
+                </div>
+                <div class="folder-card" onclick="openTemplateModal('SPECIAL', 'SPECIAL WORK')">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+                    <span class="folder-label">SPECIAL<br>TRACKWORK</span>
+                </div>
+                <div class="folder-card" onclick="openTemplateModal('GEOMETRY', 'GEOMETRY / FLAW')">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+                    <span class="folder-label">GEOMETRY<br>& RAIL FLAW</span>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -897,16 +958,15 @@
     </div>
 
     <div class="system-modal-overlay" id="templateModalOverlay">
-        <div class="system-modal" style="padding: 0; text-align: left; max-width: 400px; overflow: hidden;">
+        <div class="system-modal">
             <div class="gallery-header">
-                <h3>LOAD TEMPLATE</h3>
+                <h3 id="template-modal-title">LOAD TEMPLATE</h3>
                 <button class="menu-toggle-btn" onclick="closeTemplateModal()" style="width: 32px; height: 32px; border-color: transparent;">✖</button>
             </div>
             <div style="padding: 20px;">
-                <p style="color: var(--text-muted); margin: 0 0 15px 0; font-size: 14px; line-height: 1.5;">Select a pre-built track layout from the GitHub repository to quickly begin your inspection.</p>
+                <p style="color: var(--text-muted); margin: 0 0 15px 0; font-size: 14px; line-height: 1.5;">Select a pre-built track layout from this category.</p>
                 <select id="template-select" style="width: 100%; margin-bottom: 15px; border-radius: 4px !important;">
                     <option value="">SELECT TEMPLATE...</option>
-                    <option value="templates/BW-MTS-SP-WALK.json">BW-MTS-SP-WALK</option>
                     </select>
                 <button class="btn-primary" id="executeTemplateBtn" style="width: 100%; padding: 12px; border-radius: 4px !important;" onclick="loadSelectedTemplate()">DOWNLOAD & LOAD</button>
             </div>
@@ -950,6 +1010,23 @@
         const iconLoad = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="pointer-events: none;"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>`;
         const iconSave = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="pointer-events: none;"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>`;
 
+        // THE TEMPLATE LIBRARY DATABASE
+        // To add a new template, just copy a line and change the name and URL!
+        const templateLibrary = {
+            'WALK': [
+                { name: 'BW-MTS-SP-WALK', url: 'templates/BW-MTS-SP-WALK.json' }
+            ],
+            'SWITCH': [
+                { name: 'Placeholder Switch Route', url: 'templates/SWITCH-PLACEHOLDER.json' }
+            ],
+            'SPECIAL': [
+                { name: 'Placeholder Special Work', url: 'templates/SPECIAL-PLACEHOLDER.json' }
+            ],
+            'GEOMETRY': [
+                { name: 'Placeholder Geometry', url: 'templates/GEOMETRY-PLACEHOLDER.json' }
+            ]
+        };
+
         function toggleEmptyState() {
             const emptyState = document.getElementById('empty-workspace-state');
             if (emptyState) {
@@ -957,8 +1034,22 @@
             }
         }
 
-        // TEMPLATE ENGINE
-        function openTemplateModal() {
+        // CATEGORY DYNAMIC TEMPLATE MODAL
+        function openTemplateModal(categoryKey, categoryName) {
+            document.getElementById('template-modal-title').textContent = categoryName + " TEMPLATES";
+            
+            const select = document.getElementById('template-select');
+            select.innerHTML = '<option value="">SELECT TEMPLATE...</option>';
+            
+            if(templateLibrary[categoryKey]) {
+                templateLibrary[categoryKey].forEach(tpl => {
+                    let opt = document.createElement('option');
+                    opt.value = tpl.url;
+                    opt.textContent = tpl.name;
+                    select.appendChild(opt);
+                });
+            }
+
             document.getElementById('templateModalOverlay').style.display = 'flex';
             document.getElementById('mainCommandBar').classList.add('collapsed');
         }
@@ -1106,9 +1197,7 @@
             const btn = document.getElementById('dynamicSaveLoadBtn');
             if (loadedRoutes.size === 0) {
                 btn.innerHTML = iconLoad;
-                btn.onclick = () => { 
-                    document.getElementById('importFile').click(); 
-                };
+                btn.onclick = () => { document.getElementById('importFile').click(); };
             } else {
                 btn.innerHTML = iconSave;
                 btn.onclick = () => saveProject();
@@ -1803,12 +1892,7 @@
 
                     const routeDisplay = document.getElementById('active-route-display');
                     const areaDisplay = document.getElementById('active-area-display');
-                    
-                    if (routeName) {
-                        routeDisplay.innerHTML = `<span style="display:inline-block; width:10px; height:10px; border-radius:50%; background-color:${routeColor}; margin-right:6px; border: 1px solid rgba(255,255,255,0.3); vertical-align: middle; margin-bottom: 2px;"></span>${routeName}`;
-                    } else {
-                        routeDisplay.textContent = 'AWAITING...';
-                    }
+                    routeDisplay.textContent = routeName ? routeName : 'AWAITING...';
                     
                     if (areaName) {
                         areaDisplay.textContent = areaName;
@@ -1846,7 +1930,7 @@
             window.scrollTo({ top: elementPosition - headerHeight - 15, behavior: "smooth" });
         }
 
-        // DECOUPLED DATA INJECTOR (Supports both Local File Upload & Cloud Templates)
+        // DECOUPLED DATA INJECTOR
         function injectProjectData(projectData, fileName) {
             try {
                 if (!Array.isArray(projectData)) throw new Error("Invalid format");
