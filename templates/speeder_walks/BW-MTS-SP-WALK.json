@@ -1,0 +1,5442 @@
+[
+  {
+    "segmentNum": "903",
+    "routeKey": "BWZ-NAZ-OB",
+    "routeName": "BWZ-NAZ-OB",
+    "direction": "Outbound Track",
+    "color": "#9E00A3",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "902",
+    "routeKey": "BWZ-NAZ-OB",
+    "routeName": "BWZ-NAZ-OB",
+    "direction": "Outbound Track",
+    "color": "#9E00A3",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "901",
+    "routeKey": "BWZ-NAZ-OB",
+    "routeName": "BWZ-NAZ-OB",
+    "direction": "Outbound Track",
+    "color": "#9E00A3",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "900",
+    "routeKey": "BWZ-NAZ-OB",
+    "routeName": "BWZ-NAZ-OB",
+    "direction": "Outbound Track",
+    "color": "#9E00A3",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "899",
+    "routeKey": "BWZ-NAZ-OB",
+    "routeName": "BWZ-NAZ-OB",
+    "direction": "Outbound Track",
+    "color": "#9E00A3",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "898",
+    "routeKey": "BWZ-NAZ-OB",
+    "routeName": "BWZ-NAZ-OB",
+    "direction": "Outbound Track",
+    "color": "#9E00A3",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "897",
+    "routeKey": "BWZ-NAZ-OB",
+    "routeName": "BWZ-NAZ-OB",
+    "direction": "Outbound Track",
+    "color": "#9E00A3",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "896",
+    "routeKey": "BWZ-NAZ-OB",
+    "routeName": "BWZ-NAZ-OB",
+    "direction": "Outbound Track",
+    "color": "#9E00A3",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "895",
+    "routeKey": "BWZ-NAZ-OB",
+    "routeName": "BWZ-NAZ-OB",
+    "direction": "Outbound Track",
+    "color": "#9E00A3",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "894",
+    "routeKey": "BWZ-NAZ-OB",
+    "routeName": "BWZ-NAZ-OB",
+    "direction": "Outbound Track",
+    "color": "#9E00A3",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "893",
+    "routeKey": "BWZ-NAZ-OB",
+    "routeName": "BWZ-NAZ-OB",
+    "direction": "Outbound Track",
+    "color": "#9E00A3",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "892",
+    "routeKey": "BWZ-NAZ-OB",
+    "routeName": "BWZ-NAZ-OB",
+    "direction": "Outbound Track",
+    "color": "#9E00A3",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "891",
+    "routeKey": "BWZ-NAZ-OB",
+    "routeName": "BWZ-NAZ-OB",
+    "direction": "Outbound Track",
+    "color": "#9E00A3",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "890",
+    "routeKey": "BWZ-NAZ-OB",
+    "routeName": "BWZ-NAZ-OB",
+    "direction": "Outbound Track",
+    "color": "#9E00A3",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "889",
+    "routeKey": "BWZ-NAZ-OB",
+    "routeName": "BWZ-NAZ-OB",
+    "direction": "Outbound Track",
+    "color": "#9E00A3",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "888",
+    "routeKey": "BWZ-NAZ-OB",
+    "routeName": "BWZ-NAZ-OB",
+    "direction": "Outbound Track",
+    "color": "#9E00A3",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "887",
+    "routeKey": "BWZ-NAZ-OB",
+    "routeName": "BWZ-NAZ-OB",
+    "direction": "Outbound Track",
+    "color": "#9E00A3",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "886",
+    "routeKey": "BWZ-NAZ-OB",
+    "routeName": "BWZ-NAZ-OB",
+    "direction": "Outbound Track",
+    "color": "#9E00A3",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "885",
+    "routeKey": "BWZ-NAZ-OB",
+    "routeName": "BWZ-NAZ-OB",
+    "direction": "Outbound Track",
+    "color": "#9E00A3",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "884",
+    "routeKey": "BWZ-NAZ-OB",
+    "routeName": "BWZ-NAZ-OB",
+    "direction": "Outbound Track",
+    "color": "#9E00A3",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "883",
+    "routeKey": "BWZ-NAZ-OB",
+    "routeName": "BWZ-NAZ-OB",
+    "direction": "Outbound Track",
+    "color": "#9E00A3",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "882",
+    "routeKey": "BWZ-NAZ-OB",
+    "routeName": "BWZ-NAZ-OB",
+    "direction": "Outbound Track",
+    "color": "#9E00A3",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "881",
+    "routeKey": "BWZ-NAZ-OB",
+    "routeName": "BWZ-NAZ-OB",
+    "direction": "Outbound Track",
+    "color": "#9E00A3",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "880",
+    "routeKey": "BWZ-NAZ-OB",
+    "routeName": "BWZ-NAZ-OB",
+    "direction": "Outbound Track",
+    "color": "#9E00A3",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "879",
+    "routeKey": "BWZ-NAZ-OB",
+    "routeName": "BWZ-NAZ-OB",
+    "direction": "Outbound Track",
+    "color": "#9E00A3",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "878",
+    "routeKey": "BWZ-NAZ-OB",
+    "routeName": "BWZ-NAZ-OB",
+    "direction": "Outbound Track",
+    "color": "#9E00A3",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "877",
+    "routeKey": "BWZ-NAZ-OB",
+    "routeName": "BWZ-NAZ-OB",
+    "direction": "Outbound Track",
+    "color": "#9E00A3",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "876",
+    "routeKey": "BWZ-NAZ-OB",
+    "routeName": "BWZ-NAZ-OB",
+    "direction": "Outbound Track",
+    "color": "#9E00A3",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "875",
+    "routeKey": "BWZ-NAZ-OB",
+    "routeName": "BWZ-NAZ-OB",
+    "direction": "Outbound Track",
+    "color": "#9E00A3",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "874",
+    "routeKey": "BWZ-NAZ-OB",
+    "routeName": "BWZ-NAZ-OB",
+    "direction": "Outbound Track",
+    "color": "#9E00A3",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "873",
+    "routeKey": "BWZ-NAZ-OB",
+    "routeName": "BWZ-NAZ-OB",
+    "direction": "Outbound Track",
+    "color": "#9E00A3",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "872",
+    "routeKey": "BWZ-NAZ-OB",
+    "routeName": "BWZ-NAZ-OB",
+    "direction": "Outbound Track",
+    "color": "#9E00A3",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "871",
+    "routeKey": "BWZ-NAZ-OB",
+    "routeName": "BWZ-NAZ-OB",
+    "direction": "Outbound Track",
+    "color": "#9E00A3",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "870",
+    "routeKey": "BWZ-NAZ-OB",
+    "routeName": "BWZ-NAZ-OB",
+    "direction": "Outbound Track",
+    "color": "#9E00A3",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "869",
+    "routeKey": "BWZ-NAZ-OB",
+    "routeName": "BWZ-NAZ-OB",
+    "direction": "Outbound Track",
+    "color": "#9E00A3",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "868",
+    "routeKey": "BWZ-NAZ-OB",
+    "routeName": "BWZ-NAZ-OB",
+    "direction": "Outbound Track",
+    "color": "#9E00A3",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "867",
+    "routeKey": "BWZ-NAZ-OB",
+    "routeName": "BWZ-NAZ-OB",
+    "direction": "Outbound Track",
+    "color": "#9E00A3",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "866",
+    "routeKey": "BWZ-NAZ-OB",
+    "routeName": "BWZ-NAZ-OB",
+    "direction": "Outbound Track",
+    "color": "#9E00A3",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "865",
+    "routeKey": "BWZ-NAZ-OB",
+    "routeName": "BWZ-NAZ-OB",
+    "direction": "Outbound Track",
+    "color": "#9E00A3",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "864",
+    "routeKey": "BWZ-NAZ-OB",
+    "routeName": "BWZ-NAZ-OB",
+    "direction": "Outbound Track",
+    "color": "#9E00A3",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "863",
+    "routeKey": "BWZ-NAZ-OB",
+    "routeName": "BWZ-NAZ-OB",
+    "direction": "Outbound Track",
+    "color": "#9E00A3",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "862",
+    "routeKey": "BWZ-NAZ-OB",
+    "routeName": "BWZ-NAZ-OB",
+    "direction": "Outbound Track",
+    "color": "#9E00A3",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "861",
+    "routeKey": "BWZ-NAZ-OB",
+    "routeName": "BWZ-NAZ-OB",
+    "direction": "Outbound Track",
+    "color": "#9E00A3",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "860",
+    "routeKey": "BWZ-NAZ-OB",
+    "routeName": "BWZ-NAZ-OB",
+    "direction": "Outbound Track",
+    "color": "#9E00A3",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "859",
+    "routeKey": "BWZ-NAZ-OB",
+    "routeName": "BWZ-NAZ-OB",
+    "direction": "Outbound Track",
+    "color": "#9E00A3",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "858",
+    "routeKey": "BWZ-NAZ-OB",
+    "routeName": "BWZ-NAZ-OB",
+    "direction": "Outbound Track",
+    "color": "#9E00A3",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "857",
+    "routeKey": "BWZ-NAZ-OB",
+    "routeName": "BWZ-NAZ-OB",
+    "direction": "Outbound Track",
+    "color": "#9E00A3",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "856",
+    "routeKey": "BWZ-NAZ-OB",
+    "routeName": "BWZ-NAZ-OB",
+    "direction": "Outbound Track",
+    "color": "#9E00A3",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "855",
+    "routeKey": "BWZ-NAZ-OB",
+    "routeName": "BWZ-NAZ-OB",
+    "direction": "Outbound Track",
+    "color": "#9E00A3",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "854",
+    "routeKey": "BWZ-NAZ-OB",
+    "routeName": "BWZ-NAZ-OB",
+    "direction": "Outbound Track",
+    "color": "#9E00A3",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "853",
+    "routeKey": "BWZ-NAZ-OB",
+    "routeName": "BWZ-NAZ-OB",
+    "direction": "Outbound Track",
+    "color": "#9E00A3",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "852",
+    "routeKey": "BWZ-NAZ-OB",
+    "routeName": "BWZ-NAZ-OB",
+    "direction": "Outbound Track",
+    "color": "#9E00A3",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "851",
+    "routeKey": "BWZ-NAZ-OB",
+    "routeName": "BWZ-NAZ-OB",
+    "direction": "Outbound Track",
+    "color": "#9E00A3",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "850",
+    "routeKey": "BWZ-NAZ-OB",
+    "routeName": "BWZ-NAZ-OB",
+    "direction": "Outbound Track",
+    "color": "#9E00A3",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "849",
+    "routeKey": "BWZ-NAZ-OB",
+    "routeName": "BWZ-NAZ-OB",
+    "direction": "Outbound Track",
+    "color": "#9E00A3",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "848",
+    "routeKey": "BWZ-NAZ-OB",
+    "routeName": "BWZ-NAZ-OB",
+    "direction": "Outbound Track",
+    "color": "#9E00A3",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "847",
+    "routeKey": "BWZ-NAZ-OB",
+    "routeName": "BWZ-NAZ-OB",
+    "direction": "Outbound Track",
+    "color": "#9E00A3",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "846",
+    "routeKey": "BWZ-NAZ-OB",
+    "routeName": "BWZ-NAZ-OB",
+    "direction": "Outbound Track",
+    "color": "#9E00A3",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "845",
+    "routeKey": "BWZ-NAZ-OB",
+    "routeName": "BWZ-NAZ-OB",
+    "direction": "Outbound Track",
+    "color": "#9E00A3",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "844",
+    "routeKey": "BWZ-NAZ-OB",
+    "routeName": "BWZ-NAZ-OB",
+    "direction": "Outbound Track",
+    "color": "#9E00A3",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "843",
+    "routeKey": "BWZ-NAZ-OB",
+    "routeName": "BWZ-NAZ-OB",
+    "direction": "Outbound Track",
+    "color": "#9E00A3",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "842",
+    "routeKey": "BWZ-NAZ-OB",
+    "routeName": "BWZ-NAZ-OB",
+    "direction": "Outbound Track",
+    "color": "#9E00A3",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "841",
+    "routeKey": "BWZ-NAZ-OB",
+    "routeName": "BWZ-NAZ-OB",
+    "direction": "Outbound Track",
+    "color": "#9E00A3",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "840",
+    "routeKey": "BWZ-NAZ-OB",
+    "routeName": "BWZ-NAZ-OB",
+    "direction": "Outbound Track",
+    "color": "#9E00A3",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "839",
+    "routeKey": "BWZ-NAZ-OB",
+    "routeName": "BWZ-NAZ-OB",
+    "direction": "Outbound Track",
+    "color": "#9E00A3",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "838",
+    "routeKey": "BWZ-NAZ-OB",
+    "routeName": "BWZ-NAZ-OB",
+    "direction": "Outbound Track",
+    "color": "#9E00A3",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "837",
+    "routeKey": "BWZ-NAZ-OB",
+    "routeName": "BWZ-NAZ-OB",
+    "direction": "Outbound Track",
+    "color": "#9E00A3",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "836",
+    "routeKey": "BWZ-NAZ-OB",
+    "routeName": "BWZ-NAZ-OB",
+    "direction": "Outbound Track",
+    "color": "#9E00A3",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "835",
+    "routeKey": "BWZ-NAZ-OB",
+    "routeName": "BWZ-NAZ-OB",
+    "direction": "Outbound Track",
+    "color": "#9E00A3",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "834",
+    "routeKey": "BWZ-NAZ-OB",
+    "routeName": "BWZ-NAZ-OB",
+    "direction": "Outbound Track",
+    "color": "#9E00A3",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "833",
+    "routeKey": "BWZ-NAZ-OB",
+    "routeName": "BWZ-NAZ-OB",
+    "direction": "Outbound Track",
+    "color": "#9E00A3",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "832",
+    "routeKey": "BWZ-NAZ-OB",
+    "routeName": "BWZ-NAZ-OB",
+    "direction": "Outbound Track",
+    "color": "#9E00A3",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "831",
+    "routeKey": "BWZ-NAZ-OB",
+    "routeName": "BWZ-NAZ-OB",
+    "direction": "Outbound Track",
+    "color": "#9E00A3",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "830",
+    "routeKey": "BWZ-NAZ-OB",
+    "routeName": "BWZ-NAZ-OB",
+    "direction": "Outbound Track",
+    "color": "#9E00A3",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "829",
+    "routeKey": "BWZ-NAZ-OB",
+    "routeName": "BWZ-NAZ-OB",
+    "direction": "Outbound Track",
+    "color": "#9E00A3",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "828",
+    "routeKey": "BWZ-NAZ-OB",
+    "routeName": "BWZ-NAZ-OB",
+    "direction": "Outbound Track",
+    "color": "#9E00A3",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "827",
+    "routeKey": "BWZ-NAZ-OB",
+    "routeName": "BWZ-NAZ-OB",
+    "direction": "Outbound Track",
+    "color": "#9E00A3",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "826",
+    "routeKey": "BWZ-NAZ-OB",
+    "routeName": "BWZ-NAZ-OB",
+    "direction": "Outbound Track",
+    "color": "#9E00A3",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "825",
+    "routeKey": "BWZ-NAZ-OB",
+    "routeName": "BWZ-NAZ-OB",
+    "direction": "Outbound Track",
+    "color": "#9E00A3",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "824",
+    "routeKey": "BWZ-NAZ-OB",
+    "routeName": "BWZ-NAZ-OB",
+    "direction": "Outbound Track",
+    "color": "#9E00A3",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "823",
+    "routeKey": "BWZ-NAZ-OB",
+    "routeName": "BWZ-NAZ-OB",
+    "direction": "Outbound Track",
+    "color": "#9E00A3",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "822",
+    "routeKey": "BWZ-NAZ-OB",
+    "routeName": "BWZ-NAZ-OB",
+    "direction": "Outbound Track",
+    "color": "#9E00A3",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "821",
+    "routeKey": "BWZ-NAZ-OB",
+    "routeName": "BWZ-NAZ-OB",
+    "direction": "Outbound Track",
+    "color": "#9E00A3",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "820",
+    "routeKey": "BWZ-NAZ-OB",
+    "routeName": "BWZ-NAZ-OB",
+    "direction": "Outbound Track",
+    "color": "#9E00A3",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "819",
+    "routeKey": "BWZ-NAZ-OB",
+    "routeName": "BWZ-NAZ-OB",
+    "direction": "Outbound Track",
+    "color": "#9E00A3",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "818",
+    "routeKey": "NAZ-JYZ-OB",
+    "routeName": "NAZ-JYZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "817",
+    "routeKey": "NAZ-JYZ-OB",
+    "routeName": "NAZ-JYZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "816",
+    "routeKey": "NAZ-JYZ-OB",
+    "routeName": "NAZ-JYZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "815",
+    "routeKey": "NAZ-JYZ-OB",
+    "routeName": "NAZ-JYZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "814",
+    "routeKey": "NAZ-JYZ-OB",
+    "routeName": "NAZ-JYZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "813",
+    "routeKey": "NAZ-JYZ-OB",
+    "routeName": "NAZ-JYZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "812",
+    "routeKey": "NAZ-JYZ-OB",
+    "routeName": "NAZ-JYZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "811",
+    "routeKey": "NAZ-JYZ-OB",
+    "routeName": "NAZ-JYZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "810",
+    "routeKey": "NAZ-JYZ-OB",
+    "routeName": "NAZ-JYZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "809",
+    "routeKey": "NAZ-JYZ-OB",
+    "routeName": "NAZ-JYZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "808",
+    "routeKey": "NAZ-JYZ-OB",
+    "routeName": "NAZ-JYZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "807",
+    "routeKey": "NAZ-JYZ-OB",
+    "routeName": "NAZ-JYZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "806",
+    "routeKey": "NAZ-JYZ-OB",
+    "routeName": "NAZ-JYZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "805",
+    "routeKey": "NAZ-JYZ-OB",
+    "routeName": "NAZ-JYZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "804",
+    "routeKey": "NAZ-JYZ-OB",
+    "routeName": "NAZ-JYZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "803",
+    "routeKey": "NAZ-JYZ-OB",
+    "routeName": "NAZ-JYZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "802",
+    "routeKey": "NAZ-JYZ-OB",
+    "routeName": "NAZ-JYZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "801",
+    "routeKey": "NAZ-JYZ-OB",
+    "routeName": "NAZ-JYZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "800",
+    "routeKey": "NAZ-JYZ-OB",
+    "routeName": "NAZ-JYZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "799",
+    "routeKey": "NAZ-JYZ-OB",
+    "routeName": "NAZ-JYZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "798",
+    "routeKey": "NAZ-JYZ-OB",
+    "routeName": "NAZ-JYZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "797",
+    "routeKey": "NAZ-JYZ-OB",
+    "routeName": "NAZ-JYZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "796",
+    "routeKey": "NAZ-JYZ-OB",
+    "routeName": "NAZ-JYZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "795",
+    "routeKey": "NAZ-JYZ-OB",
+    "routeName": "NAZ-JYZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "794",
+    "routeKey": "NAZ-JYZ-OB",
+    "routeName": "NAZ-JYZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "793",
+    "routeKey": "NAZ-JYZ-OB",
+    "routeName": "NAZ-JYZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "792",
+    "routeKey": "NAZ-JYZ-OB",
+    "routeName": "NAZ-JYZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "791",
+    "routeKey": "NAZ-JYZ-OB",
+    "routeName": "NAZ-JYZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "790",
+    "routeKey": "NAZ-JYZ-OB",
+    "routeName": "NAZ-JYZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "789",
+    "routeKey": "NAZ-JYZ-OB",
+    "routeName": "NAZ-JYZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "788",
+    "routeKey": "NAZ-JYZ-OB",
+    "routeName": "NAZ-JYZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "787",
+    "routeKey": "NAZ-JYZ-OB",
+    "routeName": "NAZ-JYZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "786",
+    "routeKey": "NAZ-JYZ-OB",
+    "routeName": "NAZ-JYZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "785",
+    "routeKey": "NAZ-JYZ-OB",
+    "routeName": "NAZ-JYZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "784",
+    "routeKey": "NAZ-JYZ-OB",
+    "routeName": "NAZ-JYZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "783",
+    "routeKey": "NAZ-JYZ-OB",
+    "routeName": "NAZ-JYZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "782",
+    "routeKey": "NAZ-JYZ-OB",
+    "routeName": "NAZ-JYZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "781",
+    "routeKey": "NAZ-JYZ-OB",
+    "routeName": "NAZ-JYZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "780",
+    "routeKey": "NAZ-JYZ-OB",
+    "routeName": "NAZ-JYZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "779",
+    "routeKey": "NAZ-JYZ-OB",
+    "routeName": "NAZ-JYZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "778",
+    "routeKey": "NAZ-JYZ-OB",
+    "routeName": "NAZ-JYZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "777",
+    "routeKey": "NAZ-JYZ-OB",
+    "routeName": "NAZ-JYZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "776",
+    "routeKey": "NAZ-JYZ-OB",
+    "routeName": "NAZ-JYZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "775",
+    "routeKey": "NAZ-JYZ-OB",
+    "routeName": "NAZ-JYZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "774",
+    "routeKey": "NAZ-JYZ-OB",
+    "routeName": "NAZ-JYZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "773",
+    "routeKey": "NAZ-JYZ-OB",
+    "routeName": "NAZ-JYZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "772",
+    "routeKey": "NAZ-JYZ-OB",
+    "routeName": "NAZ-JYZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "771",
+    "routeKey": "NAZ-JYZ-OB",
+    "routeName": "NAZ-JYZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "770",
+    "routeKey": "NAZ-JYZ-OB",
+    "routeName": "NAZ-JYZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "769",
+    "routeKey": "NAZ-JYZ-OB",
+    "routeName": "NAZ-JYZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "768",
+    "routeKey": "NAZ-JYZ-OB",
+    "routeName": "NAZ-JYZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "767",
+    "routeKey": "NAZ-JYZ-OB",
+    "routeName": "NAZ-JYZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "766",
+    "routeKey": "NAZ-JYZ-OB",
+    "routeName": "NAZ-JYZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "765",
+    "routeKey": "NAZ-JYZ-OB",
+    "routeName": "NAZ-JYZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "764",
+    "routeKey": "NAZ-JYZ-OB",
+    "routeName": "NAZ-JYZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "763",
+    "routeKey": "NAZ-JYZ-OB",
+    "routeName": "NAZ-JYZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "762",
+    "routeKey": "NAZ-JYZ-OB",
+    "routeName": "NAZ-JYZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "761",
+    "routeKey": "NAZ-JYZ-OB",
+    "routeName": "NAZ-JYZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "760",
+    "routeKey": "NAZ-JYZ-OB",
+    "routeName": "NAZ-JYZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "759",
+    "routeKey": "NAZ-JYZ-OB",
+    "routeName": "NAZ-JYZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "758",
+    "routeKey": "NAZ-JYZ-OB",
+    "routeName": "NAZ-JYZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "757",
+    "routeKey": "NAZ-JYZ-OB",
+    "routeName": "NAZ-JYZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "756",
+    "routeKey": "NAZ-JYZ-OB",
+    "routeName": "NAZ-JYZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "755",
+    "routeKey": "NAZ-JYZ-OB",
+    "routeName": "NAZ-JYZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "754",
+    "routeKey": "NAZ-JYZ-OB",
+    "routeName": "NAZ-JYZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "753",
+    "routeKey": "NAZ-JYZ-OB",
+    "routeName": "NAZ-JYZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "752",
+    "routeKey": "NAZ-JYZ-OB",
+    "routeName": "NAZ-JYZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "751",
+    "routeKey": "NAZ-JYZ-OB",
+    "routeName": "NAZ-JYZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "750",
+    "routeKey": "NAZ-JYZ-OB",
+    "routeName": "NAZ-JYZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "749",
+    "routeKey": "NAZ-JYZ-OB",
+    "routeName": "NAZ-JYZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "748",
+    "routeKey": "NAZ-JYZ-OB",
+    "routeName": "NAZ-JYZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "747",
+    "routeKey": "NAZ-JYZ-OB",
+    "routeName": "NAZ-JYZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "746",
+    "routeKey": "NAZ-JYZ-OB",
+    "routeName": "NAZ-JYZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "745",
+    "routeKey": "NAZ-JYZ-OB",
+    "routeName": "NAZ-JYZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "744",
+    "routeKey": "NAZ-JYZ-OB",
+    "routeName": "NAZ-JYZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "743",
+    "routeKey": "NAZ-JYZ-OB",
+    "routeName": "NAZ-JYZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "742",
+    "routeKey": "NAZ-JYZ-OB",
+    "routeName": "NAZ-JYZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "741",
+    "routeKey": "NAZ-JYZ-OB",
+    "routeName": "NAZ-JYZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "740",
+    "routeKey": "NAZ-JYZ-OB",
+    "routeName": "NAZ-JYZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "739",
+    "routeKey": "NAZ-JYZ-OB",
+    "routeName": "NAZ-JYZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "738",
+    "routeKey": "NAZ-JYZ-OB",
+    "routeName": "NAZ-JYZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "737",
+    "routeKey": "NAZ-JYZ-OB",
+    "routeName": "NAZ-JYZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "736",
+    "routeKey": "NAZ-JYZ-OB",
+    "routeName": "NAZ-JYZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "735",
+    "routeKey": "JYZ-PTZ-OB",
+    "routeName": "JYZ-PTZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "734",
+    "routeKey": "JYZ-PTZ-OB",
+    "routeName": "JYZ-PTZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "733",
+    "routeKey": "JYZ-PTZ-OB",
+    "routeName": "JYZ-PTZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "732",
+    "routeKey": "JYZ-PTZ-OB",
+    "routeName": "JYZ-PTZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "731",
+    "routeKey": "JYZ-PTZ-OB",
+    "routeName": "JYZ-PTZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "730",
+    "routeKey": "JYZ-PTZ-OB",
+    "routeName": "JYZ-PTZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "729",
+    "routeKey": "JYZ-PTZ-OB",
+    "routeName": "JYZ-PTZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "728",
+    "routeKey": "JYZ-PTZ-OB",
+    "routeName": "JYZ-PTZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "727",
+    "routeKey": "JYZ-PTZ-OB",
+    "routeName": "JYZ-PTZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "726",
+    "routeKey": "JYZ-PTZ-OB",
+    "routeName": "JYZ-PTZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "725",
+    "routeKey": "JYZ-PTZ-OB",
+    "routeName": "JYZ-PTZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "724",
+    "routeKey": "JYZ-PTZ-OB",
+    "routeName": "JYZ-PTZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "723",
+    "routeKey": "JYZ-PTZ-OB",
+    "routeName": "JYZ-PTZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "722",
+    "routeKey": "JYZ-PTZ-OB",
+    "routeName": "JYZ-PTZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "721",
+    "routeKey": "JYZ-PTZ-OB",
+    "routeName": "JYZ-PTZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "720",
+    "routeKey": "JYZ-PTZ-OB",
+    "routeName": "JYZ-PTZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "719",
+    "routeKey": "JYZ-PTZ-OB",
+    "routeName": "JYZ-PTZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "718",
+    "routeKey": "JYZ-PTZ-OB",
+    "routeName": "JYZ-PTZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "717",
+    "routeKey": "JYZ-PTZ-OB",
+    "routeName": "JYZ-PTZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "716",
+    "routeKey": "JYZ-PTZ-OB",
+    "routeName": "JYZ-PTZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "715",
+    "routeKey": "JYZ-PTZ-OB",
+    "routeName": "JYZ-PTZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "714",
+    "routeKey": "JYZ-PTZ-OB",
+    "routeName": "JYZ-PTZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "713",
+    "routeKey": "JYZ-PTZ-OB",
+    "routeName": "JYZ-PTZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "712",
+    "routeKey": "JYZ-PTZ-OB",
+    "routeName": "JYZ-PTZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "711",
+    "routeKey": "JYZ-PTZ-OB",
+    "routeName": "JYZ-PTZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "710",
+    "routeKey": "JYZ-PTZ-OB",
+    "routeName": "JYZ-PTZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "709",
+    "routeKey": "JYZ-PTZ-OB",
+    "routeName": "JYZ-PTZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "708",
+    "routeKey": "JYZ-PTZ-OB",
+    "routeName": "JYZ-PTZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "707",
+    "routeKey": "JYZ-PTZ-OB",
+    "routeName": "JYZ-PTZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "706",
+    "routeKey": "JYZ-PTZ-OB",
+    "routeName": "JYZ-PTZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "705",
+    "routeKey": "JYZ-PTZ-OB",
+    "routeName": "JYZ-PTZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "704",
+    "routeKey": "JYZ-PTZ-OB",
+    "routeName": "JYZ-PTZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "703",
+    "routeKey": "JYZ-PTZ-OB",
+    "routeName": "JYZ-PTZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "702",
+    "routeKey": "JYZ-PTZ-OB",
+    "routeName": "JYZ-PTZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "701",
+    "routeKey": "JYZ-PTZ-OB",
+    "routeName": "JYZ-PTZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "700",
+    "routeKey": "JYZ-PTZ-OB",
+    "routeName": "JYZ-PTZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "699",
+    "routeKey": "JYZ-PTZ-OB",
+    "routeName": "JYZ-PTZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "698",
+    "routeKey": "JYZ-PTZ-OB",
+    "routeName": "JYZ-PTZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "697",
+    "routeKey": "JYZ-PTZ-OB",
+    "routeName": "JYZ-PTZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "696",
+    "routeKey": "JYZ-PTZ-OB",
+    "routeName": "JYZ-PTZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "695",
+    "routeKey": "JYZ-PTZ-OB",
+    "routeName": "JYZ-PTZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "694",
+    "routeKey": "JYZ-PTZ-OB",
+    "routeName": "JYZ-PTZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "693",
+    "routeKey": "JYZ-PTZ-OB",
+    "routeName": "JYZ-PTZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "692",
+    "routeKey": "JYZ-PTZ-OB",
+    "routeName": "JYZ-PTZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "691",
+    "routeKey": "JYZ-PTZ-OB",
+    "routeName": "JYZ-PTZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "690",
+    "routeKey": "JYZ-PTZ-OB",
+    "routeName": "JYZ-PTZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "689",
+    "routeKey": "JYZ-PTZ-OB",
+    "routeName": "JYZ-PTZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "688",
+    "routeKey": "JYZ-PTZ-OB",
+    "routeName": "JYZ-PTZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "687",
+    "routeKey": "JYZ-PTZ-OB",
+    "routeName": "JYZ-PTZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "686",
+    "routeKey": "JYZ-PTZ-OB",
+    "routeName": "JYZ-PTZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "685",
+    "routeKey": "JYZ-PTZ-OB",
+    "routeName": "JYZ-PTZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "684",
+    "routeKey": "JYZ-PTZ-OB",
+    "routeName": "JYZ-PTZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "683",
+    "routeKey": "JYZ-PTZ-OB",
+    "routeName": "JYZ-PTZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "682",
+    "routeKey": "JYZ-PTZ-OB",
+    "routeName": "JYZ-PTZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "681",
+    "routeKey": "JYZ-PTZ-OB",
+    "routeName": "JYZ-PTZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "680",
+    "routeKey": "JYZ-PTZ-OB",
+    "routeName": "JYZ-PTZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "679",
+    "routeKey": "JYZ-PTZ-OB",
+    "routeName": "JYZ-PTZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "678",
+    "routeKey": "JYZ-PTZ-OB",
+    "routeName": "JYZ-PTZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "677",
+    "routeKey": "JYZ-PTZ-OB",
+    "routeName": "JYZ-PTZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "676",
+    "routeKey": "JYZ-PTZ-OB",
+    "routeName": "JYZ-PTZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "675",
+    "routeKey": "JYZ-PTZ-OB",
+    "routeName": "JYZ-PTZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "674",
+    "routeKey": "JYZ-PTZ-OB",
+    "routeName": "JYZ-PTZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "673",
+    "routeKey": "JYZ-PTZ-OB",
+    "routeName": "JYZ-PTZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "672",
+    "routeKey": "JYZ-PTZ-OB",
+    "routeName": "JYZ-PTZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "671",
+    "routeKey": "JYZ-PTZ-OB",
+    "routeName": "JYZ-PTZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "670",
+    "routeKey": "JYZ-PTZ-OB",
+    "routeName": "JYZ-PTZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "669",
+    "routeKey": "JYZ-PTZ-OB",
+    "routeName": "JYZ-PTZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "668",
+    "routeKey": "JYZ-PTZ-OB",
+    "routeName": "JYZ-PTZ-OB",
+    "direction": "Outbound Track",
+    "color": "#0ED100",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "668",
+    "routeKey": "PTZ-ROZ-OB",
+    "routeName": "PTZ-ROZ-OB",
+    "direction": "Outbound Track",
+    "color": "#22DDB4",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "667",
+    "routeKey": "PTZ-ROZ-OB",
+    "routeName": "PTZ-ROZ-OB",
+    "direction": "Outbound Track",
+    "color": "#22DDB4",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "666",
+    "routeKey": "PTZ-ROZ-OB",
+    "routeName": "PTZ-ROZ-OB",
+    "direction": "Outbound Track",
+    "color": "#22DDB4",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "665",
+    "routeKey": "PTZ-ROZ-OB",
+    "routeName": "PTZ-ROZ-OB",
+    "direction": "Outbound Track",
+    "color": "#22DDB4",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "664",
+    "routeKey": "PTZ-ROZ-OB",
+    "routeName": "PTZ-ROZ-OB",
+    "direction": "Outbound Track",
+    "color": "#22DDB4",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "663",
+    "routeKey": "PTZ-ROZ-OB",
+    "routeName": "PTZ-ROZ-OB",
+    "direction": "Outbound Track",
+    "color": "#22DDB4",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "662",
+    "routeKey": "PTZ-ROZ-OB",
+    "routeName": "PTZ-ROZ-OB",
+    "direction": "Outbound Track",
+    "color": "#22DDB4",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "661",
+    "routeKey": "PTZ-ROZ-OB",
+    "routeName": "PTZ-ROZ-OB",
+    "direction": "Outbound Track",
+    "color": "#22DDB4",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "660",
+    "routeKey": "PTZ-ROZ-OB",
+    "routeName": "PTZ-ROZ-OB",
+    "direction": "Outbound Track",
+    "color": "#22DDB4",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "659",
+    "routeKey": "PTZ-ROZ-OB",
+    "routeName": "PTZ-ROZ-OB",
+    "direction": "Outbound Track",
+    "color": "#22DDB4",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "658",
+    "routeKey": "PTZ-ROZ-OB",
+    "routeName": "PTZ-ROZ-OB",
+    "direction": "Outbound Track",
+    "color": "#22DDB4",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "657",
+    "routeKey": "PTZ-ROZ-OB",
+    "routeName": "PTZ-ROZ-OB",
+    "direction": "Outbound Track",
+    "color": "#22DDB4",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "656",
+    "routeKey": "PTZ-ROZ-OB",
+    "routeName": "PTZ-ROZ-OB",
+    "direction": "Outbound Track",
+    "color": "#22DDB4",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "655",
+    "routeKey": "PTZ-ROZ-OB",
+    "routeName": "PTZ-ROZ-OB",
+    "direction": "Outbound Track",
+    "color": "#22DDB4",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "654",
+    "routeKey": "PTZ-ROZ-OB",
+    "routeName": "PTZ-ROZ-OB",
+    "direction": "Outbound Track",
+    "color": "#22DDB4",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "653",
+    "routeKey": "PTZ-ROZ-OB",
+    "routeName": "PTZ-ROZ-OB",
+    "direction": "Outbound Track",
+    "color": "#22DDB4",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "652",
+    "routeKey": "PTZ-ROZ-OB",
+    "routeName": "PTZ-ROZ-OB",
+    "direction": "Outbound Track",
+    "color": "#22DDB4",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "651",
+    "routeKey": "PTZ-ROZ-OB",
+    "routeName": "PTZ-ROZ-OB",
+    "direction": "Outbound Track",
+    "color": "#22DDB4",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "650",
+    "routeKey": "PTZ-ROZ-OB",
+    "routeName": "PTZ-ROZ-OB",
+    "direction": "Outbound Track",
+    "color": "#22DDB4",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "649",
+    "routeKey": "PTZ-ROZ-OB",
+    "routeName": "PTZ-ROZ-OB",
+    "direction": "Outbound Track",
+    "color": "#22DDB4",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "648",
+    "routeKey": "PTZ-ROZ-OB",
+    "routeName": "PTZ-ROZ-OB",
+    "direction": "Outbound Track",
+    "color": "#22DDB4",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "647",
+    "routeKey": "PTZ-ROZ-OB",
+    "routeName": "PTZ-ROZ-OB",
+    "direction": "Outbound Track",
+    "color": "#22DDB4",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "646",
+    "routeKey": "PTZ-ROZ-OB",
+    "routeName": "PTZ-ROZ-OB",
+    "direction": "Outbound Track",
+    "color": "#22DDB4",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "645",
+    "routeKey": "PTZ-ROZ-OB",
+    "routeName": "PTZ-ROZ-OB",
+    "direction": "Outbound Track",
+    "color": "#22DDB4",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "644",
+    "routeKey": "PTZ-ROZ-OB",
+    "routeName": "PTZ-ROZ-OB",
+    "direction": "Outbound Track",
+    "color": "#22DDB4",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "643",
+    "routeKey": "PTZ-ROZ-OB",
+    "routeName": "PTZ-ROZ-OB",
+    "direction": "Outbound Track",
+    "color": "#22DDB4",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "642",
+    "routeKey": "PTZ-ROZ-OB",
+    "routeName": "PTZ-ROZ-OB",
+    "direction": "Outbound Track",
+    "color": "#22DDB4",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "641",
+    "routeKey": "PTZ-ROZ-OB",
+    "routeName": "PTZ-ROZ-OB",
+    "direction": "Outbound Track",
+    "color": "#22DDB4",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "640",
+    "routeKey": "PTZ-ROZ-OB",
+    "routeName": "PTZ-ROZ-OB",
+    "direction": "Outbound Track",
+    "color": "#22DDB4",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "639",
+    "routeKey": "PTZ-ROZ-OB",
+    "routeName": "PTZ-ROZ-OB",
+    "direction": "Outbound Track",
+    "color": "#22DDB4",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "638",
+    "routeKey": "PTZ-ROZ-OB",
+    "routeName": "PTZ-ROZ-OB",
+    "direction": "Outbound Track",
+    "color": "#22DDB4",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "637",
+    "routeKey": "PTZ-ROZ-OB",
+    "routeName": "PTZ-ROZ-OB",
+    "direction": "Outbound Track",
+    "color": "#22DDB4",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "636",
+    "routeKey": "PTZ-ROZ-OB",
+    "routeName": "PTZ-ROZ-OB",
+    "direction": "Outbound Track",
+    "color": "#22DDB4",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "635",
+    "routeKey": "PTZ-ROZ-OB",
+    "routeName": "PTZ-ROZ-OB",
+    "direction": "Outbound Track",
+    "color": "#22DDB4",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "634",
+    "routeKey": "PTZ-ROZ-OB",
+    "routeName": "PTZ-ROZ-OB",
+    "direction": "Outbound Track",
+    "color": "#22DDB4",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "633",
+    "routeKey": "PTZ-ROZ-OB",
+    "routeName": "PTZ-ROZ-OB",
+    "direction": "Outbound Track",
+    "color": "#22DDB4",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "632",
+    "routeKey": "PTZ-ROZ-OB",
+    "routeName": "PTZ-ROZ-OB",
+    "direction": "Outbound Track",
+    "color": "#22DDB4",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "631",
+    "routeKey": "PTZ-ROZ-OB",
+    "routeName": "PTZ-ROZ-OB",
+    "direction": "Outbound Track",
+    "color": "#22DDB4",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "630",
+    "routeKey": "PTZ-ROZ-OB",
+    "routeName": "PTZ-ROZ-OB",
+    "direction": "Outbound Track",
+    "color": "#22DDB4",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "629",
+    "routeKey": "PTZ-ROZ-OB",
+    "routeName": "PTZ-ROZ-OB",
+    "direction": "Outbound Track",
+    "color": "#22DDB4",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "628",
+    "routeKey": "PTZ-ROZ-OB",
+    "routeName": "PTZ-ROZ-OB",
+    "direction": "Outbound Track",
+    "color": "#22DDB4",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "627",
+    "routeKey": "PTZ-ROZ-OB",
+    "routeName": "PTZ-ROZ-OB",
+    "direction": "Outbound Track",
+    "color": "#22DDB4",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "626",
+    "routeKey": "PTZ-ROZ-OB",
+    "routeName": "PTZ-ROZ-OB",
+    "direction": "Outbound Track",
+    "color": "#22DDB4",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "625",
+    "routeKey": "PTZ-ROZ-OB",
+    "routeName": "PTZ-ROZ-OB",
+    "direction": "Outbound Track",
+    "color": "#22DDB4",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "624",
+    "routeKey": "PTZ-ROZ-OB",
+    "routeName": "PTZ-ROZ-OB",
+    "direction": "Outbound Track",
+    "color": "#22DDB4",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "623",
+    "routeKey": "PTZ-ROZ-OB",
+    "routeName": "PTZ-ROZ-OB",
+    "direction": "Outbound Track",
+    "color": "#22DDB4",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "622",
+    "routeKey": "PTZ-ROZ-OB",
+    "routeName": "PTZ-ROZ-OB",
+    "direction": "Outbound Track",
+    "color": "#22DDB4",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "621",
+    "routeKey": "PTZ-ROZ-OB",
+    "routeName": "PTZ-ROZ-OB",
+    "direction": "Outbound Track",
+    "color": "#22DDB4",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "620",
+    "routeKey": "PTZ-ROZ-OB",
+    "routeName": "PTZ-ROZ-OB",
+    "direction": "Outbound Track",
+    "color": "#22DDB4",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "619",
+    "routeKey": "PTZ-ROZ-OB",
+    "routeName": "PTZ-ROZ-OB",
+    "direction": "Outbound Track",
+    "color": "#22DDB4",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "618",
+    "routeKey": "PTZ-ROZ-OB",
+    "routeName": "PTZ-ROZ-OB",
+    "direction": "Outbound Track",
+    "color": "#22DDB4",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "617",
+    "routeKey": "PTZ-ROZ-OB",
+    "routeName": "PTZ-ROZ-OB",
+    "direction": "Outbound Track",
+    "color": "#22DDB4",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "616",
+    "routeKey": "PTZ-ROZ-OB",
+    "routeName": "PTZ-ROZ-OB",
+    "direction": "Outbound Track",
+    "color": "#22DDB4",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "615",
+    "routeKey": "PTZ-ROZ-OB",
+    "routeName": "PTZ-ROZ-OB",
+    "direction": "Outbound Track",
+    "color": "#22DDB4",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "614",
+    "routeKey": "PTZ-ROZ-OB",
+    "routeName": "PTZ-ROZ-OB",
+    "direction": "Outbound Track",
+    "color": "#22DDB4",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "613",
+    "routeKey": "PTZ-ROZ-OB",
+    "routeName": "PTZ-ROZ-OB",
+    "direction": "Outbound Track",
+    "color": "#22DDB4",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "612",
+    "routeKey": "PTZ-ROZ-OB",
+    "routeName": "PTZ-ROZ-OB",
+    "direction": "Outbound Track",
+    "color": "#22DDB4",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "611",
+    "routeKey": "PTZ-ROZ-OB",
+    "routeName": "PTZ-ROZ-OB",
+    "direction": "Outbound Track",
+    "color": "#22DDB4",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "610",
+    "routeKey": "PTZ-ROZ-OB",
+    "routeName": "PTZ-ROZ-OB",
+    "direction": "Outbound Track",
+    "color": "#22DDB4",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "609",
+    "routeKey": "PTZ-ROZ-OB",
+    "routeName": "PTZ-ROZ-OB",
+    "direction": "Outbound Track",
+    "color": "#22DDB4",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "608",
+    "routeKey": "PTZ-ROZ-OB",
+    "routeName": "PTZ-ROZ-OB",
+    "direction": "Outbound Track",
+    "color": "#22DDB4",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "607",
+    "routeKey": "PTZ-ROZ-OB",
+    "routeName": "PTZ-ROZ-OB",
+    "direction": "Outbound Track",
+    "color": "#22DDB4",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "606",
+    "routeKey": "PTZ-ROZ-OB",
+    "routeName": "PTZ-ROZ-OB",
+    "direction": "Outbound Track",
+    "color": "#22DDB4",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "605",
+    "routeKey": "PTZ-ROZ-OB",
+    "routeName": "PTZ-ROZ-OB",
+    "direction": "Outbound Track",
+    "color": "#22DDB4",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "604",
+    "routeKey": "PTZ-ROZ-OB",
+    "routeName": "PTZ-ROZ-OB",
+    "direction": "Outbound Track",
+    "color": "#22DDB4",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "603",
+    "routeKey": "PTZ-ROZ-OB",
+    "routeName": "PTZ-ROZ-OB",
+    "direction": "Outbound Track",
+    "color": "#22DDB4",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "602",
+    "routeKey": "PTZ-ROZ-OB",
+    "routeName": "PTZ-ROZ-OB",
+    "direction": "Outbound Track",
+    "color": "#22DDB4",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "601",
+    "routeKey": "PTZ-ROZ-OB",
+    "routeName": "PTZ-ROZ-OB",
+    "direction": "Outbound Track",
+    "color": "#22DDB4",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "600",
+    "routeKey": "PTZ-ROZ-OB",
+    "routeName": "PTZ-ROZ-OB",
+    "direction": "Outbound Track",
+    "color": "#22DDB4",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "599",
+    "routeKey": "PTZ-ROZ-OB",
+    "routeName": "PTZ-ROZ-OB",
+    "direction": "Outbound Track",
+    "color": "#22DDB4",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "598",
+    "routeKey": "PTZ-ROZ-OB",
+    "routeName": "PTZ-ROZ-OB",
+    "direction": "Outbound Track",
+    "color": "#22DDB4",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "597",
+    "routeKey": "PTZ-ROZ-OB",
+    "routeName": "PTZ-ROZ-OB",
+    "direction": "Outbound Track",
+    "color": "#22DDB4",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "596",
+    "routeKey": "PTZ-ROZ-OB",
+    "routeName": "PTZ-ROZ-OB",
+    "direction": "Outbound Track",
+    "color": "#22DDB4",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "595",
+    "routeKey": "PTZ-ROZ-OB",
+    "routeName": "PTZ-ROZ-OB",
+    "direction": "Outbound Track",
+    "color": "#22DDB4",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "594",
+    "routeKey": "PTZ-ROZ-OB",
+    "routeName": "PTZ-ROZ-OB",
+    "direction": "Outbound Track",
+    "color": "#22DDB4",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "593",
+    "routeKey": "PTZ-ROZ-OB",
+    "routeName": "PTZ-ROZ-OB",
+    "direction": "Outbound Track",
+    "color": "#22DDB4",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "592",
+    "routeKey": "PTZ-ROZ-OB",
+    "routeName": "PTZ-ROZ-OB",
+    "direction": "Outbound Track",
+    "color": "#22DDB4",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "591",
+    "routeKey": "PTZ-ROZ-OB",
+    "routeName": "PTZ-ROZ-OB",
+    "direction": "Outbound Track",
+    "color": "#22DDB4",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "590",
+    "routeKey": "PTZ-ROZ-OB",
+    "routeName": "PTZ-ROZ-OB",
+    "direction": "Outbound Track",
+    "color": "#22DDB4",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "589",
+    "routeKey": "PTZ-ROZ-OB",
+    "routeName": "PTZ-ROZ-OB",
+    "direction": "Outbound Track",
+    "color": "#22DDB4",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "588",
+    "routeKey": "PTZ-ROZ-OB",
+    "routeName": "PTZ-ROZ-OB",
+    "direction": "Outbound Track",
+    "color": "#22DDB4",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "587",
+    "routeKey": "PTZ-ROZ-OB",
+    "routeName": "PTZ-ROZ-OB",
+    "direction": "Outbound Track",
+    "color": "#22DDB4",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "586",
+    "routeKey": "PTZ-ROZ-OB",
+    "routeName": "PTZ-ROZ-OB",
+    "direction": "Outbound Track",
+    "color": "#22DDB4",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  },
+  {
+    "segmentNum": "585",
+    "routeKey": "PTZ-ROZ-OB",
+    "routeName": "PTZ-ROZ-OB",
+    "direction": "Outbound Track",
+    "color": "#22DDB4",
+    "areaName": "Expo Line",
+    "notes": "",
+    "defects": [
+      {
+        "isCustom": false,
+        "comp": "",
+        "def": "",
+        "images": []
+      }
+    ]
+  }
+]
