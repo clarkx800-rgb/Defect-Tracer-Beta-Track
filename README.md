@@ -40,7 +40,7 @@ Key Functions inside:
   -openGallery(), removeImageFromGallery(): Handles the photo viewing overlay.
   -scrollToCard(), togglePageScroll(): Controls automatic and manual smooth scrolling.
 
-
+-------------------------------------------------------------------
 
 <b>2. The Visuals & Structure (The Interface)</b>
 
@@ -59,7 +59,7 @@ What it does:
 When to edit: 
   -If you want to change the width of a button, adjust the bouncy animation of the segment cards, or fix overlapping text.
 
-
+-------------------------------------------------------------------
 
 3. The Data & Configuration (The Memory)
 These files act as the "dictionaries" the app reads from when booting up.
@@ -104,13 +104,13 @@ When to edit:
 
 
 <b>manifest.json & icon.png</b>
-What they do:
+<ul>What they do:</ul>
   -Tells the iPhone/Android operating system what icon to put on the home screen, what the app is named, and to hide the Safari/Chrome URL bar so it looks like a real app.
 
 
 
 <b>exceljs.min.js & jspdf.umd.min.js</b>
-What they do:
+<ul>What they do:</ul>
   -Your locally hosted library files that allow Python-level file generation directly inside a mobile browser.
 
 <b>The Maintainer's Cheat Sheet: "Where do I go to..."</b>
