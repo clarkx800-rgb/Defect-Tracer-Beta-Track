@@ -4,14 +4,14 @@ const templateLibrary = {
         { name: 'BW-MTS-SP-WALK', url: 'templates/lim_walks/BW-MTS-SP-WALK.json' }
     ],
     'SPEEDER_WALKS': [
-        { name: 'Placeholder Speeder Walk', url: 'templates/speeder_walks/SPEEDER-PLACEHOLDER.json' },
-        { name: 'Placeholder Speeder Walk', url: 'templates/speeder_walks/WF-BW-OB-SP-WALK.json' },
-        { name: 'Placeholder Speeder Walk', url: 'templates/speeder_walks/BW-MTS-SP-WALK.json' }        
+        { name: 'SELECT YOUR SP-WALK ROUTE', url: 'templates/speeder_walks/SPEEDER-PLACEHOLDER.json' },
+        { name: 'WF-BW-OB-SP-WALK', url: 'templates/speeder_walks/WF-BW-OB-SP-WALK.json' },
+        { name: 'BW-MTS-SP-WALK', url: 'templates/speeder_walks/BW-MTS-SP-WALK.json' }        
     ],
     'POWER_RAIL': [
-        { name: 'Placeholder Power Rail', url: 'templates/power_rail/POWER-PLACEHOLDER.json' }
+        { name: 'SELECT PR-INSP ROUTE', url: 'templates/power_rail/POWER-PLACEHOLDER.json' }
     ],
     'SWITCH': [
-        { name: 'Placeholder Switch', url: 'templates/switch/SWITCH-PLACEHOLDER.json' }
+        { name: 'SELECT SW GROUP', url: 'templates/switch/SWITCH-PLACEHOLDER.json' }
     ]
 };
