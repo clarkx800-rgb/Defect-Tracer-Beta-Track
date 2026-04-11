@@ -2,7 +2,6 @@
 // APP CORE: Global State Manager & Logic Flow
 // ==========================================
 
-// EXPLICIT GLOBAL STATE (Bridging all modular files)
 window.currentFileName = null;
 window.loadedRoutes = new Set();
 window.routeLoadHistory = []; 
@@ -40,12 +39,8 @@ async function removeRouteFromMenu(e, routeKey, routeName) {
     toggleEmptyState();
 }
 
-// ==========================================
-// BUG FIXED: Zero-Division & Null-State Protection
-// ==========================================
 async function executeClone() {
     try {
-        // SURGICAL FIX 1: Lock the global reference into a safe local constant immediately
         const rowToClone = window.currentRowToClone;
         if (!rowToClone) return;
 
@@ -61,7 +56,6 @@ async function executeClone() {
             return; 
         }
 
-        // SURGICAL FIX 2: Extract ALL data BEFORE closing the modal and wiping memory
         const isCustom = rowToClone.dataset.isCustom === "true";
         const comp = isCustom ? rowToClone.querySelector('.custom-comp').value : rowToClone.querySelector('.component-select').value;
         const def = isCustom ? rowToClone.querySelector('.custom-def').value : rowToClone.querySelector('.defect-select').value;
@@ -73,7 +67,6 @@ async function executeClone() {
             return; 
         }
 
-        // Memory safely extracted. Modal can now close without crashing the sequence.
         closeCloneModal();
         await updateProgress(10, "INITIALIZING CLONE...", "CLONING DEFECT");
 
@@ -89,7 +82,7 @@ async function executeClone() {
 
         const minIdx = Math.min(startIdx, endIdx); 
         const maxIdx = Math.max(startIdx, endIdx);
-        let count = 0, total = Math.max(1, maxIdx - minIdx); // Prevent division by zero
+        let count = 0, total = Math.max(1, maxIdx - minIdx);
 
         for (let i = minIdx; i <= maxIdx; i++) {
             if (i === startIdx) continue; 
@@ -180,6 +173,31 @@ async function executeInsert() {
     const firstNewCard = document.querySelector(`.segment-card[data-route-key="${routeKey}"]`);
     if(firstNewCard) { window.isAutoScrolling = true; scrollToCard(firstNewCard); firstNewCard.classList.add('search-highlight'); setTimeout(() => { firstNewCard.classList.remove('search-highlight'); window.isAutoScrolling = false; }, 1200); }
     await updateProgress(100, "SPLICE COMPLETE!"); setTimeout(closeProgress, 800);
+}
+
+// BUG FIXED: Restored Missing Template Loader
+async function loadSelectedTemplate() {
+    const select = document.getElementById('template-select');
+    const url = select.value;
+    if (!url) {
+        showSystemAlert("Please select a template first.", "NO SELECTION", true);
+        return;
+    }
+    
+    closeTemplateModal();
+    await updateProgress(10, "DOWNLOADING TEMPLATE...", "LOADING SYSTEM");
+
+    try {
+        const response = await fetch(url + '?t=' + new Date().getTime());
+        if (!response.ok) throw new Error('Network response was not ok. Ensure file exists.');
+        const data = await response.json();
+        const fileName = url.split('/').pop();
+        await injectProjectData(data, fileName);
+    } catch (err) {
+        console.error("Fetch error:", err);
+        closeProgress();
+        showSystemAlert(`Failed to load template: ${err.message || 'Check network connection or valid template format.'}`, 'DOWNLOAD FAILED', true);
+    } 
 }
 
 async function injectProjectData(projectData, fileName) {
