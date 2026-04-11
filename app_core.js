@@ -1,19 +1,20 @@
 // ==========================================
-// APP CORE: State Management & Logic flow
+// APP CORE: Global State Manager & Logic Flow
 // ==========================================
 
-let currentFileName = null;
-let loadedRoutes = new Set();
-let routeLoadHistory = []; 
-let currentActiveArea = "";
-let currentActiveDirection = "";
-let isAutoScrolling = false;
-let currentRowForGallery = null; 
-let currentInsertTargetTS = null;
-let currentRowToClone = null; 
-let confirmResolve = null;
+// EXPLICIT GLOBAL STATE (Bridging all modular files)
+window.currentFileName = null;
+window.loadedRoutes = new Set();
+window.routeLoadHistory = []; 
+window.currentActiveArea = "";
+window.currentActiveDirection = "";
+window.isAutoScrolling = false;
+window.currentRowForGallery = null; 
+window.currentInsertTargetTS = null;
+window.currentRowToClone = null; 
+window.confirmResolve = null;
 
-const delay = ms => new Promise(res => setTimeout(res, ms));
+window.delay = ms => new Promise(res => setTimeout(res, ms));
 
 async function removeRouteFromMenu(e, routeKey, routeName) {
     e.stopPropagation(); document.getElementById('stsShortcutMenu').style.display = 'none'; 
@@ -24,27 +25,35 @@ async function removeRouteFromMenu(e, routeKey, routeName) {
     cardsToRemove.forEach(card => { card.querySelectorAll('.defect-row').forEach(row => cleanUpRowImages(row)); card.remove(); });
     document.querySelectorAll(`.map-item[data-route-key="${routeKey}"]`).forEach(el => el.remove());
     
-    loadedRoutes.delete(routeKey); routeLoadHistory = routeLoadHistory.map(batch => batch.filter(k => k !== routeKey)).filter(batch => batch.length > 0);
+    window.loadedRoutes.delete(routeKey); 
+    window.routeLoadHistory = window.routeLoadHistory.map(batch => batch.filter(k => k !== routeKey)).filter(batch => batch.length > 0);
 
-    if (loadedRoutes.size === 0) {
-        document.getElementById('quickAddGroup').style.display = 'none'; currentActiveArea = ""; currentActiveDirection = "";
-        document.getElementById('active-area-display').style.display = 'none'; document.getElementById('stsDropdownBtn').style.display = 'none'; document.getElementById('active-route-display').innerHTML = 'AWAITING...';
+    if (window.loadedRoutes.size === 0) {
+        document.getElementById('quickAddGroup').style.display = 'none'; 
+        window.currentActiveArea = ""; 
+        window.currentActiveDirection = "";
+        document.getElementById('active-area-display').style.display = 'none'; 
+        document.getElementById('stsDropdownBtn').style.display = 'none'; 
+        document.getElementById('active-route-display').innerHTML = 'AWAITING...';
         toggleHelp(true); updateCommandBar(); document.getElementById('mainCommandBar').classList.add('collapsed');
     } else { window.scrollBy(0, 1); window.scrollBy(0, -1); }
     toggleEmptyState();
 }
 
 // ==========================================
-// BUG FIXED: Order of Operations Null Crash 
+// BUG FIXED: Zero-Division & Null-State Protection
 // ==========================================
 async function executeClone() {
     try {
-        if (!currentRowToClone) return;
+        // SURGICAL FIX 1: Lock the global reference into a safe local constant immediately
+        const rowToClone = window.currentRowToClone;
+        if (!rowToClone) return;
+
         const targetTS = document.getElementById('cloneTsInput').value.trim();
         document.getElementById('cloneTsInput').blur(); 
         if (!targetTS) { closeCloneModal(); return; }
 
-        const startCard = currentRowToClone.closest('.segment-card');
+        const startCard = rowToClone.closest('.segment-card');
         const endCard = document.querySelector(`.segment-card[data-segment="${targetTS}"]`);
         
         if (!endCard) { 
@@ -52,11 +61,11 @@ async function executeClone() {
             return; 
         }
 
-        // SURGICAL FIX: Extract ALL data BEFORE closing the modal and nullifying the row.
-        const isCustom = currentRowToClone.dataset.isCustom === "true";
-        const comp = isCustom ? currentRowToClone.querySelector('.custom-comp').value : currentRowToClone.querySelector('.component-select').value;
-        const def = isCustom ? currentRowToClone.querySelector('.custom-def').value : currentRowToClone.querySelector('.defect-select').value;
-        const originalRefs = JSON.parse(currentRowToClone.dataset.images || "[]");
+        // SURGICAL FIX 2: Extract ALL data BEFORE closing the modal and wiping memory
+        const isCustom = rowToClone.dataset.isCustom === "true";
+        const comp = isCustom ? rowToClone.querySelector('.custom-comp').value : rowToClone.querySelector('.component-select').value;
+        const def = isCustom ? rowToClone.querySelector('.custom-def').value : rowToClone.querySelector('.defect-select').value;
+        const originalRefs = JSON.parse(rowToClone.dataset.images || "[]");
 
         if (!comp && !def && originalRefs.length === 0) { 
             closeCloneModal();
@@ -64,7 +73,7 @@ async function executeClone() {
             return; 
         }
 
-        // Safe to close modal and clear memory now
+        // Memory safely extracted. Modal can now close without crashing the sequence.
         closeCloneModal();
         await updateProgress(10, "INITIALIZING CLONE...", "CLONING DEFECT");
 
@@ -80,7 +89,7 @@ async function executeClone() {
 
         const minIdx = Math.min(startIdx, endIdx); 
         const maxIdx = Math.max(startIdx, endIdx);
-        let count = 0, total = Math.max(1, maxIdx - minIdx); 
+        let count = 0, total = Math.max(1, maxIdx - minIdx); // Prevent division by zero
 
         for (let i = minIdx; i <= maxIdx; i++) {
             if (i === startIdx) continue; 
@@ -139,10 +148,14 @@ async function executeClone() {
 }
 
 async function executeInsert() {
-    if (!currentInsertTargetTS) return;
-    const area = currentActiveArea; const direction = currentActiveDirection; const routeKey = document.getElementById('insert-route-select').value;
+    const targetTS = window.currentInsertTargetTS;
+    if (!targetTS) return;
+    const area = window.currentActiveArea; 
+    const direction = window.currentActiveDirection; 
+    const routeKey = document.getElementById('insert-route-select').value;
+    
     if (!area || !routeKey) { showSystemAlert('Invalid Selection. Ensure Route is selected.', 'SELECTION ERROR', true); return; }
-    if (loadedRoutes.has(routeKey)) { showSystemAlert('This section is already loaded in the workspace.', 'DUPLICATE LOAD'); return; }
+    if (window.loadedRoutes.has(routeKey)) { showSystemAlert('This section is already loaded in the workspace.', 'DUPLICATE LOAD'); return; }
 
     const selectedRouteData = window.globalDatabase[area][direction][routeKey];
     const container = document.getElementById('segments-container'); const mapContainer = document.getElementById('miniMap');
@@ -151,7 +164,7 @@ async function executeInsert() {
     const newCards = []; 
     selectedRouteData.segments.forEach(range => { const blockColor = range.color || 'var(--primary)'; if (range.start <= range.end) { for (let i = range.start; i <= range.end; i++) newCards.push({ num: i, color: blockColor }); } else { for (let i = range.start; i >= range.end; i--) newCards.push({ num: i, color: blockColor }); } });
 
-    const targetCard = document.querySelector(`.segment-card[data-segment="${currentInsertTargetTS}"]`); const targetMap = document.querySelector(`.map-item[data-map-segment="${currentInsertTargetTS}"]`);
+    const targetCard = document.querySelector(`.segment-card[data-segment="${targetTS}"]`); const targetMap = document.querySelector(`.map-item[data-map-segment="${targetTS}"]`);
     const refCard = targetCard ? targetCard.nextSibling : null; const refMap = targetMap ? targetMap.nextSibling : null;
 
     for (let i=0; i<newCards.length; i++) {
@@ -163,9 +176,9 @@ async function executeInsert() {
         attachMapItemListeners(mapBtn, card, item.num, routeKey); mapContainer.insertBefore(mapBtn, refMap);
     }
 
-    loadedRoutes.add(routeKey); routeLoadHistory.push([routeKey]); closeInsertModal(); toggleEmptyState();
+    window.loadedRoutes.add(routeKey); window.routeLoadHistory.push([routeKey]); closeInsertModal(); toggleEmptyState();
     const firstNewCard = document.querySelector(`.segment-card[data-route-key="${routeKey}"]`);
-    if(firstNewCard) { isAutoScrolling = true; scrollToCard(firstNewCard); firstNewCard.classList.add('search-highlight'); setTimeout(() => { firstNewCard.classList.remove('search-highlight'); isAutoScrolling = false; }, 1200); }
+    if(firstNewCard) { window.isAutoScrolling = true; scrollToCard(firstNewCard); firstNewCard.classList.add('search-highlight'); setTimeout(() => { firstNewCard.classList.remove('search-highlight'); window.isAutoScrolling = false; }, 1200); }
     await updateProgress(100, "SPLICE COMPLETE!"); setTimeout(closeProgress, 800);
 }
 
@@ -180,8 +193,8 @@ async function injectProjectData(projectData, fileName) {
         container.innerHTML = '';
         mapContainer.innerHTML = '';
         
-        loadedRoutes.clear(); 
-        routeLoadHistory = [];
+        window.loadedRoutes.clear(); 
+        window.routeLoadHistory = [];
         toggleHelp(false);
 
         let totalSegs = projectData.length;
@@ -240,20 +253,20 @@ async function injectProjectData(projectData, fileName) {
             mapContainer.appendChild(mapBtn);
             checkSegmentData(card);
 
-            if (activeKey && !loadedRoutes.has(activeKey)) {
-                loadedRoutes.add(activeKey);
-                routeLoadHistory.push([activeKey]);
+            if (activeKey && !window.loadedRoutes.has(activeKey)) {
+                window.loadedRoutes.add(activeKey);
+                window.routeLoadHistory.push([activeKey]);
             }
-            currentActiveArea = safeAreaName;
-            currentActiveDirection = segData.direction;
+            window.currentActiveArea = safeAreaName;
+            window.currentActiveDirection = segData.direction;
         }
 
-        if (loadedRoutes.size > 0) document.getElementById('quickAddGroup').style.display = 'flex';
+        if (window.loadedRoutes.size > 0) document.getElementById('quickAddGroup').style.display = 'flex';
 
         await updateProgress(100, "SYSTEM READY", "LOAD COMPLETE");
         setTimeout(() => {
             closeProgress();
-            currentFileName = fileName;
+            window.currentFileName = fileName;
             showSystemAlert('Data imported successfully.', 'DATA LOADED');
             toggleMenu(true);
             updateCommandBar();
@@ -269,7 +282,7 @@ async function injectProjectData(projectData, fileName) {
 }
 
 async function generateSegments() {
-    const area = currentActiveArea; const direction = currentActiveDirection;
+    const area = window.currentActiveArea; const direction = window.currentActiveDirection;
     const checkboxes = Array.from(document.querySelectorAll('#quick-add-checklist input[type="checkbox"]:checked'));
     if (checkboxes.length === 0) { showSystemAlert('Please select at least one route to add.', 'SELECTION ERROR', true); return; }
     checkboxes.sort((a, b) => parseInt(a.dataset.index) - parseInt(b.dataset.index)); const selectedRouteKeys = checkboxes.map(cb => cb.value);
@@ -279,7 +292,7 @@ async function generateSegments() {
 
     for (let j=0; j<selectedRouteKeys.length; j++) {
         const selectedRouteKey = selectedRouteKeys[j];
-        if (loadedRoutes.has(selectedRouteKey)) continue; 
+        if (window.loadedRoutes.has(selectedRouteKey)) continue; 
 
         const selectedRouteData = window.globalDatabase[area][direction][selectedRouteKey];
         const container = document.getElementById('segments-container'); const mapContainer = document.getElementById('miniMap');
@@ -294,17 +307,17 @@ async function generateSegments() {
             attachMapItemListeners(mapBtn, card, item.num, selectedRouteKey); mapContainer.appendChild(mapBtn);
             if (!firstNewCardToScroll) firstNewCardToScroll = card;
         }
-        loadedRoutes.add(selectedRouteKey);
+        window.loadedRoutes.add(selectedRouteKey);
     }
 
-    routeLoadHistory.push(selectedRouteKeys); document.getElementById('quickAddGroup').style.display = 'flex'; toggleQuickAddModal(false); updateCommandBar(); document.getElementById('mainCommandBar').classList.add('collapsed'); toggleEmptyState();
-    if(firstNewCardToScroll) { isAutoScrolling = true; scrollToCard(firstNewCardToScroll); firstNewCardToScroll.classList.add('search-highlight'); setTimeout(() => { firstNewCardToScroll.classList.remove('search-highlight'); isAutoScrolling = false; }, 1200); }
+    window.routeLoadHistory.push(selectedRouteKeys); document.getElementById('quickAddGroup').style.display = 'flex'; toggleQuickAddModal(false); updateCommandBar(); document.getElementById('mainCommandBar').classList.add('collapsed'); toggleEmptyState();
+    if(firstNewCardToScroll) { window.isAutoScrolling = true; scrollToCard(firstNewCardToScroll); firstNewCardToScroll.classList.add('search-highlight'); setTimeout(() => { firstNewCardToScroll.classList.remove('search-highlight'); window.isAutoScrolling = false; }, 1200); }
     await updateProgress(100, "ROUTES LOADED"); setTimeout(closeProgress, 500);
 }
 
 async function undoLastLoad() {
-    if (routeLoadHistory.length === 0) { showSystemAlert("No actions to undo.", "SYSTEM NOTICE"); return; }
-    const lastTransactionKeys = routeLoadHistory[routeLoadHistory.length - 1]; const keysToUndo = Array.isArray(lastTransactionKeys) ? lastTransactionKeys : [lastTransactionKeys];
+    if (window.routeLoadHistory.length === 0) { showSystemAlert("No actions to undo.", "SYSTEM NOTICE"); return; }
+    const lastTransactionKeys = window.routeLoadHistory[window.routeLoadHistory.length - 1]; const keysToUndo = Array.isArray(lastTransactionKeys) ? lastTransactionKeys : [lastTransactionKeys];
     let hasData = false; let conflictTS = ""; let conflictRoute = ""; let cardsToRemove = [];
 
     keysToUndo.forEach(key => {
@@ -324,12 +337,12 @@ async function undoLastLoad() {
 
     if (hasData) { const proceed = await showSystemConfirm(`TS-${conflictTS} has data.\n\nUndoing this will erase "${conflictRoute}" and details.\n\nAre you sure you want to cancel?`); if (!proceed) return; }
     
-    routeLoadHistory.pop();
+    window.routeLoadHistory.pop();
     cardsToRemove.forEach(card => { card.querySelectorAll('.defect-row').forEach(row => cleanUpRowImages(row)); card.remove(); });
-    keysToUndo.forEach(key => { document.querySelectorAll(`.map-item[data-route-key="${key}"]`).forEach(el => el.remove()); loadedRoutes.delete(key); });
+    keysToUndo.forEach(key => { document.querySelectorAll(`.map-item[data-route-key="${key}"]`).forEach(el => el.remove()); window.loadedRoutes.delete(key); });
     
-    if (loadedRoutes.size === 0) {
-        document.getElementById('quickAddGroup').style.display = 'none'; currentActiveArea = ""; currentActiveDirection = ""; document.getElementById('active-area-display').style.display = 'none'; document.getElementById('stsDropdownBtn').style.display = 'none'; document.getElementById('active-route-display').innerHTML = 'AWAITING...'; toggleHelp(true);
+    if (window.loadedRoutes.size === 0) {
+        document.getElementById('quickAddGroup').style.display = 'none'; window.currentActiveArea = ""; window.currentActiveDirection = ""; document.getElementById('active-area-display').style.display = 'none'; document.getElementById('stsDropdownBtn').style.display = 'none'; document.getElementById('active-route-display').innerHTML = 'AWAITING...'; toggleHelp(true);
     }
     toggleQuickAddModal(false); updateCommandBar(); document.getElementById('mainCommandBar').classList.add('collapsed'); toggleEmptyState();
 }
@@ -348,7 +361,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('font-selector').value = localStorage.getItem('appFontSize') || 'small';
     const areaSelect = document.getElementById('general-area');
     if(window.globalDatabase) { for (let area in window.globalDatabase) { let opt = document.createElement('option'); opt.value = area; opt.textContent = area; areaSelect.appendChild(opt); } }
-    if (loadedRoutes.size === 0) toggleHelp(true);
+    if (window.loadedRoutes.size === 0) toggleHelp(true);
     updateCommandBar(); toggleEmptyState();
 });
 
