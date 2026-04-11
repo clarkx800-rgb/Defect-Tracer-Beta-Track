@@ -18,11 +18,13 @@
     <script src="db_evergreen.js"></script>
     <script src="themes.js"></script> 
     <script src="instructions.js"></script>
-    <script src="template_config.js"></script> <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
+    <script src="template_config.js"></script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
     <script>
-        const APP_VERSION = "2.0.96"; // External Config Upgrade
+        const APP_VERSION = "2.0.96"; // Removed Obsolete Step 3
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
@@ -470,7 +472,7 @@
         .add-defect-btn { background-color: transparent; color: var(--text-muted); border: 1px dashed var(--text-muted); margin-top: 10px; width: 100%; transition: all 0.2s;}
         .add-defect-btn:active { border-color: var(--primary); color: var(--primary); }
 
-        /* COMMAND BAR SHEATH (GLIDING) */
+        /* COMMAND BAR SHEATH */
         .command-bar {
             position: fixed;
             bottom: 20px;
@@ -662,18 +664,15 @@
             transition: zoom 0.2s ease, transform 0.2s ease;
         }
 
-        /* TACTICAL TEMPLATE FOLDER UI */
+        /* PERFECTLY CENTERED TEMPLATE FOLDER UI */
         #empty-workspace-state {
-            position: absolute; 
-            top: 35vh; 
-            left: calc(50% + 40px);
-            transform: translate(-50%, -50%); 
-            text-align: center; 
-            width: 85%; 
-            max-width: 500px; 
-            padding: 20px; 
-            box-sizing: border-box; 
-            z-index: 10;
+            flex: 1;
+            display: none; /* Toggled by JS */
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            text-align: center;
         }
         
         .template-grid {
@@ -681,6 +680,8 @@
             grid-template-columns: repeat(2, 1fr);
             gap: 15px;
             margin-top: 20px;
+            width: 100%;
+            max-width: 400px;
         }
         
         .folder-card {
@@ -787,28 +788,21 @@
             <div class="control-panel">
                 <label for="general-area">1. SELECT LINE (EX, MI, EV)</label>
                 <div class="input-group">
-                    <select id="general-area" onchange="updateRouteDropdown()">
+                    <select id="general-area">
                         <option value="">AWAITING INPUT...</option>
                     </select>
                 </div>
 
                 <label for="page-direction">2. SELECT DIRECTION (IB or OB)</label>
                 <div class="input-group">
-                    <select id="page-direction" onchange="updateRouteDropdown()">
+                    <select id="page-direction">
                         <option value="Inbound Track">INBOUND (IB)</option>
                         <option value="Outbound Track">OUTBOUND (OB)</option>
                     </select>
                 </div>
                 
-                <label for="global-section">3. SELECT SUB-TO-SUB </label>
-                <div class="input-group">
-                    <select id="global-section">
-                        <option value="">AWAITING INPUT...</option>
-                    </select>
-                </div>
-                
                 <div class="action-buttons">
-                    <button class="btn-primary" onclick="generateSegments(false)">LOAD AREA</button>
+                    <button class="btn-primary" onclick="openInitialQuickAdd()">CHOOSE SECTIONS</button>
                     <button class="btn-outline" onclick="flipOrder()">🔃 FLIP DIR</button>
                 </div>
             </div>
@@ -1265,7 +1259,6 @@
                 window.scrollBy(0, 1); window.scrollBy(0, -1);
             }
             
-            updateRouteDropdown();
             toggleEmptyState();
         }
 
@@ -1641,6 +1634,19 @@
             setTimeout(() => { isAutoScrolling = false; }, 800); 
         }
 
+        // TACTICAL MANUAL ADD OPENER
+        function openInitialQuickAdd() {
+            const area = document.getElementById('general-area').value;
+            const dir = document.getElementById('page-direction').value;
+            if (!area || !dir) {
+                showSystemAlert('Please select Line and Direction first.', 'MISSING INFO', true);
+                return;
+            }
+            currentActiveArea = area;
+            currentActiveDirection = dir;
+            toggleQuickAddModal(true);
+        }
+
         function openInsertModal(tsNumber, baseRouteKey) {
             currentInsertTargetTS = tsNumber;
             document.getElementById('insert-target-ts').textContent = tsNumber;
@@ -1725,7 +1731,6 @@
             loadedRoutes.add(routeKey);
             routeLoadHistory.push([routeKey]);
             closeInsertModal();
-            updateRouteDropdown(); 
             toggleEmptyState();
             
             const firstNewCard = document.querySelector(`.segment-card[data-route-key="${routeKey}"]`);
@@ -1767,27 +1772,6 @@
             if (name.includes("AREA 2") || name.includes("MILLENIUM") || name.includes("MILLENNIUM")) return { bg: isLightMode ? '#3399ff' : '#00254d', text: isLightMode ? '#fff' : '#3399ff', border: '#3399ff' };
             if (name.includes("AREA 3") || name.includes("EVERGREEN")) return { bg: isLightMode ? '#4caf50' : '#0f3316', text: isLightMode ? '#fff' : '#4caf50', border: '#4caf50' };
             return { bg: isLightMode ? '#e5e5e5' : '#222', text: isLightMode ? '#000' : '#aaa', border: '#555' };
-        }
-
-        function updateRouteDropdown() {
-            const area = document.getElementById('general-area').value;
-            const direction = document.getElementById('page-direction').value;
-            const dropdown = document.getElementById('global-section');
-            dropdown.innerHTML = '<option value="">AWAITING INPUT...</option>';
-            if (area && direction && window.globalDatabase[area] && window.globalDatabase[area][direction]) {
-                const routes = window.globalDatabase[area][direction];
-                let hasOptions = false;
-                for (let routeKey in routes) {
-                    if (!loadedRoutes.has(routeKey)) {
-                        let opt = document.createElement('option');
-                        opt.value = routeKey;
-                        opt.textContent = routes[routeKey].name;
-                        dropdown.appendChild(opt);
-                        hasOptions = true;
-                    }
-                }
-                if (!hasOptions) dropdown.innerHTML = '<option value="">ALL SECTIONS LOADED</option>';
-            }
         }
 
         function updateQuickAddChecklist() {
@@ -1983,7 +1967,6 @@
 
                 if (loadedRoutes.size > 0) {
                     document.getElementById('quickAddGroup').style.display = 'flex';
-                    updateRouteDropdown(); 
                 }
 
                 currentFileName = fileName;
@@ -2041,13 +2024,12 @@
             } else {
                 area = document.getElementById('general-area').value;
                 direction = document.getElementById('page-direction').value;
-                const routeSelect = document.getElementById('global-section');
                 
-                if (!area || !routeSelect.value) { 
+                if (!area || !direction) { 
                     showSystemAlert('Invalid Selection. Ensure Area and Block are selected.', 'SELECTION ERROR', true); 
                     return; 
                 }
-                selectedRouteKeys = [routeSelect.value];
+                // Deprecated branch (replaced by Quick Add modal)
             }
 
             toggleHelp(false);
@@ -2092,9 +2074,8 @@
             currentActiveArea = area;
             currentActiveDirection = direction;
             document.getElementById('quickAddGroup').style.display = 'flex';
-            if (!isQuickAdd) document.getElementById('global-section').value = '';
-            if (isQuickAdd) { toggleQuickAddModal(false); updateRouteDropdown(); } 
-            else { updateRouteDropdown(); toggleMenu(true); }
+            if (isQuickAdd) { toggleQuickAddModal(false); } 
+            else { toggleMenu(true); }
             
             updateCommandBar();
             document.getElementById('mainCommandBar').classList.add('collapsed');
@@ -2158,7 +2139,6 @@
                 toggleHelp(true);
             }
             toggleQuickAddModal(false);
-            updateRouteDropdown();
             updateCommandBar();
             document.getElementById('mainCommandBar').classList.add('collapsed');
             toggleEmptyState();
