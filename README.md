@@ -2,7 +2,7 @@ https://clarkx800-rgb.github.io/Defect-Tracer-Beta-Track/
 
 # 🛤️ Defect Tracer
 
-> **An offline-first Progressive Web App (PWA) engineered for mobile field track inspections.**
+> **An offline-first Progressive Web App (PWA).**
 
 Defect Tracer is a modular, zero-telemetry Single Page Application (SPA) designed to operate securely in dead-zones without an internet connection. It leverages an IndexedDB memory engine to handle heavy photo attachments without crashing mobile devices, and generates Excel and PDF reports natively in the browser.
 
@@ -33,12 +33,10 @@ The application is built on a strict **Separation of Concerns (SoC)** model. UI 
   * Contains 100% of the CSS styling, animations, flexbox layouts, and responsive design rules.
 
 ### 🗄️ The Data & Configuration (The Memory)
-* **`db_expo.js`, `db_millennium.js`, `db_evergreen.js`**
-  * The static dictionaries. Defines the track station (TS) ranges, line colors, and the specific defect types that appear in the dropdown menus.
 * **`themes.js`**
   * Holds the HEX color codes for the UI themes (Tactical, Windows 11, Field Trainer, macOS Dark) and font size variables.
 * **`template_config.js`**
-  * The routing dictionary that tells the app exactly where to fetch pre-built track layouts (e.g., LIM WALKS, SWITCH INSPECTIONS) from the server.
+  * The routing dictionary that tells the app exactly where to fetch pre-built track layouts.
 * **`instructions.js`**
   * Contains the raw HTML text injected into the Help/Reference Manual overlay.
 
@@ -52,9 +50,9 @@ The application is built on a strict **Separation of Concerns (SoC)** model. UI 
 
 ---
 
-## 🛠️ Maintainer's Cheat Sheet
+## 🛠️ Gold-fish Dev Guide Sheet
 
-Use this quick-reference guide to immediately locate the file you need when pushing updates:
+Use this quick-reference guide:
 
 | Goal / Action | File to Edit | Look For (Function / Variable) |
 | :--- | :--- | :--- |
@@ -70,9 +68,12 @@ Use this quick-reference guide to immediately locate the file you need when push
 
 ## 🚀 Deployment Protocol
 
-When pushing changes to the live environment, you **must** follow these steps to ensure field devices pull the new code:
+Updating:
 1. Make your edits to the respective `.js` or `.css` files.
 2. Open **`sw.js`**.
 3. Increment the `CACHE_NAME` version (e.g., change `v3.0.10` to `v3.0.11`).
 4. Commit and sync to GitHub.
 5. On the mobile device, fully close the app/browser tab and reopen it to force the Service Worker to fetch the fresh cache.
+
+
+The creator wont remember everything after a while.
