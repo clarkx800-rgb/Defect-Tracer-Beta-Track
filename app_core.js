@@ -35,7 +35,7 @@ async function removeRouteFromMenu(e, routeKey, routeName) {
 }
 
 // ==========================================
-// BUG FIXED: Zero-Division Protection & Master Failsafe
+// BUG FIXED: Order of Operations Null Crash 
 // ==========================================
 async function executeClone() {
     try {
@@ -46,20 +46,31 @@ async function executeClone() {
 
         const startCard = currentRowToClone.closest('.segment-card');
         const endCard = document.querySelector(`.segment-card[data-segment="${targetTS}"]`);
-        if (!endCard) { showSystemAlert(`Cannot find TS-${targetTS} in the current workspace. Please ensure it is loaded.`, "CLONE ERROR", true); return; }
+        
+        if (!endCard) { 
+            showSystemAlert(`Cannot find TS-${targetTS} in the current workspace. Please ensure it is loaded.`, "CLONE ERROR", true); 
+            return; 
+        }
 
-        closeCloneModal();
-        await updateProgress(10, "INITIALIZING CLONE...", "CLONING DEFECT");
-
+        // SURGICAL FIX: Extract ALL data BEFORE closing the modal and nullifying the row.
         const isCustom = currentRowToClone.dataset.isCustom === "true";
         const comp = isCustom ? currentRowToClone.querySelector('.custom-comp').value : currentRowToClone.querySelector('.component-select').value;
         const def = isCustom ? currentRowToClone.querySelector('.custom-def').value : currentRowToClone.querySelector('.defect-select').value;
         const originalRefs = JSON.parse(currentRowToClone.dataset.images || "[]");
 
-        if (!comp && !def && originalRefs.length === 0) { closeProgress(); showSystemAlert("This row is entirely empty. There is no data to clone.", "CLONE ERROR", true); return; }
+        if (!comp && !def && originalRefs.length === 0) { 
+            closeCloneModal();
+            showSystemAlert("This row is entirely empty. There is no data to clone.", "CLONE ERROR", true); 
+            return; 
+        }
+
+        // Safe to close modal and clear memory now
+        closeCloneModal();
+        await updateProgress(10, "INITIALIZING CLONE...", "CLONING DEFECT");
 
         const allCards = Array.from(document.querySelectorAll('.segment-card'));
-        const startIdx = allCards.indexOf(startCard); const endIdx = allCards.indexOf(endCard);
+        const startIdx = allCards.indexOf(startCard); 
+        const endIdx = allCards.indexOf(endCard);
         
         if(startIdx === -1 || endIdx === -1) {
             closeProgress();
@@ -67,30 +78,59 @@ async function executeClone() {
             return;
         }
 
-        const minIdx = Math.min(startIdx, endIdx); const maxIdx = Math.max(startIdx, endIdx);
-        let count = 0, total = Math.max(1, maxIdx - minIdx); // BUG FIX: Prevent division by zero
+        const minIdx = Math.min(startIdx, endIdx); 
+        const maxIdx = Math.max(startIdx, endIdx);
+        let count = 0, total = Math.max(1, maxIdx - minIdx); 
 
         for (let i = minIdx; i <= maxIdx; i++) {
             if (i === startIdx) continue; 
-            const targetCard = allCards[i]; const areaName = targetCard.getAttribute('data-area-name'); const defectList = targetCard.querySelector('.defect-list'); const existingRows = defectList.querySelectorAll('.defect-row');
+            
+            const targetCard = allCards[i]; 
+            const areaName = targetCard.getAttribute('data-area-name'); 
+            const defectList = targetCard.querySelector('.defect-list'); 
+            const existingRows = defectList.querySelectorAll('.defect-row');
+            
             await updateProgress(10 + Math.round((count/total)*80), `CLONING TO TS-${targetCard.dataset.segment}...`, "CLONING DEFECT");
 
             if (existingRows.length === 1) {
-                const r = existingRows[0]; const rIsCustom = r.dataset.isCustom === "true"; const rComp = rIsCustom ? r.querySelector('.custom-comp').value : r.querySelector('.component-select').value; const rDef = rIsCustom ? r.querySelector('.custom-def').value : r.querySelector('.defect-select').value; const rImgs = JSON.parse(r.dataset.images || "[]");
-                if (!rComp && !rDef && rImgs.length === 0) { cleanUpRowImages(r); r.remove(); }
+                const r = existingRows[0]; 
+                const rIsCustom = r.dataset.isCustom === "true"; 
+                const rComp = rIsCustom ? r.querySelector('.custom-comp').value : r.querySelector('.component-select').value; 
+                const rDef = rIsCustom ? r.querySelector('.custom-def').value : r.querySelector('.defect-select').value; 
+                const rImgs = JSON.parse(r.dataset.images || "[]");
+                
+                if (!rComp && !rDef && rImgs.length === 0) { 
+                    cleanUpRowImages(r); 
+                    r.remove(); 
+                }
             }
 
             const newRefs = [];
             for(let ref of originalRefs) {
-                if (ref.id) { const dbImg = await getImageFromDB(ref.id); if(dbImg) { const newRef = await saveImageToDB(dbImg.data, dbImg.w, dbImg.h); newRefs.push(newRef); } } 
-                else if (ref.img) { const newRef = await saveImageToDB(ref.img, ref.w || 1200, ref.h || 1200); newRefs.push(newRef); }
+                if (ref.id) { 
+                    const dbImg = await getImageFromDB(ref.id); 
+                    if(dbImg) { 
+                        const newRef = await saveImageToDB(dbImg.data, dbImg.w, dbImg.h); 
+                        newRefs.push(newRef); 
+                    } 
+                } 
+                else if (ref.img) { 
+                    const newRef = await saveImageToDB(ref.img, ref.w || 1200, ref.h || 1200); 
+                    newRefs.push(newRef); 
+                }
             }
 
-            addDefectRow(defectList, { isCustom, comp, def, images: newRefs }, areaName); checkSegmentData(targetCard); count++;
+            addDefectRow(defectList, { isCustom, comp, def, images: newRefs }, areaName); 
+            checkSegmentData(targetCard); 
+            count++;
         }
 
         await updateProgress(100, "CLONE COMPLETE!", "CLONING DEFECT");
-        setTimeout(() => { closeProgress(); showSystemAlert(`Successfully cloned defect payload to ${count} track sections.`, "CLONE COMPLETE"); }, 800);
+        setTimeout(() => { 
+            closeProgress(); 
+            showSystemAlert(`Successfully cloned defect payload to ${count} track sections.`, "CLONE COMPLETE"); 
+        }, 800);
+        
     } catch (err) {
         console.error("Clone Crash:", err);
         closeProgress();
@@ -129,9 +169,6 @@ async function executeInsert() {
     await updateProgress(100, "SPLICE COMPLETE!"); setTimeout(closeProgress, 800);
 }
 
-// ==========================================
-// BUG FIXED: Explicit JSON Format Validation
-// ==========================================
 async function injectProjectData(projectData, fileName) {
     try {
         if (!Array.isArray(projectData)) throw new Error("Invalid Format: Ensure the template is a valid JSON Array containing track segments.");
