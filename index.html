@@ -23,6 +23,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
     <script>
+        const APP_VERSION = "2.0.92"; 
+
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('sw.js').catch(err => console.log('SW fail:', err));
@@ -163,6 +165,7 @@
             width: 100%;
             margin-top: 10px;
         }
+        
         .sts-menu-item {
             padding: 12px;
             background: var(--card-bg);
@@ -177,7 +180,7 @@
             display: flex;
             align-items: center;
         }
-        .sts-menu-item:active { background: var(--primary-dark); border-color: var(--primary); color: #fff;}
+        .sts-menu-item:active { background: var(--primary-dark); color: #fff;}
 
         .search-input-wrapper {
             display: flex;
@@ -657,7 +660,6 @@
         #helpBodyContent {
             overflow-y: auto;
             padding: 20px;
-            /* Support for CSS zoom scaling */
             transition: zoom 0.2s ease, transform 0.2s ease;
         }
 
@@ -908,14 +910,12 @@
             if ('zoom' in helpBody.style) {
                 helpBody.style.zoom = currentHelpZoom;
             } else {
-                // Fallback for Firefox/older browsers
                 helpBody.style.transform = `scale(${currentHelpZoom})`;
                 helpBody.style.transformOrigin = 'top left';
                 helpBody.style.width = `${100 / currentHelpZoom}%`;
             }
         }
 
-        // DEDICATED PINCH-TO-ZOOM FOR INSTRUCTIONS
         let initialPinchDistance = null;
         let initialZoomState = 1;
         const helpBodyContent = document.getElementById('helpBodyContent');
@@ -1007,9 +1007,7 @@
             const btn = document.getElementById('dynamicSaveLoadBtn');
             if (loadedRoutes.size === 0) {
                 btn.innerHTML = iconLoad;
-                btn.onclick = () => { 
-                    document.getElementById('importFile').click(); 
-                };
+                btn.onclick = () => { document.getElementById('importFile').click(); };
             } else {
                 btn.innerHTML = iconSave;
                 btn.onclick = () => saveProject();
@@ -1025,28 +1023,7 @@
                 overlay.style.top = `${headerHeight}px`;
                 overlay.style.height = `calc(100vh - ${headerHeight}px - 85px)`; 
                 
-                // INJECT INSTRUCTIONS + DYNAMIC VERSION LOADER
-                document.getElementById('helpBodyContent').innerHTML = systemInstructions + `<div id="sw-version-fetcher" style="text-align:center; padding-top:20px; color:var(--text-muted); font-weight:bold; font-size:14px; letter-spacing:1px;">Checking App Version...</div>`;
-                
-                fetch('sw.js')
-                    .then(r => r.text())
-                    .then(text => {
-                        const match = text.match(/v?\d+\.\d+\.\d+/);
-                        const vDiv = document.getElementById('sw-version-fetcher');
-                        if (match && vDiv) {
-                            let v = match[0];
-                            if (!v.startsWith('v')) v = 'v' + v;
-                            vDiv.textContent = 'TRACER ' + v;
-                            vDiv.style.color = 'var(--primary)';
-                        } else if (vDiv) {
-                            vDiv.textContent = 'VERSION UNKNOWN';
-                        }
-                    })
-                    .catch(() => {
-                        const vDiv = document.getElementById('sw-version-fetcher');
-                        if (vDiv) vDiv.textContent = 'TRACER (OFFLINE CACHE)';
-                    });
-
+                document.getElementById('helpBodyContent').innerHTML = systemInstructions;
                 overlay.style.display = 'flex';
                 if (document.getElementById('collapsible-menu').classList.contains('expanded')) toggleMenu(true);
                 document.getElementById('mainCommandBar').classList.add('collapsed');
@@ -1055,6 +1032,41 @@
             } else {
                 overlay.style.display = 'none';
             }
+        }
+
+        // TACTICAL ROUTE REMOVAL
+        async function removeRouteFromMenu(e, routeKey, routeName) {
+            e.stopPropagation(); 
+            document.getElementById('stsShortcutMenu').style.display = 'none'; 
+
+            const proceed = await showSystemConfirm(`Are you sure you want to remove "${routeName}" from the workspace?`, "REMOVE ROUTE", "Yes", "Nope");
+            
+            if (!proceed) return;
+
+            const cardsToRemove = document.querySelectorAll(`.segment-card[data-route-key="${routeKey}"]`);
+            cardsToRemove.forEach(el => el.remove());
+            document.querySelectorAll(`.map-item[data-route-key="${routeKey}"]`).forEach(el => el.remove());
+            
+            loadedRoutes.delete(routeKey);
+
+            routeLoadHistory = routeLoadHistory.map(batch => batch.filter(k => k !== routeKey)).filter(batch => batch.length > 0);
+
+            if (loadedRoutes.size === 0) {
+                document.getElementById('quickAddGroup').style.display = 'none';
+                currentActiveArea = "";
+                currentActiveDirection = "";
+                document.getElementById('active-area-display').style.display = 'none';
+                document.getElementById('stsDropdownBtn').style.display = 'none';
+                document.getElementById('active-route-display').innerHTML = 'AWAITING...';
+                toggleHelp(true);
+                updateCommandBar();
+                document.getElementById('mainCommandBar').classList.add('collapsed');
+            } else {
+                // Slightly bump scroll to force IntersectionObserver to recalculate active top header
+                window.scrollBy(0, 1); window.scrollBy(0, -1);
+            }
+            
+            updateRouteDropdown();
         }
 
         function openCloneModal(row) {
@@ -1136,6 +1148,7 @@
             showSystemAlert(`Successfully cloned defect payload to ${clonedCount} track sections.`, "CLONE COMPLETE");
         }
 
+        // Updated showSystemConfirm to accept custom button text
         function showSystemAlert(message, title = "SYSTEM NOTICE", isDanger = false) {
             document.getElementById('systemModalTitle').textContent = title;
             document.getElementById('systemModalTitle').style.color = isDanger ? "var(--danger)" : "var(--primary)";
@@ -1145,13 +1158,13 @@
             document.getElementById('systemModalOverlay').style.display = 'flex';
         }
 
-        function showSystemConfirm(message, title = "SYSTEM WARNING") {
+        function showSystemConfirm(message, title = "SYSTEM WARNING", confirmText = "PROCEED", cancelText = "CANCEL") {
             return new Promise((resolve) => {
                 document.getElementById('systemModalTitle').textContent = title;
                 document.getElementById('systemModalTitle').style.color = "var(--warning)";
                 document.getElementById('systemModalTitle').style.borderColor = "var(--warning)";
                 document.getElementById('systemModalMessage').textContent = message;
-                document.getElementById('systemModalBtnGroup').innerHTML = `<button class="btn-danger" style="flex: 1;" onclick="resolveSystemConfirm(true)">PROCEED</button><button class="btn-outline" style="flex: 1;" onclick="resolveSystemConfirm(false)">CANCEL</button>`;
+                document.getElementById('systemModalBtnGroup').innerHTML = `<button class="btn-danger" style="flex: 1;" onclick="resolveSystemConfirm(true)">${confirmText}</button><button class="btn-outline" style="flex: 1;" onclick="resolveSystemConfirm(false)">${cancelText}</button>`;
                 confirmResolve = resolve;
                 document.getElementById('systemModalOverlay').style.display = 'flex';
             });
@@ -1367,8 +1380,20 @@
                 if (!orderedRoutes.find(r => r.key === key)) orderedRoutes.push({ key, name, color });
             });
             orderedRoutes.forEach((route, index) => {
+                const row = document.createElement('div');
+                row.style.display = 'flex';
+                row.style.alignItems = 'stretch';
+                row.style.background = 'var(--card-bg)';
+                row.style.border = '1px solid var(--border-color)';
+                row.style.marginBottom = '4px';
+                row.style.borderRadius = 'var(--border-radius)';
+                row.style.overflow = 'hidden';
+
                 const btn = document.createElement('button');
                 btn.className = 'sts-menu-item';
+                btn.style.flex = '1';
+                btn.style.border = 'none';
+                btn.style.margin = '0';
                 btn.style.display = 'flex';
                 btn.style.alignItems = 'center';
                 btn.innerHTML = `
@@ -1377,7 +1402,28 @@
                     <span>${route.name}</span>
                 `;
                 btn.onclick = () => jumpToRoute(route.key);
-                menu.appendChild(btn);
+
+                // DEDICATED ROUTE REMOVE BUTTON
+                const delBtn = document.createElement('button');
+                delBtn.style.background = 'transparent';
+                delBtn.style.border = 'none';
+                delBtn.style.borderLeft = '1px solid var(--border-color)';
+                delBtn.style.color = 'var(--text-muted)';
+                delBtn.style.width = '56px';
+                delBtn.style.cursor = 'pointer';
+                delBtn.style.display = 'flex';
+                delBtn.style.alignItems = 'center';
+                delBtn.style.justifyContent = 'center';
+                delBtn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`;
+                
+                delBtn.onmousedown = () => { delBtn.style.color = 'var(--danger)'; delBtn.style.background = 'rgba(211,47,47,0.1)'; };
+                delBtn.onmouseup = () => { delBtn.style.color = 'var(--text-muted)'; delBtn.style.background = 'transparent'; };
+                delBtn.onmouseleave = () => { delBtn.style.color = 'var(--text-muted)'; delBtn.style.background = 'transparent'; };
+                delBtn.onclick = (e) => removeRouteFromMenu(e, route.key, route.name);
+
+                row.appendChild(btn);
+                row.appendChild(delBtn);
+                menu.appendChild(row);
             });
         }
 
@@ -1636,12 +1682,7 @@
 
                     const routeDisplay = document.getElementById('active-route-display');
                     const areaDisplay = document.getElementById('active-area-display');
-                    
-                    if (routeName) {
-                        routeDisplay.innerHTML = `<span style="display:inline-block; width:10px; height:10px; border-radius:50%; background-color:${routeColor}; margin-right:6px; border: 1px solid rgba(255,255,255,0.3); vertical-align: middle; margin-bottom: 2px;"></span>${routeName}`;
-                    } else {
-                        routeDisplay.textContent = 'AWAITING...';
-                    }
+                    routeDisplay.textContent = routeName ? routeName : 'AWAITING...';
                     
                     if (areaName) {
                         areaDisplay.textContent = areaName;
@@ -1807,6 +1848,7 @@
                 currentActiveDirection = "";
                 document.getElementById('active-area-display').style.display = 'none';
                 document.getElementById('stsDropdownBtn').style.display = 'none';
+                document.getElementById('active-route-display').innerHTML = 'AWAITING...';
                 toggleHelp(true);
             }
             toggleQuickAddModal(false);
@@ -2013,7 +2055,7 @@
                             row.dataset.images = JSON.stringify(currentImages);
                             updatePhotoUI(row, cameraLabel, badgeContainer);
                             checkSegmentData(row.closest('.segment-card'));
-                            fileInput.value = ''; // SAFE CLEAR AFTER PROCESSING
+                            fileInput.value = ''; 
                         };
                         img.src = event.target.result;
                     };
@@ -2136,19 +2178,19 @@
                     showSystemAlert('Backup file imported successfully.', 'DATA LOADED');
                     toggleMenu(true);
                     updateCommandBar();
+                    document.getElementById('mainCommandBar').classList.add('collapsed');
 
                 } catch (err) {
                     showSystemAlert('Corrupt or invalid JSON file.', 'SYSTEM ERROR', true);
                     console.error(err);
                 }
                 
-                // SAFE CACHE WIPE AFTER PROCESSING IS FULLY COMPLETE
                 fileInput.value = ''; 
             };
             
             reader.onerror = function() {
                 showSystemAlert('Could not read file from device.', 'FILE ERROR', true);
-                fileInput.value = ''; // Wipe on error as well
+                fileInput.value = ''; 
             };
 
             reader.readAsText(file);
