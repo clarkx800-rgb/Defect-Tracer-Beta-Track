@@ -34,52 +34,68 @@ async function removeRouteFromMenu(e, routeKey, routeName) {
     toggleEmptyState();
 }
 
+// ==========================================
+// BUG FIXED: Zero-Division Protection & Master Failsafe
+// ==========================================
 async function executeClone() {
-    if (!currentRowToClone) return;
-    const targetTS = document.getElementById('cloneTsInput').value.trim();
-    document.getElementById('cloneTsInput').blur(); 
-    if (!targetTS) { closeCloneModal(); return; }
+    try {
+        if (!currentRowToClone) return;
+        const targetTS = document.getElementById('cloneTsInput').value.trim();
+        document.getElementById('cloneTsInput').blur(); 
+        if (!targetTS) { closeCloneModal(); return; }
 
-    const startCard = currentRowToClone.closest('.segment-card');
-    const endCard = document.querySelector(`.segment-card[data-segment="${targetTS}"]`);
-    if (!endCard) { showSystemAlert(`Cannot find TS-${targetTS} in the current workspace. Please ensure it is loaded.`, "CLONE ERROR", true); return; }
+        const startCard = currentRowToClone.closest('.segment-card');
+        const endCard = document.querySelector(`.segment-card[data-segment="${targetTS}"]`);
+        if (!endCard) { showSystemAlert(`Cannot find TS-${targetTS} in the current workspace. Please ensure it is loaded.`, "CLONE ERROR", true); return; }
 
-    closeCloneModal();
-    await updateProgress(10, "INITIALIZING CLONE...", "CLONING DEFECT");
+        closeCloneModal();
+        await updateProgress(10, "INITIALIZING CLONE...", "CLONING DEFECT");
 
-    const isCustom = currentRowToClone.dataset.isCustom === "true";
-    const comp = isCustom ? currentRowToClone.querySelector('.custom-comp').value : currentRowToClone.querySelector('.component-select').value;
-    const def = isCustom ? currentRowToClone.querySelector('.custom-def').value : currentRowToClone.querySelector('.defect-select').value;
-    const originalRefs = JSON.parse(currentRowToClone.dataset.images || "[]");
+        const isCustom = currentRowToClone.dataset.isCustom === "true";
+        const comp = isCustom ? currentRowToClone.querySelector('.custom-comp').value : currentRowToClone.querySelector('.component-select').value;
+        const def = isCustom ? currentRowToClone.querySelector('.custom-def').value : currentRowToClone.querySelector('.defect-select').value;
+        const originalRefs = JSON.parse(currentRowToClone.dataset.images || "[]");
 
-    if (!comp && !def && originalRefs.length === 0) { closeProgress(); showSystemAlert("This row is entirely empty. There is no data to clone.", "CLONE ERROR", true); return; }
+        if (!comp && !def && originalRefs.length === 0) { closeProgress(); showSystemAlert("This row is entirely empty. There is no data to clone.", "CLONE ERROR", true); return; }
 
-    const allCards = Array.from(document.querySelectorAll('.segment-card'));
-    const startIdx = allCards.indexOf(startCard); const endIdx = allCards.indexOf(endCard);
-    const minIdx = Math.min(startIdx, endIdx); const maxIdx = Math.max(startIdx, endIdx);
-    let count = 0, total = (maxIdx - minIdx);
-
-    for (let i = minIdx; i <= maxIdx; i++) {
-        if (i === startIdx) continue; 
-        const targetCard = allCards[i]; const areaName = targetCard.getAttribute('data-area-name'); const defectList = targetCard.querySelector('.defect-list'); const existingRows = defectList.querySelectorAll('.defect-row');
-        await updateProgress(10 + Math.round((count/total)*80), `CLONING TO TS-${targetCard.dataset.segment}...`, "CLONING DEFECT");
-
-        if (existingRows.length === 1) {
-            const r = existingRows[0]; const rIsCustom = r.dataset.isCustom === "true"; const rComp = rIsCustom ? r.querySelector('.custom-comp').value : r.querySelector('.component-select').value; const rDef = rIsCustom ? r.querySelector('.custom-def').value : r.querySelector('.defect-select').value; const rImgs = JSON.parse(r.dataset.images || "[]");
-            if (!rComp && !rDef && rImgs.length === 0) { cleanUpRowImages(r); r.remove(); }
+        const allCards = Array.from(document.querySelectorAll('.segment-card'));
+        const startIdx = allCards.indexOf(startCard); const endIdx = allCards.indexOf(endCard);
+        
+        if(startIdx === -1 || endIdx === -1) {
+            closeProgress();
+            showSystemAlert("Could not locate cards in workspace.", "CLONE ERROR", true);
+            return;
         }
 
-        const newRefs = [];
-        for(let ref of originalRefs) {
-            if (ref.id) { const dbImg = await getImageFromDB(ref.id); if(dbImg) { const newRef = await saveImageToDB(dbImg.data, dbImg.w, dbImg.h); newRefs.push(newRef); } } 
-            else if (ref.img) { const newRef = await saveImageToDB(ref.img, ref.w || 1200, ref.h || 1200); newRefs.push(newRef); }
+        const minIdx = Math.min(startIdx, endIdx); const maxIdx = Math.max(startIdx, endIdx);
+        let count = 0, total = Math.max(1, maxIdx - minIdx); // BUG FIX: Prevent division by zero
+
+        for (let i = minIdx; i <= maxIdx; i++) {
+            if (i === startIdx) continue; 
+            const targetCard = allCards[i]; const areaName = targetCard.getAttribute('data-area-name'); const defectList = targetCard.querySelector('.defect-list'); const existingRows = defectList.querySelectorAll('.defect-row');
+            await updateProgress(10 + Math.round((count/total)*80), `CLONING TO TS-${targetCard.dataset.segment}...`, "CLONING DEFECT");
+
+            if (existingRows.length === 1) {
+                const r = existingRows[0]; const rIsCustom = r.dataset.isCustom === "true"; const rComp = rIsCustom ? r.querySelector('.custom-comp').value : r.querySelector('.component-select').value; const rDef = rIsCustom ? r.querySelector('.custom-def').value : r.querySelector('.defect-select').value; const rImgs = JSON.parse(r.dataset.images || "[]");
+                if (!rComp && !rDef && rImgs.length === 0) { cleanUpRowImages(r); r.remove(); }
+            }
+
+            const newRefs = [];
+            for(let ref of originalRefs) {
+                if (ref.id) { const dbImg = await getImageFromDB(ref.id); if(dbImg) { const newRef = await saveImageToDB(dbImg.data, dbImg.w, dbImg.h); newRefs.push(newRef); } } 
+                else if (ref.img) { const newRef = await saveImageToDB(ref.img, ref.w || 1200, ref.h || 1200); newRefs.push(newRef); }
+            }
+
+            addDefectRow(defectList, { isCustom, comp, def, images: newRefs }, areaName); checkSegmentData(targetCard); count++;
         }
 
-        addDefectRow(defectList, { isCustom, comp, def, images: newRefs }, areaName); checkSegmentData(targetCard); count++;
+        await updateProgress(100, "CLONE COMPLETE!", "CLONING DEFECT");
+        setTimeout(() => { closeProgress(); showSystemAlert(`Successfully cloned defect payload to ${count} track sections.`, "CLONE COMPLETE"); }, 800);
+    } catch (err) {
+        console.error("Clone Crash:", err);
+        closeProgress();
+        showSystemAlert("Clone failed: " + err.message, "CRITICAL ERROR", true);
     }
-
-    await updateProgress(100, "CLONE COMPLETE!", "CLONING DEFECT");
-    setTimeout(() => { closeProgress(); showSystemAlert(`Successfully cloned defect payload to ${count} track sections.`, "CLONE COMPLETE"); }, 800);
 }
 
 async function executeInsert() {
@@ -111,6 +127,108 @@ async function executeInsert() {
     const firstNewCard = document.querySelector(`.segment-card[data-route-key="${routeKey}"]`);
     if(firstNewCard) { isAutoScrolling = true; scrollToCard(firstNewCard); firstNewCard.classList.add('search-highlight'); setTimeout(() => { firstNewCard.classList.remove('search-highlight'); isAutoScrolling = false; }, 1200); }
     await updateProgress(100, "SPLICE COMPLETE!"); setTimeout(closeProgress, 800);
+}
+
+// ==========================================
+// BUG FIXED: Explicit JSON Format Validation
+// ==========================================
+async function injectProjectData(projectData, fileName) {
+    try {
+        if (!Array.isArray(projectData)) throw new Error("Invalid Format: Ensure the template is a valid JSON Array containing track segments.");
+        
+        await updateProgress(10, "UNPACKING STRUCTURE...", "LOADING DATA");
+
+        const container = document.getElementById('segments-container');
+        const mapContainer = document.getElementById('miniMap');
+        container.innerHTML = '';
+        mapContainer.innerHTML = '';
+        
+        loadedRoutes.clear(); 
+        routeLoadHistory = [];
+        toggleHelp(false);
+
+        let totalSegs = projectData.length;
+        for (let index = 0; index < totalSegs; index++) {
+            const segData = projectData[index];
+            await updateProgress(10 + Math.round((index / totalSegs) * 80), `BUILDING TS-${segData.segmentNum}...`, "LOADING DATA");
+
+            const safeAreaName = segData.areaName || '';
+            const activeKey = segData.routeKey || segData.routeName; 
+            
+            const card = createSegmentCard(segData.segmentNum, activeKey, segData.routeName, segData.direction, segData.color, safeAreaName);
+            card.style.animationDelay = `${index * 0.05}s`;
+            
+            card.querySelector('.segment-notes').value = segData.notes || '';
+            const defectList = card.querySelector('.defect-list');
+            defectList.innerHTML = '';
+            
+            if (!segData.defects || segData.defects.length === 0) { 
+                addDefectRow(defectList, null, safeAreaName); 
+            } else { 
+                for (let defData of segData.defects) {
+                    if (defData.photoBase64 && (!defData.images || defData.images.length === 0)) {
+                        defData.images = [{ img: defData.photoBase64, w: defData.imgW || 1200, h: defData.imgH || 1200 }];
+                    }
+                    if (defData.images && defData.images.length > 0) {
+                        const newRefs = [];
+                        for (let imgData of defData.images) {
+                            if(imgData.data) { 
+                                const ref = await saveImageToDB(imgData.data, imgData.w, imgData.h);
+                                newRefs.push(ref);
+                            } else if (imgData.img) { 
+                                const ref = await saveImageToDB(imgData.img, imgData.w || 1200, imgData.h || 1200);
+                                newRefs.push(ref);
+                            } else if (imgData.id) {
+                                newRefs.push(imgData); 
+                            }
+                        }
+                        defData.images = newRefs; 
+                    }
+                    addDefectRow(defectList, defData, safeAreaName); 
+                }
+            }
+
+            container.appendChild(card);
+            scrollObserver.observe(card);
+
+            const mapBtn = document.createElement('div');
+            mapBtn.className = 'map-item';
+            mapBtn.setAttribute('data-map-segment', segData.segmentNum);
+            mapBtn.setAttribute('data-route-key', activeKey);
+            mapBtn.textContent = `TS-${segData.segmentNum}`;
+            mapBtn.style.borderLeft = `4px solid ${segData.color || '#ccc'}`;
+            
+            attachMapItemListeners(mapBtn, card, segData.segmentNum, activeKey);
+            
+            mapContainer.appendChild(mapBtn);
+            checkSegmentData(card);
+
+            if (activeKey && !loadedRoutes.has(activeKey)) {
+                loadedRoutes.add(activeKey);
+                routeLoadHistory.push([activeKey]);
+            }
+            currentActiveArea = safeAreaName;
+            currentActiveDirection = segData.direction;
+        }
+
+        if (loadedRoutes.size > 0) document.getElementById('quickAddGroup').style.display = 'flex';
+
+        await updateProgress(100, "SYSTEM READY", "LOAD COMPLETE");
+        setTimeout(() => {
+            closeProgress();
+            currentFileName = fileName;
+            showSystemAlert('Data imported successfully.', 'DATA LOADED');
+            toggleMenu(true);
+            updateCommandBar();
+            document.getElementById('mainCommandBar').classList.add('collapsed');
+            toggleEmptyState();
+        }, 800);
+
+    } catch (err) {
+        closeProgress();
+        showSystemAlert(`Error Loading Data: ${err.message}`, 'SYSTEM ERROR', true);
+        console.error(err);
+    }
 }
 
 async function generateSegments() {
