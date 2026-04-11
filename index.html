@@ -24,7 +24,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
     <script>
-        const APP_VERSION = "2.2.00"; // Pristine UI + IndexedDB Engine
+        const APP_VERSION = "2.2.05"; // Security Token Expiration Fix
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
@@ -2116,6 +2116,26 @@
             const cards = document.querySelectorAll('.segment-card');
             if (cards.length === 0) { showSystemAlert('No data available to save.', 'SAVE FAILED', true); return; }
 
+            let exportName = currentFileName || `TRACK_DATA_${new Date().toISOString().split('T')[0]}.json`;
+            let fileHandle = null;
+
+            // 1. ACQUIRE USER GESTURE PERMISSION IMMEDIATELY
+            if (window.showSaveFilePicker) {
+                try {
+                    fileHandle = await window.showSaveFilePicker({
+                        suggestedName: exportName,
+                        types: [{ description: 'JSON File', accept: {'application/json': ['.json']} }],
+                    });
+                } catch (err) {
+                    if (err.name !== 'AbortError') {
+                        console.error(err);
+                        showSystemAlert('File selection failed.', 'SAVE ERROR', true);
+                    }
+                    return; // User canceled the picker, abort silently.
+                }
+            }
+
+            // 2. NOW LOCK UI AND PACK DATA
             await updateProgress(10, "PACKAGING TRACK DATA...", "SAVING DATA");
             const projectData = [];
             
@@ -2159,19 +2179,15 @@
 
             await updateProgress(75, "WRITING JSON FILE...", "SAVING DATA");
             const dataStr = JSON.stringify(projectData, null, 2);
-            let exportName = currentFileName || `TRACK_DATA_${new Date().toISOString().split('T')[0]}.json`;
 
+            // 3. WRITE TO THE RESERVED FILE HANDLE
             try {
-                if (window.showSaveFilePicker) {
-                    const handle = await window.showSaveFilePicker({
-                        suggestedName: exportName,
-                        types: [{ description: 'JSON File', accept: {'application/json': ['.json']} }],
-                    });
-                    const writable = await handle.createWritable();
+                if (fileHandle) {
                     await updateProgress(90, "FINALIZING WRITE...", "SAVING DATA");
+                    const writable = await fileHandle.createWritable();
                     await writable.write(dataStr);
                     await writable.close();
-                    currentFileName = handle.name;
+                    currentFileName = fileHandle.name;
                     await updateProgress(100, "SAVE COMPLETE!", "SAVING DATA");
                     setTimeout(() => { closeProgress(); showSystemAlert('Data saved successfully to selected location.', 'SAVE COMPLETE'); }, 1000);
                 } else {
@@ -2187,10 +2203,8 @@
                 }
             } catch (err) {
                 closeProgress();
-                if (err.name !== 'AbortError') {
-                    console.error(err);
-                    showSystemAlert('Failed to save file.', 'SAVE ERROR', true);
-                }
+                console.error(err);
+                showSystemAlert('Failed to write file.', 'SAVE ERROR', true);
             }
             toggleMenu(true);
             document.getElementById('mainCommandBar').classList.add('collapsed');
@@ -2208,6 +2222,36 @@
             const cards = document.querySelectorAll('.segment-card');
             if (cards.length === 0) { showSystemAlert('No data available to export.', 'EXPORT FAILED'); return; }
 
+            // 1. FAST SYNCHRONOUS DOM SCAN FOR IMAGES
+            let requiresFolder = false;
+            document.querySelectorAll('.defect-row').forEach(row => {
+                if (JSON.parse(row.dataset.images || "[]").length > 0) requiresFolder = true;
+            });
+
+            const date = new Date().toISOString().split('T')[0];
+            const excelFilename = `DEFECT_REPORT_${date}.xlsx`;
+            let dirHandle = null;
+            let singleFileHandle = null;
+
+            // 2. ACQUIRE USER GESTURE PERMISSION IMMEDIATELY
+            try {
+                if (requiresFolder && window.showDirectoryPicker) {
+                    dirHandle = await window.showDirectoryPicker({ mode: 'readwrite' });
+                } else if (!requiresFolder && window.showSaveFilePicker) {
+                    singleFileHandle = await window.showSaveFilePicker({
+                        suggestedName: excelFilename,
+                        types: [{ description: 'Excel File', accept: {'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx']} }],
+                    });
+                }
+            } catch (err) {
+                if (err.name !== 'AbortError') {
+                    console.error(err);
+                    showSystemAlert('Folder/File selection failed.', 'EXPORT ERROR', true);
+                }
+                return; // Abort silently if user cancels picker
+            }
+
+            // 3. LOCK UI AND PROCESS HEAVY DATA
             try {
                 await updateProgress(5, "INITIALIZING EXCEL...", "EXPORTING DATA");
                 const workbook = new ExcelJS.Workbook();
@@ -2276,79 +2320,52 @@
                 await updateProgress(35, "GENERATING EXCEL BLOB...", "EXPORTING DATA");
                 const buffer = await workbook.xlsx.writeBuffer();
                 const excelBlob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-                const date = new Date().toISOString().split('T')[0];
-                const excelFilename = `DEFECT_REPORT_${date}.xlsx`;
-
+                
                 const totalSteps = pdfJobs.length + 1;
 
-                if (pdfJobs.length > 0 && window.showDirectoryPicker) {
-                    try {
-                        await updateProgress(40, "AWAITING FOLDER SELECTION...", "GENERATING EXPORT");
-                        const dirHandle = await window.showDirectoryPicker({ mode: 'readwrite' });
-                        
-                        await updateProgress(42, "SAVING EXCEL REPORT...", "GENERATING EXPORT");
-                        const excelFileHandle = await dirHandle.getFileHandle(excelFilename, { create: true });
-                        const excelWritable = await excelFileHandle.createWritable();
-                        await excelWritable.write(excelBlob);
-                        await excelWritable.close();
+                // 4. WRITE DATA TO RESERVED HANDLES
+                if (dirHandle) {
+                    await updateProgress(42, "SAVING EXCEL REPORT...", "GENERATING EXPORT");
+                    const excelFileHandle = await dirHandle.getFileHandle(excelFilename, { create: true });
+                    const excelWritable = await excelFileHandle.createWritable();
+                    await excelWritable.write(excelBlob);
+                    await excelWritable.close();
 
-                        for (let j = 0; j < pdfJobs.length; j++) {
-                            const job = pdfJobs[j];
-                            await updateProgress(42 + Math.round(((j+0.5) / totalSteps) * 58), `BUILDING PDF ${j+1}/${pdfJobs.length} [${job.tsId}]...`, "GENERATING EXPORT");
-                            
-                            const imgs = [];
-                            for(let r of job.refs) { 
-                                if (r.id) {
-                                    const d = await getImageFromDB(r.id); 
-                                    if(d && d.data) imgs.push(d); 
-                                } else if (r.img) { // Ghost Data Legacy Fallback
-                                    imgs.push({ data: r.img, w: r.w || 1200, h: r.h || 1200 });
-                                }
+                    for (let j = 0; j < pdfJobs.length; j++) {
+                        const job = pdfJobs[j];
+                        await updateProgress(42 + Math.round(((j+0.5) / totalSteps) * 58), `BUILDING PDF ${j+1}/${pdfJobs.length} [${job.tsId}]...`, "GENERATING EXPORT");
+                        
+                        const imgs = [];
+                        for(let r of job.refs) { 
+                            if (r.id) {
+                                const d = await getImageFromDB(r.id); 
+                                if(d && d.data) imgs.push(d); 
+                            } else if (r.img) { 
+                                imgs.push({ data: r.img, w: r.w || 1200, h: r.h || 1200 }); // Ghost Data Fallback
                             }
-                            
-                            if (imgs.length === 0) { console.warn(`Skipping PDF for ${job.tsId}`); continue; }
+                        }
+                        
+                        if (imgs.length === 0) continue;
 
-                            const pdfBlob = await generatePDFBlob(job, imgs);
-                            const cleanComp = job.comp ? job.comp.toString().replace(/[^a-z0-9]/gi, '_') : 'UNKNOWN';
-                            const pdfFilename = `${job.tsId}_${cleanComp}_DEFECT.pdf`;
-                            
-                            const pdfFileHandle = await dirHandle.getFileHandle(pdfFilename, { create: true });
-                            const pdfWritable = await pdfFileHandle.createWritable();
-                            await pdfWritable.write(pdfBlob);
-                            await pdfWritable.close();
-                            await delay(16);
-                        }
+                        const pdfBlob = await generatePDFBlob(job, imgs);
+                        const cleanComp = job.comp ? job.comp.toString().replace(/[^a-z0-9]/gi, '_') : 'UNKNOWN';
+                        const pdfFilename = `${job.tsId}_${cleanComp}_DEFECT.pdf`;
                         
-                        await updateProgress(100, "ALL FILES EXPORTED!", "GENERATING EXPORT");
-                        setTimeout(() => { closeProgress(); showSystemAlert("All files successfully saved to the selected folder.", "EXPORT COMPLETE"); }, 1000);
-                        
-                    } catch (err) {
-                        if (err.name !== 'AbortError') {
-                            console.error(err);
-                            fallbackDownload(excelBlob, excelFilename, pdfJobs, totalSteps);
-                        } else {
-                            closeProgress();
-                        }
+                        const pdfFileHandle = await dirHandle.getFileHandle(pdfFilename, { create: true });
+                        const pdfWritable = await pdfFileHandle.createWritable();
+                        await pdfWritable.write(pdfBlob);
+                        await pdfWritable.close();
+                        await delay(16);
                     }
-                } else if (pdfJobs.length === 0 && window.showSaveFilePicker) {
-                    try {
-                        const handle = await window.showSaveFilePicker({
-                            suggestedName: excelFilename,
-                            types: [{ description: 'Excel File', accept: {'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx']} }],
-                        });
-                        const writable = await handle.createWritable();
-                        await writable.write(excelBlob);
-                        await writable.close();
-                        await updateProgress(100, "EXCEL REPORT SAVED!", "GENERATING EXPORT");
-                        setTimeout(() => { closeProgress(); showSystemAlert("Excel report saved successfully.", "EXPORT COMPLETE"); }, 1000);
-                    } catch (err) {
-                        if (err.name !== 'AbortError') {
-                            console.error(err);
-                            fallbackDownload(excelBlob, excelFilename, [], totalSteps);
-                        } else {
-                            closeProgress();
-                        }
-                    }
+                    
+                    await updateProgress(100, "ALL FILES EXPORTED!", "GENERATING EXPORT");
+                    setTimeout(() => { closeProgress(); showSystemAlert("All files successfully saved to the selected folder.", "EXPORT COMPLETE"); }, 1000);
+                } else if (singleFileHandle) {
+                    const writable = await singleFileHandle.createWritable();
+                    await writable.write(excelBlob);
+                    await writable.close();
+                    await updateProgress(100, "EXCEL REPORT SAVED!", "GENERATING EXPORT");
+                    setTimeout(() => { closeProgress(); showSystemAlert("Excel report saved successfully.", "EXPORT COMPLETE"); }, 1000);
                 } else {
                     fallbackDownload(excelBlob, excelFilename, pdfJobs, totalSteps);
                 }
