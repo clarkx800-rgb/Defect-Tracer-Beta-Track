@@ -54,7 +54,9 @@ function cleanUpRowImages(row) {
     images.forEach(img => { if (img.id) deleteImageFromDB(img.id); });
 }
 
-// EXPORT ENGINE
+// ==========================================
+// EXPORT ENGINE (BUG FIXED: Await Fallback & Ghost Data)
+// ==========================================
 async function exportData() {
     if (typeof ExcelJS === 'undefined' || typeof window.jspdf === 'undefined') {
         showSystemAlert("Libraries offline. Requires network connection for initial boot.", "EXPORT ERROR", true);
@@ -179,11 +181,14 @@ async function exportData() {
                         const d = await getImageFromDB(r.id); 
                         if(d && d.data) imgs.push(d); 
                     } else if (r.img) { 
-                        imgs.push({ data: r.img, w: r.w || 1200, h: r.h || 1200 }); 
+                        imgs.push({ data: r.img, w: r.w || 1200, h: r.h || 1200 }); // Ghost Data Fallback Fix
                     }
                 }
                 
-                if (imgs.length === 0) continue;
+                if (imgs.length === 0) {
+                    console.warn(`Skipping PDF for ${job.tsId}: No valid images found.`);
+                    continue; 
+                }
 
                 const pdfBlob = await generatePDFBlob(job, imgs);
                 const cleanComp = job.comp ? job.comp.toString().replace(/[^a-z0-9]/gi, '_') : 'UNKNOWN';
@@ -205,7 +210,7 @@ async function exportData() {
             await updateProgress(100, "EXCEL REPORT SAVED!", "GENERATING EXPORT");
             setTimeout(() => { closeProgress(); showSystemAlert("Excel report saved successfully.", "EXPORT COMPLETE"); }, 1000);
         } else {
-            fallbackDownload(excelBlob, excelFilename, pdfJobs, totalSteps);
+            await fallbackDownload(excelBlob, excelFilename, pdfJobs, totalSteps); // BUG FIX: Added 'await'
         }
 
     } catch (error) {
@@ -233,7 +238,7 @@ async function fallbackDownload(excelBlob, excelFilename, pdfJobs, totalSteps) {
             const imgs = [];
             for(let r of job.refs) { 
                 if (r.id) { const d = await getImageFromDB(r.id); if(d && d.data) imgs.push(d); }
-                else if (r.img) { imgs.push({ data: r.img, w: r.w || 1200, h: r.h || 1200 }); }
+                else if (r.img) { imgs.push({ data: r.img, w: r.w || 1200, h: r.h || 1200 }); } // Ghost Data Fix
             }
             
             if (imgs.length === 0) continue;
@@ -257,7 +262,10 @@ async function fallbackDownload(excelBlob, excelFilename, pdfJobs, totalSteps) {
 
 async function generatePDFBlob(job, imgs) {
     const { jsPDF } = window.jspdf;
-    let firstOrientation = (imgs[0].w > imgs[0].h) ? 'landscape' : 'portrait';
+    let firstImgW = imgs[0].w || 1200;
+    let firstImgH = imgs[0].h || 1200;
+    let firstOrientation = (firstImgW > firstImgH) ? 'landscape' : 'portrait';
+    
     const doc = new jsPDF({ orientation: firstOrientation, unit: 'mm', format: 'a4' });
     
     const activeTheme = localStorage.getItem('appTheme') || 'tactical';
@@ -265,7 +273,10 @@ async function generatePDFBlob(job, imgs) {
 
     for(let i=0; i<imgs.length; i++) {
         const imgObj = imgs[i];
-        let orientation = (imgObj.w > imgObj.h) ? 'landscape' : 'portrait';
+        let imgW = imgObj.w || 1200;
+        let imgH = imgObj.h || 1200;
+        let orientation = (imgW > imgH) ? 'landscape' : 'portrait';
+        
         if (i > 0) doc.addPage('a4', orientation);
 
         const pageWidth = orientation === 'landscape' ? 297 : 210;
@@ -286,7 +297,7 @@ async function generatePDFBlob(job, imgs) {
         }
 
         const footerHeight = 22; const safeZoneX = margin + 2; const safeZoneY = margin + 2; const safeZoneW = borderW - 4; const safeZoneH = borderH - footerHeight - 4; 
-        const imgRatio = imgObj.w / imgObj.h; const safeRatio = safeZoneW / safeZoneH;
+        const imgRatio = imgW / imgH; const safeRatio = safeZoneW / safeZoneH;
         
         let finalW, finalH, finalX, finalY;
         if (imgRatio > safeRatio) { finalW = safeZoneW; finalH = safeZoneW / imgRatio; } else { finalH = safeZoneH; finalW = safeZoneH * imgRatio; }
@@ -321,6 +332,9 @@ async function generatePDFBlob(job, imgs) {
     return doc.output('blob');
 }
 
+// ==========================================
+// SAVE & LOAD LOGIC
+// ==========================================
 async function saveProject() {
     const cards = document.querySelectorAll('.segment-card');
     if (cards.length === 0) { showSystemAlert('No data available to save.', 'SAVE FAILED', true); return; }
@@ -425,7 +439,7 @@ function loadProject(event) {
     reader.onload = async function(e) {
         try {
             const projectData = JSON.parse(e.target.result);
-            await injectProjectData(projectData, file.name);
+            await injectProjectData(projectData, file.name); // Relies on app_core.js
         } catch (err) {
             closeProgress();
             showSystemAlert('Corrupt or invalid JSON file.', 'SYSTEM ERROR', true);
@@ -440,102 +454,4 @@ function loadProject(event) {
     };
 
     reader.readAsText(file);
-}
-
-async function injectProjectData(projectData, fileName) {
-    try {
-        if (!Array.isArray(projectData)) throw new Error("Invalid format");
-        await updateProgress(10, "UNPACKING STRUCTURE...", "LOADING DATA");
-
-        const container = document.getElementById('segments-container');
-        const mapContainer = document.getElementById('miniMap');
-        container.innerHTML = '';
-        mapContainer.innerHTML = '';
-        
-        loadedRoutes.clear(); 
-        routeLoadHistory = [];
-        toggleHelp(false);
-
-        let totalSegs = projectData.length;
-        for (let index = 0; index < totalSegs; index++) {
-            const segData = projectData[index];
-            await updateProgress(10 + Math.round((index / totalSegs) * 80), `BUILDING TS-${segData.segmentNum}...`, "LOADING DATA");
-
-            const safeAreaName = segData.areaName || '';
-            const activeKey = segData.routeKey || segData.routeName; 
-            
-            const card = createSegmentCard(segData.segmentNum, activeKey, segData.routeName, segData.direction, segData.color, safeAreaName);
-            card.style.animationDelay = `${index * 0.05}s`;
-            
-            card.querySelector('.segment-notes').value = segData.notes || '';
-            const defectList = card.querySelector('.defect-list');
-            defectList.innerHTML = '';
-            
-            if (!segData.defects || segData.defects.length === 0) { 
-                addDefectRow(defectList, null, safeAreaName); 
-            } else { 
-                for (let defData of segData.defects) {
-                    if (defData.photoBase64 && (!defData.images || defData.images.length === 0)) {
-                        defData.images = [{ img: defData.photoBase64, w: defData.imgW || 1200, h: defData.imgH || 1200 }];
-                    }
-                    if (defData.images && defData.images.length > 0) {
-                        const newRefs = [];
-                        for (let imgData of defData.images) {
-                            if(imgData.data) { 
-                                const ref = await saveImageToDB(imgData.data, imgData.w, imgData.h);
-                                newRefs.push(ref);
-                            } else if (imgData.img) { 
-                                const ref = await saveImageToDB(imgData.img, imgData.w, imgData.h);
-                                newRefs.push(ref);
-                            } else if (imgData.id) {
-                                newRefs.push(imgData); 
-                            }
-                        }
-                        defData.images = newRefs; 
-                    }
-                    addDefectRow(defectList, defData, safeAreaName); 
-                }
-            }
-
-            container.appendChild(card);
-            scrollObserver.observe(card);
-
-            const mapBtn = document.createElement('div');
-            mapBtn.className = 'map-item';
-            mapBtn.setAttribute('data-map-segment', segData.segmentNum);
-            mapBtn.setAttribute('data-route-key', activeKey);
-            mapBtn.textContent = `TS-${segData.segmentNum}`;
-            mapBtn.style.borderLeft = `4px solid ${segData.color || '#ccc'}`;
-            
-            attachMapItemListeners(mapBtn, card, segData.segmentNum, activeKey);
-            
-            mapContainer.appendChild(mapBtn);
-            checkSegmentData(card);
-
-            if (activeKey && !loadedRoutes.has(activeKey)) {
-                loadedRoutes.add(activeKey);
-                routeLoadHistory.push([activeKey]);
-            }
-            currentActiveArea = safeAreaName;
-            currentActiveDirection = segData.direction;
-        }
-
-        if (loadedRoutes.size > 0) document.getElementById('quickAddGroup').style.display = 'flex';
-
-        await updateProgress(100, "SYSTEM READY", "LOAD COMPLETE");
-        setTimeout(() => {
-            closeProgress();
-            currentFileName = fileName;
-            showSystemAlert('Data imported successfully.', 'DATA LOADED');
-            toggleMenu(true);
-            updateCommandBar();
-            document.getElementById('mainCommandBar').classList.add('collapsed');
-            toggleEmptyState();
-        }, 800);
-
-    } catch (err) {
-        closeProgress();
-        showSystemAlert('Corrupt or invalid JSON data.', 'SYSTEM ERROR', true);
-        console.error(err);
-    }
 }
