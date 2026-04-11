@@ -24,7 +24,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
     <script>
-        const APP_VERSION = "2.1.00"; // IndexedDB + System Lock Integration
+        const APP_VERSION = "2.1.12"; // Ghost-Data Failsafe & IndexedDB Active
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
@@ -35,14 +35,11 @@
         function applySavedSettings() {
             const savedTheme = localStorage.getItem('appTheme') || 'tactical';
             const savedFont = localStorage.getItem('appFontSize') || 'small';
-            
             const themeData = systemThemes[savedTheme];
             const fontData = systemFonts[savedFont];
-            
             const root = document.documentElement;
             for (let key in themeData) root.style.setProperty(key, themeData[key]);
             for (let key in fontData) root.style.setProperty(key, fontData[key]);
-            
             document.getElementById('themeColorMeta').setAttribute('content', themeData['--theme-color-meta']);
         }
         applySavedSettings();
@@ -50,220 +47,70 @@
     
     <style>
         :root {
-            --primary: #8bc34a; 
-            --primary-dark: #33691e;
-            --danger: #d32f2f; 
-            --success: #4caf50;
-            --warning: #ffb300; 
-            --bg-color: #0d0d0d; 
-            --card-bg: #1a1a1a; 
-            --input-bg: #111111;
-            --text-color: #e0e0e0;
-            --text-muted: #888888;
-            --border-color: #333333;
-            --hud-glow: 0 0 8px rgba(139, 195, 74, 0.4);
-            --border-radius: 2px;
-            
-            --base-font: 13px;
-            --header-font: 16px;
-            --map-font: 15px;
-            --btn-font: 14px;
-            --map-width: 80px; 
+            --primary: #8bc34a; --primary-dark: #33691e; --danger: #d32f2f; --success: #4caf50; --warning: #ffb300; 
+            --bg-color: #0d0d0d; --card-bg: #1a1a1a; --input-bg: #111111; --text-color: #e0e0e0; --text-muted: #888888;
+            --border-color: #333333; --hud-glow: 0 0 8px rgba(139, 195, 74, 0.4); --border-radius: 2px;
+            --base-font: 13px; --header-font: 16px; --map-font: 15px; --btn-font: 14px; --map-width: 80px; 
         }
 
-        body {
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            margin: 0;
-            padding: 0; 
-            box-sizing: border-box;
-            text-transform: uppercase; 
-            -webkit-font-smoothing: antialiased; 
-            transition: background-color 0.3s ease, color 0.3s ease;
-        }
-
+        body { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: var(--bg-color); color: var(--text-color); margin: 0; padding: 0; box-sizing: border-box; text-transform: uppercase; -webkit-font-smoothing: antialiased; transition: background-color 0.3s ease, color 0.3s ease; }
         * { border-radius: var(--border-radius) !important; }
 
-        .sticky-header {
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            background-color: var(--card-bg);
-            padding: 10px 15px;
-            border-bottom: 2px solid var(--primary);
-            box-shadow: var(--hud-glow); 
-            will-change: transform;
-            transition: background-color 0.3s ease;
-        }
-
+        .sticky-header { position: sticky; top: 0; z-index: 1000; background-color: var(--card-bg); padding: 10px 15px; border-bottom: 2px solid var(--primary); box-shadow: var(--hud-glow); }
         .header-top-bar { display: flex; justify-content: space-between; align-items: center; flex-wrap: nowrap; gap: 12px; }
         .header-title-container { flex: 1; min-width: 0; position: relative; display: flex; align-items: center; flex-wrap: wrap; gap: 10px; }
+        #active-area-display { font-size: var(--base-font); padding: 4px 10px; font-weight: bold; text-transform: uppercase; border: 1px solid transparent; display: inline-block; }
+        .sts-header-btn { background-color: var(--input-bg); border: 1px solid var(--primary); color: var(--text-color); padding: 4px 10px; font-weight: bold; cursor: pointer; display: inline-flex; align-items: center; text-transform: uppercase; box-shadow: var(--hud-glow); }
+        .sts-shortcut-menu { position: absolute; top: 100%; left: 0; background: var(--bg-color); border: 1px solid var(--primary); box-shadow: 0 10px 25px rgba(0,0,0,0.9), var(--hud-glow); z-index: 1002; padding: 5px; display: none; flex-direction: column; gap: 5px; max-height: 350px; overflow-y: auto; width: 100%; margin-top: 10px; }
+        .sts-menu-item { padding: 12px; background: var(--card-bg); border: 1px solid var(--border-color); color: var(--text-color); cursor: pointer; font-size: var(--base-font); font-weight: bold; display: flex; align-items: center; }
 
-        #active-area-display { font-size: var(--base-font); padding: 4px 10px; font-weight: bold; text-transform: uppercase; border: 1px solid transparent; display: inline-block; margin: 0; }
-        #active-area-display:empty { display: none; }
-
-        .sts-header-btn {
-            background-color: var(--input-bg); border: 1px solid var(--primary); color: var(--text-color); padding: 4px 10px; font-family: inherit; font-size: var(--base-font); font-weight: bold; letter-spacing: 1px; cursor: pointer; display: inline-flex; align-items: center; text-transform: uppercase; transition: background-color 0.2s ease; box-shadow: var(--hud-glow); word-wrap: break-word; white-space: normal; text-align: left; margin: 0;
-        }
-        .sts-header-btn:active { background-color: var(--border-color); }
-        .sts-header-btn span#active-route-display { color: var(--text-color); display: flex; align-items: center; }
-
-        .sts-shortcut-menu {
-            position: absolute; top: 100%; left: 0; background: var(--bg-color); border: 1px solid var(--primary); box-shadow: 0 10px 25px rgba(0,0,0,0.9), var(--hud-glow); z-index: 1002; padding: 5px; display: none; flex-direction: column; gap: 5px; max-height: 350px; overflow-y: auto; width: 100%; margin-top: 10px;
-        }
-        .sts-menu-item {
-            padding: 12px; background: var(--card-bg); border: 1px solid var(--border-color); color: var(--text-color); cursor: pointer; font-size: var(--base-font); font-weight: bold; text-align: left; letter-spacing: 1px; transition: background 0.2s; display: flex; align-items: center;
-        }
-        .sts-menu-item:active { background: var(--primary-dark); color: #fff;}
-
-        .search-input-wrapper { display: flex; align-items: center; background: var(--input-bg); border: 1px solid var(--primary); flex: 1; padding: 0 10px; box-shadow: var(--hud-glow); }
-        .search-prefix { color: var(--primary); font-weight: bold; font-size: var(--base-font); letter-spacing: 1px; }
-        #quickTsSearchInput, #cloneTsInput, #pillSearchInput {
-            background: transparent !important; border: none !important; color: var(--text-color) !important; font-size: var(--base-font); font-weight: bold; flex: 1; padding: 12px 5px; outline: none; box-shadow: none !important; width: 100%; -webkit-appearance: none;
-        }
-        #pillSearchInput { width: 70px; font-size: 16px; padding: 0; }
-
-        .menu-toggle-btn {
-            background-color: var(--card-bg); color: var(--text-color); border: 1px solid var(--border-color); width: 42px; height: 42px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 2px 4px rgba(0,0,0,0.5); padding: 0; transition: background-color 0.2s ease;
-        }
-        .menu-toggle-btn:active { background-color: var(--border-color); }
-        .menu-toggle-icon { font-size: 20px; font-family: sans-serif; line-height: 1; pointer-events: none; }
-
-        #collapsible-menu { overflow: hidden; transition: max-height 0.3s ease-out, opacity 0.3s ease-out, margin-top 0.3s ease-out; will-change: max-height, opacity; }
+        #collapsible-menu { overflow: hidden; transition: max-height 0.3s ease-out, opacity 0.3s ease-out; }
         #collapsible-menu.expanded { max-height: 1200px; opacity: 1; margin-top: 15px; }
         #collapsible-menu.collapsed { max-height: 0; opacity: 0; margin-top: 0; }
-
-        .control-panel { background: var(--card-bg); padding: 12px; border: 1px solid var(--border-color); margin-bottom: 10px; display: flex; flex-direction: column; gap: 8px; transition: background-color 0.3s ease; }
-        .control-panel label { font-size: var(--base-font); letter-spacing: 1px; color: var(--text-muted); margin-top: 5px; }
-        .input-group { display: flex; gap: 8px; }
         
-        select, .segment-notes, .custom-comp, .custom-def {
-            flex: 1; padding: 12px; border: 1px solid var(--border-color) !important; font-size: var(--base-font); background-color: var(--input-bg) !important; color: var(--text-color) !important; text-transform: uppercase; font-family: inherit; appearance: none; transition: background-color 0.3s ease;
-        }
-        select:focus, .segment-notes:focus, .custom-comp:focus, .custom-def:focus { outline: none; border-color: var(--primary) !important; box-shadow: var(--hud-glow); }
-        select:disabled { background-color: var(--border-color) !important; color: var(--text-muted) !important; cursor: not-allowed; }
-        .custom-comp, .custom-def { flex: 1 1 35%; min-width: 100px; }
-
-        .checkbox-list { display: flex; flex-direction: column; gap: 4px; max-height: 250px; overflow-y: auto; background: var(--input-bg); border: 1px solid var(--border-color); padding: 10px; margin-bottom: 10px; border-radius: var(--border-radius); }
-        .checkbox-item { display: flex; align-items: center; gap: 12px; color: var(--text-color); font-size: var(--base-font); cursor: pointer; text-transform: uppercase; font-weight: bold; padding: 8px 5px; border-bottom: 1px solid rgba(255,255,255,0.05); transition: background-color 0.2s; }
-        .checkbox-item:active { background-color: rgba(255,255,255,0.1); }
-        .checkbox-item:last-child { border-bottom: none; }
-        .checkbox-item input[type="checkbox"] { width: 20px; height: 20px; accent-color: var(--primary); cursor: pointer; margin: 0; }
-
-        .action-buttons { display: flex; gap: 8px; margin-top: 5px; }
+        .control-panel { background: var(--card-bg); padding: 12px; border: 1px solid var(--border-color); margin-bottom: 10px; display: flex; flex-direction: column; gap: 8px; }
+        select, .segment-notes, .custom-comp, .custom-def { flex: 1; padding: 12px; border: 1px solid var(--border-color) !important; font-size: var(--base-font); background-color: var(--input-bg) !important; color: var(--text-color) !important; text-transform: uppercase; font-family: inherit; appearance: none; }
+        .checkbox-list { display: flex; flex-direction: column; gap: 4px; max-height: 250px; overflow-y: auto; background: var(--input-bg); border: 1px solid var(--border-color); padding: 10px; margin-bottom: 10px; }
+        
+        button { padding: 12px; border: 1px solid transparent; font-size: var(--btn-font); font-weight: bold; letter-spacing: 1px; color: white; cursor: pointer; font-family: inherit; }
+        .btn-success { background-color: var(--success); color: #fff; width: 100%; margin-bottom: 5px;}
+        .btn-primary { background-color: var(--primary-dark); border-color: var(--primary); flex: 2; }
+        .btn-danger { background-color: transparent; color: var(--danger); border-color: var(--danger); }
+        .btn-outline { background-color: transparent; color: var(--primary); border: 1px solid var(--primary); flex: 1; }
         .save-load-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 5px; }
 
-        button { padding: 12px; border: 1px solid transparent; font-size: var(--btn-font); font-weight: bold; letter-spacing: 1px; color: white; cursor: pointer; touch-action: manipulation; font-family: inherit; }
-        .btn-primary { background-color: var(--primary-dark); color: #fff; border-color: var(--primary); flex: 2; }
-        .btn-success { background-color: var(--success); color: #fff; width: 100%; margin-bottom: 5px;}
-        .btn-warning { background-color: var(--warning); color: #000; }
-        .btn-info { background-color: #01579b; color: #fff; border-color: #29b6f6; }
-        .btn-danger { background-color: transparent; color: var(--danger); border-color: var(--danger); }
-        .btn-danger:active { background-color: var(--danger); color: #fff; }
-        .btn-outline { background-color: transparent; color: var(--primary); border: 1px solid var(--primary); flex: 1; }
-        .revert-btn { border: 1px solid var(--warning); color: var(--warning); flex: 0 1 auto;}
-        .revert-btn:active { background-color: var(--warning); color: #000; }
-
         .app-layout { display: flex; align-items: flex-start; gap: 10px; padding: 15px 15px 30px 10px; position: relative; }
-
-        .mini-map-container { position: sticky; top: 90px; width: var(--map-width); max-height: calc(100vh - 105px); overflow-y: auto; display: flex; flex-direction: column; gap: 5px; scrollbar-width: none; -ms-overflow-style: none; padding-bottom: 90px; scroll-behavior: smooth; }
-        .mini-map-container::-webkit-scrollbar { display: none; }
-
-        .map-item { background: var(--card-bg); border: 1px solid var(--border-color); padding: 10px 0; text-align: center; font-weight: bold; font-size: var(--map-font); color: var(--text-muted); cursor: pointer; transition: all 0.2s ease; user-select: none; will-change: transform, background-color; touch-action: pan-y; }
-        .map-item:active { transform: scale(0.9); }
+        .mini-map-container { position: sticky; top: 90px; width: var(--map-width); max-height: calc(100vh - 105px); overflow-y: auto; display: flex; flex-direction: column; gap: 5px; scrollbar-width: none; }
+        .map-item { background: var(--card-bg); border: 1px solid var(--border-color); padding: 10px 0; text-align: center; font-weight: bold; font-size: var(--map-font); color: var(--text-muted); cursor: pointer; user-select: none; }
         .map-item.has-data { background-color: var(--primary-dark); color: #fff; border-color: var(--primary-dark); }
         .map-item.active-map { background: var(--primary); color: #fff; border-color: var(--primary-dark) !important; box-shadow: var(--hud-glow);}
-        .map-item.active-map.has-data { background-color: var(--warning); color: #000; border-color: var(--danger) !important;}
 
-        #segments-container { flex: 1; display: flex; flex-direction: column; gap: 15px; min-width: 0; padding-bottom: 90px; min-height: 60vh;}
-
-        @keyframes cascadingFadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes searchFlash { 0% { box-shadow: var(--hud-glow); border-color: var(--border-color); } 20% { box-shadow: 0 0 20px 4px var(--primary); border-color: var(--primary); } 40% { box-shadow: var(--hud-glow); border-color: var(--border-color); } 60% { box-shadow: 0 0 20px 4px var(--primary); border-color: var(--primary); } 80% { box-shadow: var(--hud-glow); border-color: var(--border-color); } 100% { box-shadow: var(--hud-glow); border-color: var(--border-color); } }
-        
-        .search-highlight { animation: searchFlash 1.2s ease-in-out !important; opacity: 1 !important; transform: translateY(0) !important; }
-
-        .segment-card { background: var(--card-bg); border: 1px solid var(--border-color); padding: 15px; position: relative; opacity: 1; transform: translateY(0); animation: cascadingFadeIn 0.3s ease-out; scroll-margin-top: 150px; will-change: opacity, transform, border-color, box-shadow; transition: background-color 0.3s ease; box-shadow: var(--hud-glow); }
+        #segments-container { flex: 1; display: flex; flex-direction: column; gap: 15px; min-width: 0; padding-bottom: 90px; }
+        .segment-card { background: var(--card-bg); border: 1px solid var(--border-color); padding: 15px; position: relative; box-shadow: var(--hud-glow); animation: cascadingFadeIn 0.3s ease-out; scroll-margin-top: 150px; }
         .segment-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; margin-bottom: 10px; }
-        .segment-header h3 { margin: 0; color: var(--primary); font-size: var(--header-font); letter-spacing: 2px;}
-        .segment-header-badges { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
-        .direction-badge { font-size: var(--base-font); font-weight: bold; color: var(--text-color); background: var(--input-bg); padding: 4px 8px; border: 1px solid var(--border-color);}
-        .segment-notes { width: 100%; display: block; margin-bottom: 15px; box-sizing: border-box; resize: vertical; min-height: 60px; }
-
-        .defect-list { display: flex; flex-direction: column; gap: 12px; }
+        
         .defect-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; background: var(--input-bg); padding: 10px; border: 1px solid var(--border-color); }
-
         .photo-wrapper { display: flex; align-items: stretch; gap: 8px; flex: 1 1 100%; justify-content: space-between; background: var(--card-bg); padding: 5px; border: 1px solid var(--border-color); }
-        .file-input { display: none; }
-        .camera-btn { background-color: var(--border-color); color: var(--text-color); padding: 10px 12px; font-size: var(--base-font); font-weight: bold; cursor: pointer; text-align: center; border: 1px solid var(--border-color); flex: 0 1 auto; transition: background-color 0.2s; display: flex; align-items: center; justify-content: center;}
-        .camera-btn:active { background-color: var(--primary); color: white;}
-        
-        .status-badge-container { flex: 1; display: flex; align-items: center;}
-        .photo-status-badge { background: var(--primary-dark); color: #fff; padding: 8px 10px; cursor: pointer; font-size: var(--base-font); font-weight: bold; flex: 1; text-align: center; border: 1px solid var(--primary); transition: background 0.2s; box-shadow: var(--hud-glow); display: flex; align-items: center; justify-content: center; height: 100%; box-sizing: border-box; }
-        .photo-status-badge:active { background: var(--primary); }
-        
-        .clone-btn, .delete-btn { background-color: transparent; width: 40px; font-size: 18px; display: flex; align-items: center; justify-content: center; padding: 0; flex-shrink: 0; transition: all 0.2s; }
-        .clone-btn { color: #0A84FF; border: 1px solid #0A84FF; }
-        .clone-btn:active { background-color: #0A84FF; color: #fff; }
-        .delete-btn { color: var(--danger); border: 1px solid var(--danger); }
-        .delete-btn:active { background-color: var(--danger); color: #fff; }
-        .add-defect-btn { background-color: transparent; color: var(--text-muted); border: 1px dashed var(--text-muted); margin-top: 10px; width: 100%; transition: all 0.2s;}
-        .add-defect-btn:active { border-color: var(--primary); color: var(--primary); }
+        .camera-btn { background-color: var(--border-color); color: var(--text-color); padding: 10px 12px; font-weight: bold; cursor: pointer; flex: 0 1 auto; display: flex; align-items: center; justify-content: center; }
+        .photo-status-badge { background: var(--primary-dark); color: #fff; padding: 8px 10px; cursor: pointer; font-size: var(--base-font); font-weight: bold; flex: 1; text-align: center; border: 1px solid var(--primary); display: flex; align-items: center; justify-content: center; height: 100%; }
 
         .command-bar { position: fixed; bottom: 20px; left: 20px; display: flex; align-items: center; background-color: var(--card-bg); border: 2px solid var(--primary); border-radius: 28px; height: 56px; box-shadow: 0 4px 10px rgba(0,0,0,0.8), var(--hud-glow); z-index: 980; overflow: hidden; transition: width 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); width: 440px; max-width: calc(100vw - 40px); white-space: nowrap; }
         .command-bar.collapsed { width: 56px; }
-        .command-btn { background: transparent; border: none; color: var(--text-color); width: 56px; height: 100%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background-color 0.2s ease, transform 0.1s ease; padding: 0; border-radius: 0 !important; flex-shrink: 0; }
-        .command-btn:active { background-color: var(--border-color); transform: scale(0.9); }
-        .command-divider { width: 2px; height: 60%; background-color: var(--border-color); flex-shrink: 0; }
-        .command-items { display: flex; align-items: center; height: 100%; opacity: 1; transition: opacity 0.2s ease 0.1s; width: calc(100% - 56px); justify-content: space-evenly; }
-        .command-bar.collapsed .command-items { opacity: 0; pointer-events: none; transition: opacity 0.1s ease; }
-        #cmdToggleIcon { transition: transform 0.3s ease; pointer-events: none; }
-        .command-bar:not(.collapsed) #cmdToggleIcon { transform: rotate(180deg); }
-
-        .quick-add-modal { position: fixed; bottom: 85px; left: 20px; width: 300px; max-width: calc(100vw - 40px); background-color: var(--bg-color); border: 1px solid var(--primary); box-shadow: 0 10px 25px rgba(0,0,0,0.9), var(--hud-glow); z-index: 985; padding: 15px; display: none; flex-direction: column; gap: 10px; will-change: opacity; }
-        .quick-add-modal h4 { margin: 0 0 5px 0; color: var(--text-color); font-size: var(--base-font); letter-spacing: 1px; border-bottom: 1px solid var(--border-color); padding-bottom: 8px;}
+        .command-btn { background: transparent; border: none; color: var(--text-color); width: 56px; height: 100%; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; }
         
+        .quick-add-modal { position: fixed; bottom: 85px; left: 20px; width: 300px; max-width: calc(100vw - 40px); background-color: var(--bg-color); border: 1px solid var(--primary); box-shadow: 0 10px 25px rgba(0,0,0,0.9), var(--hud-glow); z-index: 985; padding: 15px; display: none; flex-direction: column; gap: 10px; }
         .system-modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); z-index: 9999; display: none; align-items: center; justify-content: center; backdrop-filter: blur(3px); }
-        .system-modal { background: var(--card-bg); border: 1px solid var(--primary); box-shadow: 0 0 20px rgba(0,0,0, 0.3); width: 85%; max-width: 320px; padding: 20px; text-align: center; animation: cascadingFadeIn 0.2s ease-out; }
-        .system-modal-title { color: var(--warning); font-size: var(--header-font); font-weight: bold; margin-bottom: 15px; letter-spacing: 2px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; }
-        .system-modal-message { color: var(--text-color); font-size: var(--base-font); margin-bottom: 20px; line-height: 1.5; white-space: pre-wrap; }
-        .system-modal-btn-group { display: flex; gap: 10px; }
+        .system-modal { background: var(--card-bg); border: 1px solid var(--primary); box-shadow: 0 0 20px rgba(0,0,0, 0.3); width: 85%; max-width: 320px; padding: 20px; text-align: center; }
 
-        .gallery-modal { background: var(--bg-color); border: 1px solid var(--primary); box-shadow: 0 0 25px rgba(0,0,0,0.9), var(--hud-glow); width: 90%; max-width: 500px; max-height: 85vh; display: flex; flex-direction: column; animation: cascadingFadeIn 0.2s ease-out; z-index: 9999; }
-        .gallery-header { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid var(--border-color); background: var(--card-bg); }
-        .gallery-header h3 { margin: 0; color: var(--primary); font-size: var(--header-font); letter-spacing: 1px;}
-        .gallery-grid { padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 20px; flex: 1; background: #000; }
-        .gallery-item { position: relative; border: 1px solid var(--border-color); background: var(--card-bg); padding: 5px; }
-        .gallery-item img { width: 100%; height: auto; display: block; }
-        .remove-img-btn { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); background: var(--danger); color: #fff; border: 2px solid #fff; height: 36px; padding: 0 15px; font-size: var(--base-font); font-weight: bold; letter-spacing: 1px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 8px rgba(0,0,0,0.8); white-space: nowrap; }
-        .remove-img-btn:active { transform: translateX(-50%) scale(0.9); }
+        /* LOCK SCREEN WITH NON-BLOCKING UI */
+        .export-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.95); z-index: 99999; display: none; flex-direction: column; align-items: center; justify-content: center; backdrop-filter: blur(8px); }
+        .export-box { background: var(--card-bg); border: 2px solid var(--primary); padding: 30px; border-radius: 4px; width: 85%; max-width: 400px; text-align: center; box-shadow: 0 0 50px rgba(139, 195, 74, 0.3); }
+        .progress-container { width: 100%; background: var(--input-bg); border: 1px solid var(--border-color); height: 32px; border-radius: 4px; overflow: hidden; position: relative; margin: 20px 0; }
+        .progress-bar { height: 100%; background: var(--primary); width: 0%; transition: width 0.1s linear; }
+        .progress-text { position: absolute; width: 100%; text-align: center; top: 6px; font-weight: bold; color: #fff; text-shadow: 1px 1px 2px #000; }
+        .export-status { color: var(--text-color); font-size: 14px; font-weight: bold; letter-spacing: 1px; }
 
-        .help-overlay { position: fixed; left: 0; width: 100%; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(4px); z-index: 990; display: flex; align-items: flex-start; justify-content: center; padding: 20px; animation: cascadingFadeIn 0.2s ease-out; box-sizing: border-box; }
-        .help-modal { background: var(--card-bg); border: 2px solid var(--primary); box-shadow: 0 10px 30px rgba(0,0,0,0.8), var(--hud-glow); width: 100%; max-width: 600px; max-height: 100%; display: flex; flex-direction: column; overflow: hidden; }
-        .help-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--border-color); padding: 10px 20px; }
-        .help-header h3 { color: var(--primary); font-size: var(--header-font); margin: 0; letter-spacing: 2px;}
-        #helpBodyContent { overflow-y: auto; padding: 20px; transition: zoom 0.2s ease, transform 0.2s ease; }
-
-        #empty-workspace-state { flex: 1; display: none; flex-direction: column; align-items: center; justify-content: center; padding: 20px; text-align: center; }
-        .template-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-top: 20px; width: 100%; max-width: 400px; }
-        .folder-card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 8px !important; padding: 15px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
-        .folder-card:active { transform: scale(0.95); border-color: var(--primary); box-shadow: var(--hud-glow); }
-        .folder-card svg { color: var(--primary); transition: transform 0.2s ease; }
-        .folder-card:active svg { transform: scale(1.1); }
-        .folder-label { font-size: 12px; font-weight: bold; color: var(--text-color); text-align: center; letter-spacing: 1px; line-height: 1.3; }
-
-        #templateModalOverlay .system-modal { padding: 0; text-align: left; max-width: 400px; }
-
-        /* NEW: SECURE EXPORT PROGRESS OVERLAY */
-        .export-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.9); z-index: 99999; display: none; flex-direction: column; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
-        .export-box { background: var(--card-bg); border: 2px solid var(--primary); padding: 30px; border-radius: 8px; width: 85%; max-width: 400px; text-align: center; box-shadow: 0 0 30px rgba(139, 195, 74, 0.3); }
-        .export-title { color: var(--primary); font-size: 20px; font-weight: bold; margin-bottom: 25px; letter-spacing: 2px; }
-        .progress-container { width: 100%; background: var(--input-bg); border: 1px solid var(--border-color); height: 28px; border-radius: 4px; overflow: hidden; position: relative; }
-        .progress-bar { height: 100%; background: var(--primary); width: 0%; transition: width 0.3s ease; }
-        .progress-text { position: absolute; width: 100%; text-align: center; top: 5px; font-size: 15px; font-weight: bold; color: #fff; text-shadow: 1px 1px 2px #000; letter-spacing: 1px;}
-        .export-status { color: var(--text-color); margin-top: 20px; font-size: 14px; font-weight: bold; letter-spacing: 1px;}
-
-        @media (max-width: 600px) { select { flex: 1 1 100%; } }
+        @keyframes cascadingFadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
@@ -273,1436 +120,568 @@
             <div class="header-title-container">
                 <span id="active-area-display"></span>
                 <button id="stsDropdownBtn" class="sts-header-btn" onclick="toggleStsMenu(event)" style="display: none;">
-                    <span style="color:var(--text-muted); font-weight:normal; margin-right:4px;">Sub RANGE:</span> 
                     <span id="active-route-display">AWAITING...</span> 
                     <span style="font-size:10px; margin-left:6px; color:var(--primary);">▼</span>
                 </button>
                 <div id="stsShortcutMenu" class="sts-shortcut-menu"></div>
             </div>
-            
-            <div style="display: flex; gap: 8px;">
-                <button class="menu-toggle-btn" onclick="toggleMenu()" id="menuBtn">
-                    <span class="menu-toggle-icon">&#9881;&#xFE0E;</span>
-                </button>
-            </div>
+            <button class="menu-toggle-btn" onclick="toggleMenu()" id="menuBtn" style="background:none; border:none; color:white; font-size:24px;">⚙</button>
         </div>
         
         <div id="collapsible-menu" class="collapsed">
-            <div class="control-panel" style="margin-bottom: 15px; border-color: var(--primary);">
-                <div style="display: flex; gap: 8px;">
-                    <div style="flex: 1;">
-                        <label for="theme-selector" style="color: var(--primary); font-weight: bold;">UI THEME</label>
-                        <select id="theme-selector" onchange="changeTheme(this.value)">
-                            <option value="tactical">TACTICAL (DARK)</option>
-                            <option value="windows11">WINDOWS 11 (LIGHT)</option>
-                            <option value="pokemongo">FIELD TRAINER (GAME)</option>
-                            <option value="macosdark">MACOS (DARK)</option>
-                        </select>
-                    </div>
-                    <div style="flex: 1;">
-                        <label for="font-selector" style="color: var(--primary); font-weight: bold;">FONT SIZE</label>
-                        <select id="font-selector" onchange="changeFontSize(this.value)">
-                            <option value="small">STANDARD</option>
-                            <option value="medium">MEDIUM</option>
-                            <option value="large">LARGE</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-
             <button id="exportBtn" class="btn-success" onclick="exportData()">📊 EXPORT REPORT (Excel & PDF)</button>
-            
             <div class="save-load-grid">
                 <button class="btn-warning" onclick="saveProject()">💾 SAVE DATA</button>
                 <button class="btn-info" onclick="document.getElementById('importFile').click()">📂 LOAD DATA</button>
-                <input type="file" id="importFile" accept=".json,application/json" style="position: absolute; left: -9999px; top: -9999px; opacity: 0;" onchange="loadProject(event)">
+                <input type="file" id="importFile" accept=".json" style="display:none;" onchange="loadProject(event)">
             </div>
-
             <div class="control-panel">
-                <label for="general-area">1. SELECT LINE (EX, MI, EV)</label>
-                <div class="input-group">
-                    <select id="general-area">
-                        <option value="">AWAITING INPUT...</option>
-                    </select>
-                </div>
-
-                <label for="page-direction">2. SELECT DIRECTION (IB or OB)</label>
-                <div class="input-group">
-                    <select id="page-direction">
-                        <option value="Inbound Track">INBOUND (IB)</option>
-                        <option value="Outbound Track">OUTBOUND (OB)</option>
-                    </select>
-                </div>
-                
+                <select id="general-area"><option value="">SELECT LINE...</option></select>
+                <select id="page-direction"><option value="Inbound Track">INBOUND (IB)</option><option value="Outbound Track">OUTBOUND (OB)</option></select>
                 <div class="action-buttons">
                     <button class="btn-primary" onclick="openInitialQuickAdd()">CHOOSE SECTIONS</button>
-                    <button class="btn-outline" onclick="flipOrder()">🔃 FLIP DIR</button>
+                    <button class="btn-outline" onclick="flipOrder()" style="border:1px solid var(--primary); color:var(--primary);">🔃 FLIP</button>
                 </div>
             </div>
-        </div>
-    </div>
-
-    <div id="helpOverlay" class="help-overlay" style="display: none;">
-        <div class="help-modal">
-            <div class="help-header">
-                <h3>HOW TO USE</h3>
-                <div style="display: flex; gap: 8px; align-items: center;">
-                    <button class="menu-toggle-btn" onclick="zoomHelpModal(0.2)" style="width: 32px; height: 32px; border-color: var(--border-color); font-size:16px;">🔍+</button>
-                    <button class="menu-toggle-btn" onclick="zoomHelpModal(-0.2)" style="width: 32px; height: 32px; border-color: var(--border-color); font-size:16px;">🔍-</button>
-                    <div style="width: 1px; height: 20px; background: var(--border-color); margin: 0 4px;"></div>
-                    <button class="menu-toggle-btn" onclick="toggleHelp(false)" style="width: 32px; height: 32px; border-color: transparent;">
-                        <span class="menu-toggle-icon" style="font-size: 14px;">✖</span>
-                    </button>
-                </div>
-            </div>
-            <div id="helpBodyContent"></div>
         </div>
     </div>
 
     <div class="app-layout">
         <div class="mini-map-container" id="miniMap"></div>
         <div id="segments-container"></div>
-        
-        <div id="empty-workspace-state">
-            <h3 style="color: var(--text-muted); letter-spacing: 2px; margin: 0 0 5px 0;">WORKSPACE EMPTY</h3>
-            <p style="color: var(--text-muted); font-size: 14px; margin: 0 0 15px 0; line-height: 1.5; max-width: 300px;">Load a track section from the <b>⚙ top menu</b>, or select an inspection category below to load a GitHub template.</p>
-            
-            <div class="template-grid">
-                <div class="folder-card" onclick="openTemplateModal('LIM_WALKS', 'LIM WALKS')">
-                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
-                    <span class="folder-label">LIM<br>WALKS</span>
-                </div>
-                <div class="folder-card" onclick="openTemplateModal('SPEEDER_WALKS', 'SPEEDER WALKS')">
-                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
-                    <span class="folder-label">SPEEDER<br>WALKS</span>
-                </div>
-                <div class="folder-card" onclick="openTemplateModal('POWER_RAIL', 'POWER RAIL INSPECTION')">
-                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
-                    <span class="folder-label">POWER RAIL<br>INSPECTION</span>
-                </div>
-                <div class="folder-card" onclick="openTemplateModal('SWITCH', 'SWITCH INSPECTION')">
-                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
-                    <span class="folder-label">SWITCH<br>INSPECTION</span>
-                </div>
-            </div>
+        <div id="empty-workspace-state" style="flex:1; display:none; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:50px;">
+            <h3 style="color:var(--text-muted);">WORKSPACE EMPTY</h3>
+            <p style="color:var(--text-muted); font-size:14px;">Select sections from the menu above to begin.</p>
         </div>
     </div>
 
     <div class="command-bar collapsed" id="mainCommandBar">
-        <button class="command-btn" onclick="toggleCommandBar(event)" id="cmdToggleBtn" title="Menu">
-            <svg id="cmdToggleIcon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="9 18 15 12 9 6"></polyline>
-            </svg>
-        </button>
-        
-        <div class="command-items" id="cmdItems">
-            <div class="command-divider"></div>
-            
-            <div style="display:flex; align-items:center; padding: 0 5px 0 10px; height: 100%;">
-                <span style="font-size: 18px; font-weight:bold; color:var(--primary); margin-right:2px;">TS-</span>
-                <input type="tel" id="pillSearchInput" placeholder="(SEARCH)" onkeypress="if(event.key === 'Enter') searchTSFromPill()" onfocus="toggleHelp(false); toggleQuickAddModal(false); closeCloneModal();">
-            </div>
-            <button class="command-btn" onclick="searchTSFromPill()" title="Search" style="width: 40px;">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="pointer-events: none;">
-                    <circle cx="11" cy="11" r="8"></circle>
-                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                </svg>
-            </button>
-            <div class="command-divider"></div>
-            
-            <div id="quickAddGroup" style="display: none; height: 100%; align-items: center;">
-                <button class="command-btn" id="quickAddBtn" onclick="toggleQuickAddModal(event)" title="Add Route">
-                    <span style="font-size: 28px; font-weight: bold; transform: translateY(-2px); pointer-events: none;">+</span>
-                </button>
-                <div class="command-divider"></div>
-            </div>
-            
-            <button class="command-btn" id="dynamicSaveLoadBtn" title="Command Action"></button>
-            <div class="command-divider"></div>
-            
-            <button class="command-btn" onclick="togglePageScroll()" title="Scroll Page">
-                <svg id="scrollToggleIcon" data-dir="down" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="pointer-events: none; transition: transform 0.3s ease; transform: rotate(180deg);">
-                    <polyline points="18 15 12 9 6 15"></polyline>
-                </svg>
-            </button>
-            <div class="command-divider"></div>
-
-            <button class="command-btn" onclick="toggleHelp(true)" title="Help">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="pointer-events: none;">
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
-                    <line x1="12" y1="17" x2="12.01" y2="17"></line>
-                </svg>
-            </button>
-        </div>
-    </div>
-
-    <div class="quick-add-modal" id="quickAddModal">
-        <h4>ADD ROUTE TO: <span id="quick-add-title" style="color: var(--primary);"></span></h4>
-        <div id="quick-add-checklist" class="checkbox-list">
-            <div style="color: var(--text-muted); text-align: center; font-style: italic;">AWAITING INPUT...</div>
-        </div>
-        <div style="display: flex; gap: 8px;">
-            <button class="btn-primary" style="flex: 1; padding: 10px;" onclick="generateSegments()">ADD SELECTED</button>
-            <button class="btn-outline" style="flex: 1; padding: 10px;" onclick="toggleQuickAddModal(false)">CANCEL</button>
-        </div>
-        <div style="display: flex; gap: 8px; margin-top: 5px;">
-            <button class="btn-danger" style="flex: 1; padding: 10px;" onclick="undoLastLoad()">↺ UNDO BATCH</button>
-        </div>
-    </div>
-
-    <div class="quick-add-modal" id="insertModal">
-        <h4>SPLICE SWITCH AFTER TS-<span id="insert-target-ts" style="color: var(--primary);"></span></h4>
-        <select id="insert-route-select" style="width: 100%; margin-bottom: 5px;">
-            <option value="">AWAITING INPUT...</option>
-        </select>
-        <div style="display: flex; gap: 8px; margin-top: 10px;">
-            <button class="btn-primary" style="flex: 1; padding: 10px;" onclick="executeInsert()">INSERT</button>
-            <button class="btn-outline" style="flex: 1; padding: 10px;" onclick="closeInsertModal()">CANCEL</button>
-        </div>
-    </div>
-
-    <div class="quick-add-modal" id="cloneModal">
-        <h4>CLONE DEFECT TO TS:</h4>
-        <div class="search-input-wrapper" style="margin-bottom: 10px;">
-            <span class="search-prefix">TS-</span>
-            <input type="tel" id="cloneTsInput" placeholder="END TS NUMBER..." onkeypress="if(event.key === 'Enter') executeClone()">
-        </div>
-        <div style="display: flex; gap: 8px;">
-            <button class="btn-primary" style="flex: 1; padding: 10px; background-color: #0A84FF; border-color: #0A84FF;" onclick="executeClone()">CLONE</button>
-            <button class="btn-outline" style="flex: 1; padding: 10px;" onclick="closeCloneModal()">CANCEL</button>
-        </div>
-    </div>
-
-    <div class="system-modal-overlay" id="templateModalOverlay">
-        <div class="system-modal">
-            <div class="gallery-header">
-                <h3 id="template-modal-title">LOAD TEMPLATE</h3>
-                <button class="menu-toggle-btn" onclick="closeTemplateModal()" style="width: 32px; height: 32px; border-color: transparent;">✖</button>
-            </div>
-            <div style="padding: 20px;">
-                <p style="color: var(--text-muted); margin: 0 0 15px 0; font-size: 14px; line-height: 1.5;">Select a pre-built track layout from this category.</p>
-                <select id="template-select" style="width: 100%; margin-bottom: 15px; border-radius: 4px !important;">
-                    <option value="">SELECT TEMPLATE...</option>
-                </select>
-                <button class="btn-primary" id="executeTemplateBtn" style="width: 100%; padding: 12px; border-radius: 4px !important;" onclick="loadSelectedTemplate()">DOWNLOAD & LOAD</button>
-            </div>
-        </div>
-    </div>
-
-    <div class="system-modal-overlay" id="systemModalOverlay">
-        <div class="system-modal">
-            <div class="system-modal-title" id="systemModalTitle">SYSTEM ALERT</div>
-            <div class="system-modal-message" id="systemModalMessage">Message goes here</div>
-            <div class="system-modal-btn-group" id="systemModalBtnGroup">
-                <button class="btn-primary" style="width: 100%;" onclick="closeSystemModal()">ACKNOWLEDGE</button>
-            </div>
-        </div>
-    </div>
-
-    <div class="system-modal-overlay" id="galleryModalOverlay">
-        <div class="gallery-modal">
-            <div class="gallery-header">
-                <h3 id="galleryTitle">ATTACHED PHOTOS</h3>
-                <button class="menu-toggle-btn" onclick="closeGallery()" style="width: 32px; height: 32px;">
-                    <span class="menu-toggle-icon" style="font-size: 14px;">✖</span>
-                </button>
-            </div>
-            <div class="gallery-grid" id="galleryGrid"></div>
+        <button class="command-btn" onclick="toggleCommandBar(event)">💊</button>
+        <div style="display:flex; align-items:center; width:100%; justify-content:space-evenly;">
+            <div style="display:flex; align-items:center;"><span style="color:var(--primary); font-weight:bold;">TS-</span><input type="tel" id="pillSearchInput" placeholder="####" style="width:60px; background:none; border:none; color:white; font-weight:bold;" onkeypress="if(event.key === 'Enter') searchTSFromPill()"></div>
+            <button class="command-btn" onclick="toggleQuickAddModal(true)">+</button>
+            <button class="command-btn" id="dynamicSaveLoadBtn">💾</button>
         </div>
     </div>
 
     <div class="export-overlay" id="exportProgressOverlay">
         <div class="export-box">
-            <div class="export-title" id="exportMainTitle">SYSTEM LOCKED</div>
-            <div class="progress-container">
-                <div class="progress-bar" id="exportProgressBar"></div>
-                <div class="progress-text" id="exportProgressText">0%</div>
-            </div>
-            <div class="export-status" id="exportStatusText">INITIALIZING...</div>
+            <div class="export-title" id="exportMainTitle">SYSTEM BUSY</div>
+            <div class="progress-container"><div class="progress-bar" id="exportProgressBar"></div><div class="progress-text" id="exportProgressText">0%</div></div>
+            <div class="export-status" id="exportStatusText">INITIALIZING ENGINE...</div>
         </div>
     </div>
 
+    <div class="quick-add-modal" id="quickAddModal">
+        <h4 id="quick-add-title">ADD ROUTE</h4>
+        <div id="quick-add-checklist" class="checkbox-list"></div>
+        <div style="display:flex; gap:8px;"><button class="btn-primary" onclick="generateSegments()">ADD</button><button class="btn-outline" onclick="toggleQuickAddModal(false)">CANCEL</button></div>
+    </div>
+
+    <div class="quick-add-modal" id="cloneModal">
+        <h4>CLONE DEFECT TO TS:</h4>
+        <input type="tel" id="cloneTsInput" placeholder="TARGET TS..." style="width:100%; padding:12px; margin-bottom:10px;">
+        <div style="display:flex; gap:8px;"><button class="btn-primary" onclick="executeClone()">CLONE</button><button class="btn-outline" onclick="closeCloneModal()">CANCEL</button></div>
+    </div>
+
+    <div class="system-modal-overlay" id="systemModalOverlay"><div class="system-modal"><div id="systemModalTitle" style="color:var(--warning); font-weight:bold; margin-bottom:15px;">NOTICE</div><div id="systemModalMessage" style="margin-bottom:20px;"></div><button class="btn-primary" onclick="closeSystemModal()" style="width:100%;">OK</button></div></div>
+    <div class="system-modal-overlay" id="galleryModalOverlay"><div class="gallery-modal" style="background:var(--bg-color); width:90%; max-height:80vh; display:flex; flex-direction:column; border:1px solid var(--primary);"><div style="padding:15px; border-bottom:1px solid var(--border-color); display:flex; justify-content:space-between;"><h3>PHOTOS</h3><button onclick="closeGallery()" style="background:none; border:none; color:white; font-size:20px;">✖</button></div><div id="galleryGrid" style="flex:1; overflow-y:auto; padding:15px; display:grid; gap:15px;"></div></div></div>
+
     <script>
-        let currentFileName = null;
-        let loadedRoutes = new Set();
-        let routeLoadHistory = []; 
-        let currentActiveArea = "";
-        let currentActiveDirection = "";
-        let isAutoScrolling = false;
-        let currentRowForGallery = null; 
-        let currentInsertTargetTS = null;
-        let currentRowToClone = null; 
-        let confirmResolve = null;
+        let currentFileName = null, loadedRoutes = new Set(), routeLoadHistory = [], currentActiveArea = "", currentActiveDirection = "";
+        let isAutoScrolling = false, currentRowForGallery = null, currentRowToClone = null;
 
         const delay = ms => new Promise(res => setTimeout(res, ms));
-        const iconLoad = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="pointer-events: none;"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>`;
-        const iconSave = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="pointer-events: none;"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>`;
 
         // ==========================================
-        // SECURE INDEXED-DB ENGINE
+        // INDEXED-DB ENGINE (Memory Hardened)
         // ==========================================
-        const dbName = "TracerImageDB";
-        let imageDB;
+        const initDB = () => new Promise((res, rej) => {
+            const req = indexedDB.open("TracerImageDB", 1);
+            req.onupgradeneeded = e => e.target.result.createObjectStore('images', {keyPath:'id'});
+            req.onsuccess = e => { window.imageDB = e.target.result; res(window.imageDB); };
+            req.onerror = rej;
+        });
+        initDB().catch(console.error);
 
-        const initDB = () => {
-            return new Promise((resolve, reject) => {
-                const request = indexedDB.open(dbName, 1);
-                request.onupgradeneeded = (e) => {
-                    const db = e.target.result;
-                    if (!db.objectStoreNames.contains('images')) db.createObjectStore('images', { keyPath: 'id' });
-                };
-                request.onsuccess = (e) => { imageDB = e.target.result; resolve(imageDB); };
-                request.onerror = (e) => reject(e.target.error);
-            });
+        const saveImageToDB = (data, w, h) => new Promise((res, rej) => {
+            const id = 'img_' + Date.now() + Math.random().toString(36).substr(2,5);
+            const tx = window.imageDB.transaction(['images'], 'readwrite');
+            tx.objectStore('images').add({id, data, w, h});
+            tx.oncomplete = () => res({id, w, h});
+            tx.onerror = rej;
+        });
+
+        const getImageFromDB = id => new Promise(res => {
+            const tx = window.imageDB.transaction(['images'], 'readonly');
+            const req = tx.objectStore('images').get(id);
+            req.onsuccess = e => res(e.target.result);
+            req.onerror = () => res(null);
+        });
+
+        const deleteImageFromDB = id => {
+            const tx = window.imageDB.transaction(['images'], 'readwrite');
+            tx.objectStore('images').delete(id);
         };
-        initDB().catch(err => console.error("IndexedDB Init Failed:", err));
-
-        const saveImageToDB = (base64Data, w, h) => {
-            return new Promise((resolve, reject) => {
-                if(!imageDB) return reject("DB offline");
-                const id = 'img_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
-                const transaction = imageDB.transaction(['images'], 'readwrite');
-                const store = transaction.objectStore('images');
-                const record = { id: id, data: base64Data, w: w, h: h };
-                store.add(record);
-                transaction.oncomplete = () => resolve({ id: id, w: w, h: h });
-                transaction.onerror = (e) => reject(e.target.error);
-            });
-        };
-
-        const getImageFromDB = (id) => {
-            return new Promise((resolve, reject) => {
-                if(!imageDB) return resolve(null);
-                const transaction = imageDB.transaction(['images'], 'readonly');
-                const store = transaction.objectStore('images');
-                const request = store.get(id);
-                request.onsuccess = (e) => resolve(e.target.result);
-                request.onerror = (e) => reject(e.target.error);
-            });
-        };
-
-        const deleteImageFromDB = (id) => {
-            if(!imageDB) return;
-            const transaction = imageDB.transaction(['images'], 'readwrite');
-            transaction.objectStore('images').delete(id);
-        };
-
-        function cleanUpRowImages(row) {
-            if(!row) return;
-            const images = JSON.parse(row.dataset.images || "[]");
-            images.forEach(img => deleteImageFromDB(img.id));
-        }
 
         // ==========================================
-        // PROGRESS LOCK UI CONTROLS
+        // UI PROGRESS & NON-BLOCKING CORE
         // ==========================================
-        function updateExportProgress(percent, text, title = "EXPORTING IN PROGRESS") {
+        async function updateProgress(percent, text, title = "SYSTEM PROCESSING") {
             const overlay = document.getElementById('exportProgressOverlay');
-            document.getElementById('exportMainTitle').textContent = title;
             overlay.style.display = 'flex';
+            document.getElementById('exportMainTitle').textContent = title;
             document.getElementById('exportProgressBar').style.width = percent + '%';
             document.getElementById('exportProgressText').textContent = percent + '%';
             document.getElementById('exportStatusText').textContent = text;
+            await delay(16); // UI BREATHING FRAME
         }
 
-        function closeExportProgress() {
-            document.getElementById('exportProgressOverlay').style.display = 'none';
-        }
+        function closeProgress() { document.getElementById('exportProgressOverlay').style.display = 'none'; }
 
-        function toggleEmptyState() {
-            const emptyState = document.getElementById('empty-workspace-state');
-            const segmentsContainer = document.getElementById('segments-container');
-            if (emptyState && segmentsContainer) {
-                if (loadedRoutes.size === 0) {
-                    emptyState.style.display = 'flex';
-                    segmentsContainer.style.display = 'none';
-                } else {
-                    emptyState.style.display = 'none';
-                    segmentsContainer.style.display = 'flex';
-                }
-            }
-        }
-
-        function openTemplateModal(categoryKey, categoryName) {
-            document.getElementById('template-modal-title').textContent = categoryName;
-            const select = document.getElementById('template-select');
-            select.innerHTML = '<option value="">SELECT TEMPLATE...</option>';
-            if(typeof templateLibrary !== 'undefined' && templateLibrary[categoryKey]) {
-                templateLibrary[categoryKey].forEach(tpl => {
-                    let opt = document.createElement('option');
-                    opt.value = tpl.url;
-                    opt.textContent = tpl.name;
-                    select.appendChild(opt);
-                });
-            } else {
-                let opt = document.createElement('option');
-                opt.value = "";
-                opt.textContent = "No templates found in config.";
-                select.appendChild(opt);
-            }
-            document.getElementById('templateModalOverlay').style.display = 'flex';
-            document.getElementById('mainCommandBar').classList.add('collapsed');
-        }
-
-        function closeTemplateModal() {
-            document.getElementById('templateModalOverlay').style.display = 'none';
-        }
-
-        async function loadSelectedTemplate() {
-            const select = document.getElementById('template-select');
-            const url = select.value;
-            if (!url) { showSystemAlert("Please select a template first.", "NO SELECTION", true); return; }
+        // ==========================================
+        // EXPORT ENGINE (GHOST-DATA SAFE)
+        // ==========================================
+        async function exportData() {
+            const cards = document.querySelectorAll('.segment-card');
+            if (!cards.length) return;
             
-            closeTemplateModal();
-            updateExportProgress(10, "DOWNLOADING TEMPLATE...", "LOADING...");
-
             try {
-                const response = await fetch(url + '?t=' + new Date().getTime());
-                if (!response.ok) throw new Error('Network response was not ok');
-                const data = await response.json();
-                const fileName = url.split('/').pop();
-                await injectProjectData(data, fileName);
-            } catch (err) {
-                console.error("Fetch error:", err);
-                closeExportProgress();
-                showSystemAlert('Failed to load template. Ensure you have an internet connection and the file exists in the correct GitHub folder.', 'DOWNLOAD FAILED', true);
-            } 
-        }
+                await updateProgress(5, "INITIALIZING EXCEL...", "EXPORTING DATA");
+                const workbook = new ExcelJS.Workbook();
+                const ws = workbook.addWorksheet('Defects');
+                ws.columns = [
+                    {header:'Area',key:'area',width:15},{header:'Route',key:'route',width:20},
+                    {header:'TS',key:'ts',width:10},{header:'Notes',key:'notes',width:30},
+                    {header:'Component',key:'comp',width:20},{header:'Defect',key:'def',width:20}
+                ];
+                
+                let pdfJobs = [], hasData = false, total = cards.length;
 
-        let currentHelpZoom = 1;
-        function zoomHelpModal(step) {
-            currentHelpZoom = Math.max(0.8, Math.min(3.0, currentHelpZoom + step));
-            const helpBody = document.getElementById('helpBodyContent');
-            if ('zoom' in helpBody.style) { helpBody.style.zoom = currentHelpZoom; } 
-            else { helpBody.style.transform = `scale(${currentHelpZoom})`; helpBody.style.transformOrigin = 'top left'; helpBody.style.width = `${100 / currentHelpZoom}%`; }
-        }
+                for(let i=0; i<total; i++) {
+                    const card = cards[i];
+                    const ts = `TS-${card.dataset.segment}`;
+                    const notes = card.querySelector('.segment-notes').value;
+                    const rows = card.querySelectorAll('.defect-row');
+                    
+                    await updateProgress(5 + Math.round((i/total)*25), `SCRAPING TS-${card.dataset.segment}...`);
 
-        let initialPinchDistance = null, initialZoomState = 1;
-        const helpBodyContent = document.getElementById('helpBodyContent');
-        helpBodyContent.addEventListener('touchstart', (e) => { if (e.touches.length === 2) { initialPinchDistance = Math.hypot(e.touches[0].pageX - e.touches[1].pageX, e.touches[0].pageY - e.touches[1].pageY); initialZoomState = currentHelpZoom; } }, {passive: true});
-        helpBodyContent.addEventListener('touchmove', (e) => {
-            if (e.touches.length === 2 && initialPinchDistance) {
-                const scale = Math.hypot(e.touches[0].pageX - e.touches[1].pageX, e.touches[0].pageY - e.touches[1].pageY) / initialPinchDistance;
-                currentHelpZoom = Math.max(0.8, Math.min(3.0, initialZoomState * scale));
-                if ('zoom' in helpBodyContent.style) { helpBodyContent.style.zoom = currentHelpZoom; } 
-                else { helpBodyContent.style.transform = `scale(${currentHelpZoom})`; helpBodyContent.style.transformOrigin = 'top left'; helpBodyContent.style.width = `${100 / currentHelpZoom}%`; }
+                    rows.forEach(row => {
+                        const isC = row.dataset.isCustom === "true";
+                        const comp = isC ? row.querySelector('.custom-comp').value : row.querySelector('.component-select').value;
+                        const def = isC ? row.querySelector('.custom-def').value : row.querySelector('.defect-select').value;
+                        const refs = JSON.parse(row.dataset.images || "[]");
+                        
+                        if(comp || def || refs.length > 0) {
+                            hasData = true;
+                            ws.addRow({area:card.dataset.areaName, route:card.dataset.routeName, ts, notes, comp, def});
+                            if(refs.length > 0) pdfJobs.push({ts, area:card.dataset.areaName, route:card.dataset.routeName, comp, def, refs, notes});
+                        }
+                    });
+                    if (i % 5 === 0) await delay(16); 
+                }
+
+                if(!hasData) { closeProgress(); showSystemAlert("No data found to export."); return; }
+
+                await updateProgress(35, "GENERATING EXCEL BLOB...", "EXPORTING DATA");
+                const buffer = await workbook.xlsx.writeBuffer();
+                triggerDownload(new Blob([buffer]), `REPORT_${Date.now()}.xlsx`);
+
+                if(pdfJobs.length > 0) {
+                    for(let j=0; j<pdfJobs.length; j++) {
+                        const job = pdfJobs[j];
+                        await updateProgress(40 + Math.round((j/pdfJobs.length)*55), `BUILDING PDF ${j+1}/${pdfJobs.length}: ${job.ts}...`);
+                        
+                        const imgs = [];
+                        for(let r of job.refs) { 
+                            if (r.id) {
+                                // Modern DB Fetch
+                                const d = await getImageFromDB(r.id); 
+                                if(d && d.data) imgs.push(d); 
+                            } else if (r.img) {
+                                // Ghost-Data Legacy Support
+                                imgs.push({ data: r.img, w: r.w || 1200, h: r.h || 1200 });
+                            }
+                        }
+                        
+                        if (imgs.length === 0) {
+                            console.warn(`No valid images found for ${job.ts}. Skipping PDF.`);
+                            continue;
+                        }
+                        
+                        const doc = await generatePDFBlob(job, imgs);
+                        const safeComp = (job.comp || 'UNKNOWN').toString().replace(/\W/g,'_');
+                        triggerDownload(doc, `${job.ts}_${safeComp}.pdf`);
+                        await delay(300); 
+                    }
+                }
+
+                await updateProgress(100, "EXPORT COMPLETE!", "SYSTEM READY");
+                setTimeout(closeProgress, 1000);
+
+            } catch (error) {
+                console.error("Export Crash:", error);
+                closeProgress();
+                showSystemAlert("Export failed: " + error.message, "CRITICAL ERROR", true);
             }
-        }, {passive: true});
-        helpBodyContent.addEventListener('touchend', (e) => { if (e.touches.length < 2) initialPinchDistance = null; });
-
-        let isPageScrolling = false;
-        function togglePageScroll() {
-            const btnIcon = document.getElementById('scrollToggleIcon');
-            const dir = btnIcon.dataset.dir || 'down'; 
-            const maxScroll = Math.max(document.body.scrollHeight, document.body.offsetHeight, document.documentElement.clientHeight, document.documentElement.scrollHeight, document.documentElement.offsetHeight) - window.innerHeight;
-            if (dir === 'up') doSmoothScroll(0, 800); else doSmoothScroll(maxScroll, 800);
         }
 
-        function doSmoothScroll(targetY, duration) {
-            isPageScrolling = true;
-            const startY = window.scrollY; const diff = targetY - startY; let startTime = null;
-            function step(timestamp) {
-                if (!isPageScrolling) return; 
-                if (!startTime) startTime = timestamp;
-                const time = timestamp - startTime; let percent = Math.min(time / duration, 1);
-                percent = percent < 0.5 ? 2 * percent * percent : -1 + (4 - 2 * percent) * percent;
-                window.scrollTo(0, startY + diff * percent);
-                if (time < duration) requestAnimationFrame(step); else isPageScrolling = false;
+        async function generatePDFBlob(job, imgs) {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF({orientation: imgs[0].w > imgs[0].h ? 'l' : 'p', unit:'mm', format:'a4'});
+            
+            for(let i=0; i<imgs.length; i++) {
+                if(i > 0) doc.addPage('a4', imgs[i].w > imgs[i].h ? 'l' : 'p');
+                const pW = doc.internal.pageSize.getWidth(), pH = doc.internal.pageSize.getHeight();
+                const r = imgs[i].w / imgs[i].h, pr = (pW-20)/(pH-40);
+                let w, h;
+                if(r > pr) { w = pW-20; h = w/r; } else { h = pH-40; w = h*r; }
+                
+                doc.addImage(imgs[i].data, 'JPEG', (pW-w)/2, 10, w, h);
+                
+                const safeComp = job.comp || 'N/A';
+                const safeDef = job.def || 'N/A';
+                const safeRoute = job.route || 'UNKNOWN ROUTE';
+                const safeArea = job.area || '';
+                
+                doc.setFontSize(12); doc.text(`${job.ts} | ${safeComp} - ${safeDef}`, 10, pH-15);
+                doc.setFontSize(10); doc.text(`Loc: ${safeRoute} | ${safeArea}`, 10, pH-10);
+                
+                if (i % 2 === 0) await delay(16); 
             }
-            requestAnimationFrame(step);
-        }
-        ['touchstart', 'mousedown', 'wheel'].forEach(evt => { window.addEventListener(evt, () => { if (isPageScrolling) isPageScrolling = false; }, { passive: true }); });
-
-        window.addEventListener('scroll', () => {
-            const btnIcon = document.getElementById('scrollToggleIcon');
-            if (!btnIcon) return;
-            if (window.scrollY < 100) { btnIcon.style.transform = 'rotate(180deg)'; btnIcon.dataset.dir = 'down'; } 
-            else { btnIcon.style.transform = 'rotate(0deg)'; btnIcon.dataset.dir = 'up'; }
-        }, { passive: true });
-
-        function toggleCommandBar(e) {
-            if (e) e.stopPropagation();
-            const bar = document.getElementById('mainCommandBar');
-            if (bar.classList.contains('collapsed')) { bar.classList.remove('collapsed'); toggleHelp(false); closeCloneModal(); } 
-            else { bar.classList.add('collapsed'); toggleQuickAddModal(false); }
+            return doc.output('blob');
         }
 
-        function updateCommandBar() {
-            const btn = document.getElementById('dynamicSaveLoadBtn');
-            if (loadedRoutes.size === 0) { btn.innerHTML = iconLoad; btn.onclick = () => { document.getElementById('importFile').click(); }; } 
-            else { btn.innerHTML = iconSave; btn.onclick = () => saveProject(); }
-        }
+        function triggerDownload(blob, name) { const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; a.click(); }
 
-        function toggleHelp(forceShow = null) {
-            const overlay = document.getElementById('helpOverlay');
-            const header = document.getElementById('stickyHeader');
-            const shouldShow = forceShow !== null ? forceShow : overlay.style.display === 'none';
-            if (shouldShow) {
-                overlay.style.top = `${header.offsetHeight}px`; overlay.style.height = `calc(100vh - ${header.offsetHeight}px - 85px)`; 
-                document.getElementById('helpBodyContent').innerHTML = systemInstructions + `<div id="sw-version-fetcher" style="text-align:center; padding-top:20px; color:var(--text-muted); font-weight:bold; font-size:14px; letter-spacing:1px;">Checking App Version...</div>`;
-                fetch('sw.js').then(r => r.text()).then(text => {
-                    const match = text.match(/v?\d+\.\d+\.\d+/);
-                    const vDiv = document.getElementById('sw-version-fetcher');
-                    if (match && vDiv) { let v = match[0]; if (!v.startsWith('v')) v = 'v' + v; vDiv.textContent = 'TRACER ' + v; vDiv.style.color = 'var(--primary)'; } 
-                    else if (vDiv) { vDiv.textContent = 'VERSION UNKNOWN'; }
-                }).catch(() => { const vDiv = document.getElementById('sw-version-fetcher'); if (vDiv) vDiv.textContent = 'TRACER (OFFLINE CACHE)'; });
-                overlay.style.display = 'flex';
-                if (document.getElementById('collapsible-menu').classList.contains('expanded')) toggleMenu(true);
-                document.getElementById('mainCommandBar').classList.add('collapsed');
-                toggleQuickAddModal(false); closeCloneModal();
-            } else { overlay.style.display = 'none'; }
-        }
-
-        async function removeRouteFromMenu(e, routeKey, routeName) {
-            e.stopPropagation(); document.getElementById('stsShortcutMenu').style.display = 'none'; 
-            const proceed = await showSystemConfirm(`Are you sure you want to remove "${routeName}" from the workspace?`, "REMOVE ROUTE", "Yes", "Nope");
-            if (!proceed) return;
-
-            const cardsToRemove = document.querySelectorAll(`.segment-card[data-route-key="${routeKey}"]`);
-            cardsToRemove.forEach(card => {
-                card.querySelectorAll('.defect-row').forEach(row => cleanUpRowImages(row));
-                card.remove();
-            });
-            document.querySelectorAll(`.map-item[data-route-key="${routeKey}"]`).forEach(el => el.remove());
-            loadedRoutes.delete(routeKey);
-            routeLoadHistory = routeLoadHistory.map(batch => batch.filter(k => k !== routeKey)).filter(batch => batch.length > 0);
-
-            if (loadedRoutes.size === 0) {
-                document.getElementById('quickAddGroup').style.display = 'none';
-                currentActiveArea = ""; currentActiveDirection = "";
-                document.getElementById('active-area-display').style.display = 'none';
-                document.getElementById('stsDropdownBtn').style.display = 'none';
-                document.getElementById('active-route-display').innerHTML = 'AWAITING...';
-                toggleHelp(true); updateCommandBar(); document.getElementById('mainCommandBar').classList.add('collapsed');
-            } else { window.scrollBy(0, 1); window.scrollBy(0, -1); }
-            toggleEmptyState();
-        }
-
-        function openCloneModal(row) {
-            currentRowToClone = row; document.getElementById('cloneTsInput').value = ''; document.getElementById('cloneModal').style.display = 'flex';
-            toggleMenu(true); toggleQuickAddModal(false); toggleHelp(false); document.getElementById('mainCommandBar').classList.add('collapsed');
-            setTimeout(() => document.getElementById('cloneTsInput').focus(), 100);
-        }
-
-        function closeCloneModal() { document.getElementById('cloneModal').style.display = 'none'; currentRowToClone = null; }
-
+        // ==========================================
+        // FEATURE: GRANULAR CLONING
+        // ==========================================
         async function executeClone() {
             if (!currentRowToClone) return;
             const targetTS = document.getElementById('cloneTsInput').value.trim();
-            document.getElementById('cloneTsInput').blur(); 
             if (!targetTS) { closeCloneModal(); return; }
 
             const startCard = currentRowToClone.closest('.segment-card');
             const endCard = document.querySelector(`.segment-card[data-segment="${targetTS}"]`);
+            if (!endCard) { showSystemAlert(`TS-${targetTS} not found.`); return; }
 
-            if (!endCard) { showSystemAlert(`Cannot find TS-${targetTS} in the current workspace. Please ensure it is loaded.`, "CLONE ERROR", true); return; }
+            closeCloneModal();
+            await updateProgress(10, "INITIALIZING CLONE...", "CLONING DEFECT");
 
             const isCustom = currentRowToClone.dataset.isCustom === "true";
             const comp = isCustom ? currentRowToClone.querySelector('.custom-comp').value : currentRowToClone.querySelector('.component-select').value;
             const def = isCustom ? currentRowToClone.querySelector('.custom-def').value : currentRowToClone.querySelector('.defect-select').value;
             const originalRefs = JSON.parse(currentRowToClone.dataset.images || "[]");
 
-            if (!comp && !def && originalRefs.length === 0) {
-                showSystemAlert("This row is entirely empty. There is no data to clone.", "CLONE ERROR", true);
-                closeCloneModal(); return;
-            }
-
-            closeCloneModal();
-            updateExportProgress(10, "CLONING DATABASE ENTRIES...", "CLONING SYSTEM");
-
             const allCards = Array.from(document.querySelectorAll('.segment-card'));
-            const startIdx = allCards.indexOf(startCard);
-            const endIdx = allCards.indexOf(endCard);
-            const minIdx = Math.min(startIdx, endIdx);
-            const maxIdx = Math.max(startIdx, endIdx);
+            const sIdx = allCards.indexOf(startCard);
+            const eIdx = allCards.indexOf(endCard);
+            const min = Math.min(sIdx, eIdx);
+            const max = Math.max(sIdx, eIdx);
             
-            let clonedCount = 0;
-            let totalSteps = (maxIdx - minIdx);
+            let count = 0, total = (max - min);
 
-            for (let i = minIdx; i <= maxIdx; i++) {
-                if (i === startIdx) continue; 
-                updateExportProgress(10 + Math.round((clonedCount / totalSteps) * 80), `CLONING TO CARD ${i - minIdx + 1}/${totalSteps}...`, "CLONING SYSTEM");
-
-                const targetCard = allCards[i];
-                const areaName = targetCard.getAttribute('data-area-name');
-                const defectList = targetCard.querySelector('.defect-list');
-                const existingRows = defectList.querySelectorAll('.defect-row');
+            for (let i = min; i <= max; i++) {
+                if (i === sIdx) continue;
+                const target = allCards[i];
+                const area = target.dataset.areaName;
+                const list = target.querySelector('.defect-list');
                 
-                if (existingRows.length === 1) {
-                    const r = existingRows[0];
-                    const rIsCustom = r.dataset.isCustom === "true";
-                    const rComp = rIsCustom ? r.querySelector('.custom-comp').value : r.querySelector('.component-select').value;
-                    const rDef = rIsCustom ? r.querySelector('.custom-def').value : r.querySelector('.defect-select').value;
-                    const rImgs = JSON.parse(r.dataset.images || "[]");
-                    if (!rComp && !rDef && rImgs.length === 0) {
-                        cleanUpRowImages(r); r.remove();
-                    }
-                }
+                await updateProgress(10 + Math.round((count/total)*80), `CLONING TO TS-${target.dataset.segment}...`);
 
-                // Deep copy images in DB for clones
                 const newRefs = [];
                 for(let ref of originalRefs) {
-                    const dbImg = await getImageFromDB(ref.id);
-                    if(dbImg) {
-                        const newRef = await saveImageToDB(dbImg.data, dbImg.w, dbImg.h);
+                    if (ref.id) {
+                        const dbImg = await getImageFromDB(ref.id);
+                        if(dbImg) {
+                            const newRef = await saveImageToDB(dbImg.data, dbImg.w, dbImg.h);
+                            newRefs.push(newRef);
+                        }
+                    } else if (ref.img) {
+                        // Support cloning ghost data by converting it into the new DB
+                        const newRef = await saveImageToDB(ref.img, ref.w || 1200, ref.h || 1200);
                         newRefs.push(newRef);
                     }
                 }
-
-                addDefectRow(defectList, { isCustom, comp, def, images: newRefs }, areaName);
-                checkSegmentData(targetCard);
-                clonedCount++;
+                addDefectRow(list, { isCustom, comp, def, images: newRefs }, area);
+                checkSegmentData(target);
+                count++;
             }
 
-            updateExportProgress(100, "CLONE COMPLETE!", "CLONING SYSTEM");
-            setTimeout(() => {
-                closeExportProgress();
-                showSystemAlert(`Successfully cloned defect payload to ${clonedCount} track sections.`, "CLONE COMPLETE");
-            }, 800);
+            await updateProgress(100, "CLONE COMPLETE!");
+            setTimeout(closeProgress, 800);
         }
 
-        function showSystemAlert(message, title = "SYSTEM NOTICE", isDanger = false) {
-            document.getElementById('systemModalTitle').textContent = title;
-            document.getElementById('systemModalTitle').style.color = isDanger ? "var(--danger)" : "var(--primary)";
-            document.getElementById('systemModalTitle').style.borderColor = isDanger ? "var(--danger)" : "var(--primary)";
-            document.getElementById('systemModalMessage').textContent = message;
-            document.getElementById('systemModalBtnGroup').innerHTML = `<button class="btn-primary" style="width: 100%;" onclick="closeSystemModal()">ACKNOWLEDGE</button>`;
-            document.getElementById('systemModalOverlay').style.display = 'flex';
+        // ==========================================
+        // DYNAMIC UI COMPONENT FACTORY
+        // ==========================================
+        function createSegmentCard(num, key, text, dir, color, area) {
+            const card = document.createElement('div');
+            card.className = 'segment-card'; card.dataset.segment = num; card.dataset.routeName = text; card.dataset.areaName = area;
+            card.innerHTML = `<div class="segment-header"><h3>TS-${num}</h3><div><span style="font-size:10px; opacity:0.6; margin-right:5px;">${area}</span><span style="background:var(--primary-dark); padding:2px 6px; font-size:10px;">${text}</span></div></div><textarea class="segment-notes" placeholder="NOTES..."></textarea><div class="defect-list"></div><button class="add-defect-btn" style="width:100%; margin-top:10px; background:none; border:1px dashed var(--text-muted); color:var(--text-muted);" onclick="addDefectRow(this.previousElementSibling, null, '${area}')">+ ROW</button>`;
+            addDefectRow(card.querySelector('.defect-list'), null, area);
+            return card;
         }
 
-        function showSystemConfirm(message, title = "SYSTEM WARNING", confirmText = "PROCEED", cancelText = "CANCEL") {
-            return new Promise((resolve) => {
-                document.getElementById('systemModalTitle').textContent = title;
-                document.getElementById('systemModalTitle').style.color = "var(--warning)";
-                document.getElementById('systemModalTitle').style.borderColor = "var(--warning)";
-                document.getElementById('systemModalMessage').textContent = message;
-                document.getElementById('systemModalBtnGroup').innerHTML = `<button class="btn-danger" style="flex: 1;" onclick="resolveSystemConfirm(true)">${confirmText}</button><button class="btn-outline" style="flex: 1;" onclick="resolveSystemConfirm(false)">${cancelText}</button>`;
-                confirmResolve = resolve;
-                document.getElementById('systemModalOverlay').style.display = 'flex';
-            });
+        function addDefectRow(container, prefill, area) {
+            const row = document.createElement('div'); row.className = 'defect-row'; row.dataset.images = "[]"; row.dataset.isCustom = "false";
+            const map = (window.globalDefectMaps && window.globalDefectMaps[area]) || {};
+            
+            const compSel = document.createElement('select'); compSel.className = 'component-select';
+            ['SELECT COMP', ...Object.keys(map), 'CUSTOM ENTRY...'].forEach(v => { const o = document.createElement('option'); o.value = v==='SELECT COMP'?'':v; o.textContent = v; compSel.appendChild(o); });
+            
+            const defSel = document.createElement('select'); defSel.className = 'defect-select'; defSel.disabled = true;
+            const customComp = document.createElement('input'); customComp.className='custom-comp'; customComp.placeholder='COMP...'; customComp.style.display='none';
+            const customDef = document.createElement('input'); customDef.className='custom-def'; customDef.placeholder='DEFECT...'; customDef.style.display='none';
+            
+            const revertBtn = document.createElement('button'); revertBtn.textContent='↺'; revertBtn.style.cssText='display:none; background:none; color:var(--warning); border:1px solid var(--warning); width:40px;';
+            
+            const photoWrap = document.createElement('div'); photoWrap.className = 'photo-wrapper';
+            const cam = document.createElement('label'); cam.className = 'camera-btn'; cam.textContent = '📷';
+            const file = document.createElement('input'); file.type = 'file'; file.accept = 'image/*'; file.capture = 'environment'; file.style.display = 'none';
+            const fid = 'f-'+Math.random(); cam.htmlFor = fid; file.id = fid;
+            
+            const badge = document.createElement('div'); badge.className = 'status-badge-container';
+            const clone = document.createElement('button'); clone.textContent='⇊'; clone.style.cssText='background:none; border:1px solid #0A84FF; color:#0A84FF; width:40px;';
+            const del = document.createElement('button'); del.className='delete-btn'; del.textContent='✖'; del.style.cssText='background:none; border:1px solid var(--danger); color:var(--danger); width:40px;';
+
+            revertBtn.onclick = () => { row.dataset.isCustom="false"; compSel.style.display=''; defSel.style.display=''; customComp.style.display='none'; customDef.style.display='none'; revertBtn.style.display='none'; compSel.value=''; };
+            del.onclick = () => { 
+                JSON.parse(row.dataset.images || "[]").forEach(r => { if(r.id) deleteImageFromDB(r.id); }); 
+                row.remove(); 
+                checkSegmentData(container.closest('.segment-card')); 
+            };
+            clone.onclick = () => openCloneModal(row);
+
+            file.onchange = async () => {
+                if(!file.files[0]) return;
+                cam.textContent = '⏳';
+                const r = new FileReader();
+                r.onload = e => {
+                    const img = new Image();
+                    img.onload = async () => {
+                        const cvs = document.createElement('canvas');
+                        const M = 1200; let w=img.width, h=img.height;
+                        if(w>h) { if(w>M){h*=M/w; w=M;}} else {if(h>M){w*=M/h; h=M;}}
+                        cvs.width=w; cvs.height=h;
+                        const ctx=cvs.getContext('2d'); ctx.fillStyle="#fff"; ctx.fillRect(0,0,w,h); ctx.drawImage(img,0,0,w,h);
+                        const ref = await saveImageToDB(cvs.toDataURL('image/jpeg', 0.85), w, h);
+                        const refs = JSON.parse(row.dataset.images || "[]"); refs.push(ref); row.dataset.images=JSON.stringify(refs);
+                        updatePhotoUI(row, cam, badge); checkSegmentData(container.closest('.segment-card'));
+                    };
+                    img.src = e.target.result;
+                };
+                r.readAsDataURL(file.files[0]);
+            };
+
+            compSel.onchange = () => {
+                if(compSel.value==='CUSTOM ENTRY...') { row.dataset.isCustom="true"; compSel.style.display='none'; defSel.style.display='none'; customComp.style.display=''; customDef.style.display=''; revertBtn.style.display=''; }
+                else {
+                    defSel.innerHTML=''; defSel.disabled = !compSel.value;
+                    if(map[compSel.value]) map[compSel.value].forEach(d => { const o=document.createElement('option'); o.value=d; o.textContent=d; defSel.appendChild(o); });
+                }
+                checkSegmentData(container.closest('.segment-card'));
+            };
+
+            photoWrap.append(cam, file, badge, clone, del);
+            row.append(compSel, defSel, customComp, customDef, revertBtn, photoWrap);
+            container.appendChild(row);
+
+            if(prefill) {
+                if(prefill.isCustom) { compSel.value='CUSTOM ENTRY...'; compSel.onchange(); customComp.value=prefill.comp; customDef.value=prefill.def; }
+                else if(prefill.comp) { compSel.value=prefill.comp; compSel.onchange(); defSel.value=prefill.def; }
+                if(prefill.images) { row.dataset.images=JSON.stringify(prefill.images); updatePhotoUI(row, cam, badge); }
+            }
         }
 
-        function resolveSystemConfirm(result) { closeSystemModal(); if (confirmResolve) confirmResolve(result); }
-        function closeSystemModal() { document.getElementById('systemModalOverlay').style.display = 'none'; }
-
-        window.addEventListener('beforeunload', function (e) { const cards = document.querySelectorAll('.segment-card'); if (cards.length > 0) { e.preventDefault(); e.returnValue = 'Data loss imminent. Are you sure you want to cancel?'; } });
-
-        window.history.pushState({ isAppOpen: true }, "", "");
-        window.addEventListener('popstate', function(event) {
-            const cards = document.querySelectorAll('.segment-card');
-            if (cards.length > 0) {
-                window.history.pushState({ isAppOpen: true }, "", "");
-                showSystemConfirm("WARNING: Using the system back button will exit the app and delete unsaved data.\n\nAre you sure you want to exit?", "DATA LOSS IMMINENT").then(proceed => { if (proceed) window.history.go(-2); });
-            } else { window.history.back(); }
-        });
-
-        function updatePhotoUI(row, cameraBtn, badgeContainer) {
-            const images = JSON.parse(row.dataset.images || "[]");
-            if (images.length === 0) { cameraBtn.innerHTML = '📷 PHOTO'; cameraBtn.style.backgroundColor = 'var(--border-color)'; cameraBtn.style.color = 'var(--text-color)'; badgeContainer.innerHTML = ''; } 
-            else { cameraBtn.innerHTML = '➕ ADD'; cameraBtn.style.backgroundColor = 'var(--success)'; cameraBtn.style.color = '#fff'; badgeContainer.innerHTML = `<div class="photo-status-badge" onclick="openGallery(this.closest('.defect-row'))">${images.length} ATTACHED (VIEW)</div>`; }
+        function updatePhotoUI(row, cam, badge) {
+            const refs = JSON.parse(row.dataset.images || "[]");
+            cam.textContent = refs.length ? '➕' : '📷';
+            badge.innerHTML = refs.length ? `<div class="photo-status-badge" onclick="openGallery(this.closest('.defect-row'))">${refs.length} VIEW</div>` : '';
         }
+
+        // ==========================================
+        // SYSTEM CONTROLS & EVENT BUS
+        // ==========================================
+        function toggleMenu() { document.getElementById('collapsible-menu').classList.toggle('expanded'); }
+        function toggleCommandBar() { document.getElementById('mainCommandBar').classList.toggle('collapsed'); }
+        function openCloneModal(row) { currentRowToClone = row; document.getElementById('cloneTsInput').value=''; document.getElementById('cloneModal').style.display='flex'; }
+        function closeCloneModal() { document.getElementById('cloneModal').style.display='none'; }
+        function showSystemAlert(m, t="NOTICE", isDanger=false) { 
+            document.getElementById('systemModalMessage').textContent=m; 
+            document.getElementById('systemModalTitle').textContent=t;
+            document.getElementById('systemModalTitle').style.color=isDanger?'var(--danger)':'var(--warning)';
+            document.getElementById('systemModalOverlay').style.display='flex'; 
+        }
+        function closeSystemModal() { document.getElementById('systemModalOverlay').style.display='none'; }
 
         async function openGallery(row) {
-            currentRowForGallery = row;
-            const images = JSON.parse(row.dataset.images || "[]");
-            const grid = document.getElementById('galleryGrid');
-            grid.innerHTML = '<div style="text-align:center; padding:20px; color:var(--primary); font-weight:bold;">⏳ LOADING HIGHEST QUALITY...</div>';
-            document.getElementById('galleryModalOverlay').style.display = 'flex';
-
-            grid.innerHTML = ''; 
-            for(let i=0; i<images.length; i++) {
-                const imgRef = images[i];
-                const dbImg = await getImageFromDB(imgRef.id);
-                if(dbImg) {
-                    const item = document.createElement('div');
-                    item.className = 'gallery-item';
-                    const img = document.createElement('img');
-                    img.src = dbImg.data;
-                    const delBtn = document.createElement('button');
-                    delBtn.className = 'remove-img-btn';
-                    delBtn.innerHTML = 'REMOVE PIC';
-                    delBtn.onclick = () => removeImageFromGallery(i);
-                    item.appendChild(img); item.appendChild(delBtn); grid.appendChild(item);
+            const grid = document.getElementById('galleryGrid'); grid.innerHTML='⏳ LOADING...';
+            document.getElementById('galleryModalOverlay').style.display='flex';
+            const refs = JSON.parse(row.dataset.images || "[]");
+            grid.innerHTML='';
+            for(let r of refs) {
+                let imgData = null;
+                if (r.id) { const d = await getImageFromDB(r.id); if(d) imgData = d.data; }
+                else if (r.img) { imgData = r.img; } // Fallback for ghost data
+                
+                if(imgData) {
+                    const item = document.createElement('div'); item.style.position='relative';
+                    const i = document.createElement('img'); i.src=imgData; i.style.width='100%';
+                    const b = document.createElement('button'); b.textContent='REMOVE'; b.style.cssText='position:absolute; top:5px; right:5px; background:red; color:white; border:none; padding:5px;';
+                    b.onclick = () => { 
+                        if(r.id) deleteImageFromDB(r.id); 
+                        const newRefs = JSON.parse(row.dataset.images).filter(ref => ref.id !== r.id && ref.img !== r.img);
+                        row.dataset.images = JSON.stringify(newRefs);
+                        updatePhotoUI(row, row.querySelector('.camera-btn'), row.querySelector('.status-badge-container'));
+                        item.remove(); 
+                    };
+                    item.append(i, b); grid.append(item);
                 }
             }
-            if (images.length === 0) grid.innerHTML = '<div style="text-align:center; padding:20px; color:var(--text-muted);">NO PHOTOS ATTACHED</div>';
+        }
+        function closeGallery() { document.getElementById('galleryModalOverlay').style.display='none'; }
+
+        function checkSegmentData(card) {
+            const notes = card.querySelector('.segment-notes').value.trim();
+            let hasRows = false;
+            card.querySelectorAll('.defect-row').forEach(r => { 
+                const isC = r.dataset.isCustom==="true";
+                const c = isC ? r.querySelector('.custom-comp').value : r.querySelector('.component-select').value;
+                if(c || JSON.parse(r.dataset.images || "[]").length) hasRows = true;
+            });
+            const mapItem = document.querySelector(`.map-item[data-segment="${card.dataset.segment}"]`);
+            if(mapItem) mapItem.classList.toggle('has-data', !!(notes || hasRows));
         }
 
-        function removeImageFromGallery(indexToRemove) {
-            if (!currentRowForGallery) return;
-            let images = JSON.parse(currentRowForGallery.dataset.images || "[]");
-            const imgToRemove = images[indexToRemove];
-            if(imgToRemove) deleteImageFromDB(imgToRemove.id); 
+        async function generateSegments() {
+            const area = document.getElementById('general-area').value;
+            const dir = document.getElementById('page-direction').value;
+            const cbs = Array.from(document.querySelectorAll('#quick-add-checklist input:checked'));
+            if(!cbs.length) return;
+
+            await updateProgress(10, "BUILDING WORKSPACE...", "LOADING TRACK");
+            const container = document.getElementById('segments-container');
+            const map = document.getElementById('miniMap');
             
-            images.splice(indexToRemove, 1); 
-            currentRowForGallery.dataset.images = JSON.stringify(images); 
-            const wrapper = currentRowForGallery.querySelector('.photo-wrapper');
-            updatePhotoUI(currentRowForGallery, wrapper.querySelector('.camera-btn'), wrapper.querySelector('.status-badge-container'));
-            checkSegmentData(currentRowForGallery.closest('.segment-card'));
-
-            if (images.length === 0) closeGallery(); else openGallery(currentRowForGallery); 
-        }
-
-        function closeGallery() { document.getElementById('galleryModalOverlay').style.display = 'none'; currentRowForGallery = null; }
-
-        function changeTheme(themeName) { localStorage.setItem('appTheme', themeName); applySavedSettings(); }
-        function changeFontSize(sizeName) { localStorage.setItem('appFontSize', sizeName); applySavedSettings(); }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            document.getElementById('theme-selector').value = localStorage.getItem('appTheme') || 'tactical';
-            document.getElementById('font-selector').value = localStorage.getItem('appFontSize') || 'small';
-            const areaSelect = document.getElementById('general-area');
-            for (let area in window.globalDatabase) { let opt = document.createElement('option'); opt.value = area; opt.textContent = area; areaSelect.appendChild(opt); }
-            if (loadedRoutes.size === 0) toggleHelp(true);
-            updateCommandBar(); toggleEmptyState();
-        });
-
-        document.addEventListener('click', (e) => {
-            const menu = document.getElementById('collapsible-menu');
-            const fabModal = document.getElementById('quickAddModal');
-            const stsMenu = document.getElementById('stsShortcutMenu');
-            const insertModal = document.getElementById('insertModal');
-            const cloneModal = document.getElementById('cloneModal');
-            const menuBtn = document.getElementById('menuBtn');
-            const stsBtn = document.getElementById('stsDropdownBtn');
-            const helpOverlay = document.getElementById('helpOverlay');
-            const cmdBar = document.getElementById('mainCommandBar');
-
-            if (!menu.contains(e.target) && !menuBtn.contains(e.target) && menu.classList.contains('expanded')) toggleMenu(true);
-            if (stsMenu && stsBtn && !stsMenu.contains(e.target) && !stsBtn.contains(e.target) && stsMenu.style.display === 'flex') stsMenu.style.display = 'none';
-            if (insertModal && !insertModal.contains(e.target) && !e.target.closest('.map-item') && insertModal.style.display === 'flex') closeInsertModal();
-            if (cloneModal && !cloneModal.contains(e.target) && !e.target.closest('.clone-btn') && cloneModal.style.display === 'flex') closeCloneModal();
-            if (helpOverlay.style.display === 'flex' && e.target === helpOverlay) toggleHelp(false);
-            if (cmdBar && !cmdBar.classList.contains('collapsed') && !cmdBar.contains(e.target) && (!fabModal || !fabModal.contains(e.target))) { cmdBar.classList.add('collapsed'); toggleQuickAddModal(false); }
-        });
-
-        function toggleMenu(forceClose = false) {
-            const menu = document.getElementById('collapsible-menu');
-            const btn = document.getElementById('menuBtn');
-            if (forceClose || menu.classList.contains('expanded')) { menu.classList.remove('expanded'); menu.classList.add('collapsed'); btn.innerHTML = '<span class="menu-toggle-icon">&#9881;&#xFE0E;</span>'; } 
-            else { menu.classList.remove('collapsed'); menu.classList.add('expanded'); btn.innerHTML = '<span class="menu-toggle-icon">✖</span>'; document.getElementById('stsShortcutMenu').style.display = 'none'; closeCloneModal(); }
-        }
-
-        function searchTSFromPill() {
-            const input = document.getElementById('pillSearchInput');
-            const tsNumber = input.value.trim();
-            if(tsNumber) { input.blur(); searchTS(tsNumber); input.value = ''; document.getElementById('mainCommandBar').classList.add('collapsed'); }
-        }
-
-        function searchTS(passedTs = null) {
-            const tsNumber = passedTs;
-            if (!tsNumber) return;
-            const targetCard = document.querySelector(`.segment-card[data-segment="${tsNumber}"]`);
-            if (targetCard) {
-                isAutoScrolling = true; scrollToCard(targetCard);
-                const targetMapItem = document.querySelector(`.map-item[data-map-segment="${tsNumber}"]`);
-                if (targetMapItem) {
-                    const mapContainer = document.getElementById('miniMap');
-                    const containerRect = mapContainer.getBoundingClientRect(); const itemRect = targetMapItem.getBoundingClientRect();
-                    mapContainer.scrollTo({ top: mapContainer.scrollTop + (itemRect.top - containerRect.top) - (containerRect.height / 2) + (itemRect.height / 2), behavior: 'smooth' });
-                }
-                setTimeout(() => { targetCard.classList.add('search-highlight'); setTimeout(() => { targetCard.classList.remove('search-highlight'); }, 1200); }, 500);
-                setTimeout(() => { isAutoScrolling = false; }, 800);
-            } else { showSystemAlert(`Could not find TS-${tsNumber}.\nSub to sub section may have not been loaded.`, "TS MISSING", true); }
-        }
-
-        function toggleStsMenu(e) {
-            if (e) e.stopPropagation();
-            const menu = document.getElementById('stsShortcutMenu');
-            if (menu.style.display === 'flex') { menu.style.display = 'none'; } 
-            else { populateStsMenu(); menu.style.display = 'flex'; toggleMenu(true); toggleQuickAddModal(false); closeCloneModal(); }
-        }
-
-        function populateStsMenu() {
-            const menu = document.getElementById('stsShortcutMenu');
-            menu.innerHTML = '';
-            const cards = document.querySelectorAll('.segment-card');
-            if (cards.length === 0) { menu.innerHTML = '<div style="padding:10px; color:var(--text-muted); font-size:var(--base-font);">NO SECTIONS LOADED</div>'; return; }
-            const orderedRoutes = [];
-            cards.forEach(card => {
-                const key = card.getAttribute('data-route-key'); const name = card.getAttribute('data-route-name'); const color = card.getAttribute('data-color') || 'var(--primary)';
-                if (!orderedRoutes.find(r => r.key === key)) orderedRoutes.push({ key, name, color });
-            });
-            orderedRoutes.forEach((route, index) => {
-                const row = document.createElement('div');
-                row.style.display = 'flex'; row.style.alignItems = 'stretch'; row.style.background = 'var(--card-bg)'; row.style.border = '1px solid var(--border-color)'; row.style.marginBottom = '4px'; row.style.borderRadius = 'var(--border-radius)'; row.style.overflow = 'hidden';
-                const btn = document.createElement('button');
-                btn.className = 'sts-menu-item'; btn.style.flex = '1'; btn.style.border = 'none'; btn.style.margin = '0'; btn.style.display = 'flex'; btn.style.alignItems = 'center';
-                btn.innerHTML = `<span style="display:inline-block; width:12px; height:12px; border-radius:50%; background-color:${route.color}; margin-right:10px; flex-shrink:0; border:1px solid rgba(255,255,255,0.2);"></span><span style="color:var(--primary); margin-right:8px;">${index + 1}.</span><span>${route.name}</span>`;
-                btn.onclick = () => jumpToRoute(route.key);
-                const delBtn = document.createElement('button');
-                delBtn.style.background = 'transparent'; delBtn.style.border = 'none'; delBtn.style.borderLeft = '1px solid var(--border-color)'; delBtn.style.color = 'var(--text-muted)'; delBtn.style.width = '56px'; delBtn.style.cursor = 'pointer'; delBtn.style.display = 'flex'; delBtn.style.alignItems = 'center'; delBtn.style.justifyContent = 'center';
-                delBtn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`;
-                delBtn.onmousedown = () => { delBtn.style.color = 'var(--danger)'; delBtn.style.background = 'rgba(211,47,47,0.1)'; }; delBtn.onmouseup = () => { delBtn.style.color = 'var(--text-muted)'; delBtn.style.background = 'transparent'; }; delBtn.onmouseleave = () => { delBtn.style.color = 'var(--text-muted)'; delBtn.style.background = 'transparent'; };
-                delBtn.onclick = (e) => removeRouteFromMenu(e, route.key, route.name);
-                row.appendChild(btn); row.appendChild(delBtn); menu.appendChild(row);
-            });
-        }
-
-        function jumpToRoute(routeKey) {
-            isAutoScrolling = true; 
-            const firstCard = document.querySelector(`.segment-card[data-route-key="${routeKey}"]`);
-            if (firstCard) scrollToCard(firstCard);
-            const firstMapItem = document.querySelector(`.map-item[data-route-key="${routeKey}"]`);
-            if (firstMapItem) {
-                const mapContainer = document.getElementById('miniMap');
-                const containerRect = mapContainer.getBoundingClientRect(); const itemRect = firstMapItem.getBoundingClientRect();
-                mapContainer.scrollTo({ top: mapContainer.scrollTop + (itemRect.top - containerRect.top) - (containerRect.height / 2) + (itemRect.height / 2), behavior: 'smooth' });
+            for(let cb of cbs) {
+                const route = window.globalDatabase[area][dir][cb.value];
+                if(loadedRoutes.has(cb.value)) continue;
+                
+                route.segments.forEach(range => {
+                    const step = range.start <= range.end ? 1 : -1;
+                    for(let i=range.start; (step===1?i<=range.end:i>=range.end); i+=step) {
+                        const card = createSegmentCard(i, cb.value, route.name, dir, range.color, area);
+                        container.appendChild(card);
+                        const mi = document.createElement('div'); mi.className='map-item'; mi.textContent=`TS-${i}`; mi.dataset.segment=i;
+                        mi.style.borderLeft = `4px solid ${range.color || '#ccc'}`;
+                        mi.onclick = () => card.scrollIntoView({behavior:'smooth', block:'center'});
+                        map.appendChild(mi);
+                    }
+                });
+                loadedRoutes.add(cb.value);
             }
-            document.getElementById('stsShortcutMenu').style.display = 'none';
-            setTimeout(() => { isAutoScrolling = false; }, 800); 
+            document.getElementById('empty-workspace-state').style.display='none';
+            toggleMenu(); document.getElementById('quickAddModal').style.display='none';
+            closeProgress();
         }
 
         function openInitialQuickAdd() {
             const area = document.getElementById('general-area').value;
             const dir = document.getElementById('page-direction').value;
-            if (!area || !dir) { showSystemAlert('Please select Line and Direction first.', 'MISSING INFO', true); return; }
-            currentActiveArea = area; currentActiveDirection = dir; toggleQuickAddModal(true);
-        }
-
-        function openInsertModal(tsNumber, baseRouteKey) {
-            currentInsertTargetTS = tsNumber; document.getElementById('insert-target-ts').textContent = tsNumber;
-            updateInsertDropdown(baseRouteKey); document.getElementById('insertModal').style.display = 'flex';
-            toggleMenu(true); toggleQuickAddModal(false); closeCloneModal(); document.getElementById('stsShortcutMenu').style.display = 'none'; document.getElementById('mainCommandBar').classList.add('collapsed');
-        }
-
-        function closeInsertModal() { document.getElementById('insertModal').style.display = 'none'; currentInsertTargetTS = null; }
-
-        function updateInsertDropdown(baseRouteKey) {
-            const dropdown = document.getElementById('insert-route-select');
-            dropdown.innerHTML = '<option value="">AWAITING INPUT...</option>';
-            if (currentActiveArea && currentActiveDirection && window.globalDatabase[currentActiveArea] && window.globalDatabase[currentActiveArea][currentActiveDirection]) {
-                const routes = window.globalDatabase[currentActiveArea][currentActiveDirection]; let hasOptions = false;
-                for (let key in routes) {
-                    const routeName = routes[key].name; const isSwitchOrPocket = key.includes('-X') || key.endsWith('-ST') || routeName.includes('Pocket') || routeName.includes('Cross') || routeName.includes('Spur');
-                    if (!loadedRoutes.has(key) && isSwitchOrPocket) { let opt = document.createElement('option'); opt.value = key; opt.textContent = routeName; dropdown.appendChild(opt); hasOptions = true; }
-                }
-                if (!hasOptions) dropdown.innerHTML = '<option value="">ALL SWITCHES LOADED</option>';
-            } else { dropdown.innerHTML = '<option value="">NO AREA LOADED</option>'; }
-        }
-
-        function executeInsert() {
-            if (!currentInsertTargetTS) return;
-            const area = currentActiveArea; const direction = currentActiveDirection; const routeKey = document.getElementById('insert-route-select').value;
-            if (!area || !routeKey) { showSystemAlert('Invalid Selection. Ensure Route is selected.', 'SELECTION ERROR', true); return; }
-            if (loadedRoutes.has(routeKey)) { showSystemAlert('This section is already loaded in the workspace.', 'DUPLICATE LOAD'); return; }
-
-            const selectedRouteData = window.globalDatabase[area][direction][routeKey];
-            const container = document.getElementById('segments-container'); const mapContainer = document.getElementById('miniMap');
-            const newCards = []; 
-            selectedRouteData.segments.forEach(range => { const blockColor = range.color || 'var(--primary)'; if (range.start <= range.end) { for (let i = range.start; i <= range.end; i++) newCards.push({ num: i, color: blockColor }); } else { for (let i = range.start; i >= range.end; i--) newCards.push({ num: i, color: blockColor }); } });
-
-            const targetCard = document.querySelector(`.segment-card[data-segment="${currentInsertTargetTS}"]`); const targetMap = document.querySelector(`.map-item[data-map-segment="${currentInsertTargetTS}"]`);
-            const refCard = targetCard ? targetCard.nextSibling : null; const refMap = targetMap ? targetMap.nextSibling : null;
-
-            newCards.forEach((item, index) => {
-                const card = createSegmentCard(item.num, routeKey, selectedRouteData.name, direction, item.color, area);
-                card.style.animationDelay = `${index * 0.05}s`; container.insertBefore(card, refCard); scrollObserver.observe(card);
-                const mapBtn = document.createElement('div'); mapBtn.className = 'map-item'; mapBtn.setAttribute('data-map-segment', item.num); mapBtn.setAttribute('data-route-key', routeKey); mapBtn.textContent = `TS-${item.num}`; mapBtn.style.borderLeft = `4px solid ${item.color}`;
-                attachMapItemListeners(mapBtn, card, item.num, routeKey); mapContainer.insertBefore(mapBtn, refMap);
+            if(!area) return;
+            const list = document.getElementById('quick-add-checklist'); list.innerHTML='';
+            Object.keys(window.globalDatabase[area][dir]).forEach(k => {
+                const l = document.createElement('label'); l.style.display='block';
+                l.innerHTML = `<input type="checkbox" value="${k}"> ${window.globalDatabase[area][dir][k].name}`;
+                list.appendChild(l);
             });
-
-            loadedRoutes.add(routeKey); routeLoadHistory.push([routeKey]); closeInsertModal(); toggleEmptyState();
-            const firstNewCard = document.querySelector(`.segment-card[data-route-key="${routeKey}"]`);
-            if(firstNewCard) { isAutoScrolling = true; scrollToCard(firstNewCard); firstNewCard.classList.add('search-highlight'); setTimeout(() => { firstNewCard.classList.remove('search-highlight'); isAutoScrolling = false; }, 1200); }
+            document.getElementById('quickAddModal').style.display='flex';
         }
 
-        function attachMapItemListeners(mapBtn, card, itemNum, routeKey) {
-            mapBtn.onclick = () => { isAutoScrolling = true; scrollToCard(card); setTimeout(() => { isAutoScrolling = false; }, 800); };
-            let pressTimer; const startPress = (e) => { if (e.type === 'mousedown' && e.button !== 0) return; pressTimer = setTimeout(() => openInsertModal(itemNum, routeKey), 600); }; const cancelPress = () => clearTimeout(pressTimer);
-            mapBtn.addEventListener('touchstart', startPress, {passive: true}); mapBtn.addEventListener('touchend', cancelPress); mapBtn.addEventListener('touchmove', cancelPress); mapBtn.addEventListener('mousedown', startPress); mapBtn.addEventListener('mouseup', cancelPress); mapBtn.addEventListener('mouseleave', cancelPress); mapBtn.addEventListener('contextmenu', (e) => { e.preventDefault(); openInsertModal(itemNum, routeKey); });
-        }
+        function toggleQuickAddModal(s) { document.getElementById('quickAddModal').style.display = s ? 'flex' : 'none'; }
 
-        function getLineColors(lineName) {
-            const activeTheme = localStorage.getItem('appTheme') || 'tactical'; const isLightMode = !['tactical', 'macosdark'].includes(activeTheme);
-            if (!lineName) return { bg: 'transparent', text: 'var(--text-color)', border: 'var(--border-color)' }; const name = lineName.toUpperCase();
-            if (name.includes("AREA 1") || name.includes("EXPO")) return { bg: isLightMode ? '#ffc107' : '#3e3000', text: isLightMode ? '#000' : '#ffc107', border: '#ffc107' };
-            if (name.includes("AREA 2") || name.includes("MILLENIUM") || name.includes("MILLENNIUM")) return { bg: isLightMode ? '#3399ff' : '#00254d', text: isLightMode ? '#fff' : '#3399ff', border: '#3399ff' };
-            if (name.includes("AREA 3") || name.includes("EVERGREEN")) return { bg: isLightMode ? '#4caf50' : '#0f3316', text: isLightMode ? '#fff' : '#4caf50', border: '#4caf50' };
-            return { bg: isLightMode ? '#e5e5e5' : '#222', text: isLightMode ? '#000' : '#aaa', border: '#555' };
-        }
-
-        function updateQuickAddChecklist() {
-            const container = document.getElementById('quick-add-checklist'); container.innerHTML = '';
-            if (currentActiveArea && currentActiveDirection && window.globalDatabase[currentActiveArea] && window.globalDatabase[currentActiveArea][currentActiveDirection]) {
-                const routes = window.globalDatabase[currentActiveArea][currentActiveDirection]; let hasOptions = false;
-                for (let routeKey in routes) {
-                    if (!loadedRoutes.has(routeKey)) {
-                        const label = document.createElement('label'); label.className = 'checkbox-item';
-                        const cb = document.createElement('input'); cb.type = 'checkbox'; cb.value = routeKey; cb.dataset.index = Object.keys(routes).indexOf(routeKey);
-                        const text = document.createTextNode(routes[routeKey].name);
-                        label.appendChild(cb); label.appendChild(text); container.appendChild(label); hasOptions = true;
-                    }
-                }
-                if (!hasOptions) { container.innerHTML = '<div style="color: var(--text-muted); text-align: center;">ALL SECTIONS LOADED</div>'; }
-            } else { container.innerHTML = '<div style="color: var(--text-muted); text-align: center; font-style: italic;">AWAITING INPUT...</div>'; }
-        }
-
-        function toggleQuickAddModal(eventOrShow) {
-            const modal = document.getElementById('quickAddModal'); let shouldShow;
-            if (eventOrShow === true || eventOrShow === false) { shouldShow = eventOrShow; } 
-            else if (eventOrShow && typeof eventOrShow === 'object' && eventOrShow.stopPropagation) { eventOrShow.stopPropagation(); shouldShow = modal.style.display !== 'flex'; } 
-            else { shouldShow = modal.style.display !== 'flex'; }
-            if (shouldShow) {
-                const dirCode = currentActiveDirection === "Inbound Track" ? "IB" : "OB"; document.getElementById('quick-add-title').textContent = `${currentActiveArea} [${dirCode}]`;
-                updateQuickAddChecklist(); modal.style.display = 'flex'; toggleMenu(true); document.getElementById('stsShortcutMenu').style.display = 'none'; toggleHelp(false); closeCloneModal();
-            } else { modal.style.display = 'none'; }
-        }
-
-        function checkSegmentData(card) {
-            if (!card) return;
-            const segNum = card.getAttribute('data-segment'); let hasData = false;
-            if (card.querySelector('.segment-notes').value.trim() !== '') hasData = true;
-            card.querySelectorAll('.defect-row').forEach(row => {
-                const images = JSON.parse(row.dataset.images || "[]"); const isCustom = row.dataset.isCustom === "true";
-                const compVal = isCustom ? row.querySelector('.custom-comp').value : row.querySelector('.component-select').value;
-                const defVal = isCustom ? row.querySelector('.custom-def').value : row.querySelector('.defect-select').value;
-                if (compVal || defVal || images.length > 0) hasData = true;
-            });
-            const mapItem = document.querySelector(`.map-item[data-map-segment="${segNum}"]`);
-            if (mapItem) { if (hasData) mapItem.classList.add('has-data'); else mapItem.classList.remove('has-data'); }
-        }
-
-        document.getElementById('segments-container').addEventListener('input', (e) => checkSegmentData(e.target.closest('.segment-card')));
-        document.getElementById('segments-container').addEventListener('change', (e) => checkSegmentData(e.target.closest('.segment-card')));
-
-        const scrollObserver = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    const segNum = entry.target.getAttribute('data-segment'); const routeName = entry.target.getAttribute('data-route-name'); const areaName = entry.target.getAttribute('data-area-name');
-                    const routeDisplay = document.getElementById('active-route-display'); const areaDisplay = document.getElementById('active-area-display');
-                    routeDisplay.textContent = routeName ? routeName : 'AWAITING...';
-                    if (areaName) {
-                        areaDisplay.textContent = areaName; areaDisplay.style.display = 'inline-block';
-                        const colors = getLineColors(areaName); areaDisplay.style.backgroundColor = colors.bg; areaDisplay.style.color = colors.text; areaDisplay.style.borderColor = colors.border;
-                        document.getElementById('stsDropdownBtn').style.display = 'inline-flex';
-                    } else { areaDisplay.style.display = 'none'; document.getElementById('stsDropdownBtn').style.display = 'none'; }
-
-                    document.querySelectorAll('.map-item').forEach(item => item.classList.remove('active-map'));
-                    const activeMapItem = document.querySelector(`.map-item[data-map-segment="${segNum}"]`);
-                    if (activeMapItem) {
-                        activeMapItem.classList.add('active-map');
-                        if (!isAutoScrolling) {
-                            const mapContainer = document.getElementById('miniMap'); const containerRect = mapContainer.getBoundingClientRect(); const itemRect = activeMapItem.getBoundingClientRect();
-                            if (itemRect.top < containerRect.top + 20 || itemRect.bottom > containerRect.bottom - 20) { mapContainer.scrollTo({ top: mapContainer.scrollTop + (itemRect.top - containerRect.top) - (containerRect.height / 2) + (itemRect.height / 2), behavior: 'smooth' }); }
-                        }
-                    }
-                }
-            });
-        }, { rootMargin: '-120px 0px -60% 0px' }); 
-
-        function scrollToCard(card) { const headerHeight = document.getElementById('stickyHeader').offsetHeight; const elementPosition = card.getBoundingClientRect().top + window.scrollY; window.scrollTo({ top: elementPosition - headerHeight - 15, behavior: "smooth" }); }
-
-        async function injectProjectData(projectData, fileName) {
-            try {
-                if (!Array.isArray(projectData)) throw new Error("Invalid format");
-                updateExportProgress(10, "UNPACKING STRUCTURE...", "LOADING DATA");
-
-                const container = document.getElementById('segments-container');
-                const mapContainer = document.getElementById('miniMap');
-                container.innerHTML = ''; mapContainer.innerHTML = '';
-                loadedRoutes.clear(); routeLoadHistory = []; toggleHelp(false);
-
-                let totalSegs = projectData.length;
-                for (let index = 0; index < totalSegs; index++) {
-                    const segData = projectData[index];
-                    updateExportProgress(10 + Math.round((index / totalSegs) * 80), `BUILDING TS-${segData.segmentNum}...`, "LOADING DATA");
-
-                    const safeAreaName = segData.areaName || '';
-                    const activeKey = segData.routeKey || segData.routeName; 
-                    
-                    const card = createSegmentCard(segData.segmentNum, activeKey, segData.routeName, segData.direction, segData.color, safeAreaName);
-                    card.style.animationDelay = `${index * 0.05}s`;
-                    card.querySelector('.segment-notes').value = segData.notes || '';
-                    
-                    const defectList = card.querySelector('.defect-list');
-                    defectList.innerHTML = '';
-                    
-                    if (!segData.defects || segData.defects.length === 0) { 
-                        addDefectRow(defectList, null, safeAreaName); 
-                    } else { 
-                        for (let defData of segData.defects) {
-                            if (defData.photoBase64 && (!defData.images || defData.images.length === 0)) {
-                                defData.images = [{ img: defData.photoBase64, w: defData.imgW, h: defData.imgH }];
-                            }
-                            if (defData.images && defData.images.length > 0) {
-                                const newRefs = [];
-                                for (let imgData of defData.images) {
-                                    if(imgData.img) {
-                                        const ref = await saveImageToDB(imgData.img, imgData.w, imgData.h);
-                                        newRefs.push(ref);
-                                    } else if (imgData.id) {
-                                        newRefs.push(imgData);
-                                    }
-                                }
-                                defData.images = newRefs; 
-                            }
-                            addDefectRow(defectList, defData, safeAreaName); 
-                        }
-                    }
-
-                    container.appendChild(card);
-                    scrollObserver.observe(card);
-
-                    const mapBtn = document.createElement('div');
-                    mapBtn.className = 'map-item'; mapBtn.setAttribute('data-map-segment', segData.segmentNum); mapBtn.setAttribute('data-route-key', activeKey); mapBtn.textContent = `TS-${segData.segmentNum}`; mapBtn.style.borderLeft = `4px solid ${segData.color || '#ccc'}`;
-                    attachMapItemListeners(mapBtn, card, segData.segmentNum, activeKey);
-                    mapContainer.appendChild(mapBtn);
-                    checkSegmentData(card);
-
-                    if (activeKey && !loadedRoutes.has(activeKey)) { loadedRoutes.add(activeKey); routeLoadHistory.push([activeKey]); }
-                    currentActiveArea = safeAreaName; currentActiveDirection = segData.direction;
-                }
-
-                if (loadedRoutes.size > 0) document.getElementById('quickAddGroup').style.display = 'flex';
-
-                updateExportProgress(100, "SYSTEM READY", "LOAD COMPLETE");
-                setTimeout(() => {
-                    closeExportProgress();
-                    currentFileName = fileName;
-                    showSystemAlert('Data imported successfully.', 'DATA LOADED');
-                    toggleMenu(true); updateCommandBar(); document.getElementById('mainCommandBar').classList.add('collapsed'); toggleEmptyState();
-                }, 800);
-
-            } catch (err) {
-                closeExportProgress();
-                showSystemAlert('Corrupt or invalid JSON data.', 'SYSTEM ERROR', true);
-                console.error(err);
-            }
-        }
-
-        function loadProject(event) {
-            const fileInput = event.target; const file = fileInput.files[0]; if (!file) return;
-            const reader = new FileReader();
-            reader.onload = async function(e) {
-                try { const projectData = JSON.parse(e.target.result); await injectProjectData(projectData, file.name); } 
-                catch (err) { showSystemAlert('Corrupt or invalid JSON file.', 'SYSTEM ERROR', true); console.error(err); }
-                fileInput.value = ''; 
-            };
-            reader.onerror = function() { showSystemAlert('Could not read file from device.', 'FILE ERROR', true); fileInput.value = ''; };
-            reader.readAsText(file);
-        }
-
-        function generateSegments() {
-            const area = currentActiveArea; const direction = currentActiveDirection;
-            const checkboxes = Array.from(document.querySelectorAll('#quick-add-checklist input[type="checkbox"]:checked'));
-            if (checkboxes.length === 0) { showSystemAlert('Please select at least one route to add.', 'SELECTION ERROR', true); return; }
-            checkboxes.sort((a, b) => parseInt(a.dataset.index) - parseInt(b.dataset.index));
-            const selectedRouteKeys = checkboxes.map(cb => cb.value);
-
-            toggleHelp(false); let firstNewCardToScroll = null;
-
-            selectedRouteKeys.forEach(selectedRouteKey => {
-                if (loadedRoutes.has(selectedRouteKey)) return; 
-                const selectedRouteData = window.globalDatabase[area][direction][selectedRouteKey];
-                const container = document.getElementById('segments-container'); const mapContainer = document.getElementById('miniMap');
-                const newCards = []; 
-                selectedRouteData.segments.forEach(range => { const blockColor = range.color || 'var(--primary)'; if (range.start <= range.end) { for (let i = range.start; i <= range.end; i++) newCards.push({ num: i, color: blockColor }); } else { for (let i = range.start; i >= range.end; i--) newCards.push({ num: i, color: blockColor }); } });
-                
-                newCards.forEach((item, index) => {
-                    const card = createSegmentCard(item.num, selectedRouteKey, selectedRouteData.name, direction, item.color, area);
-                    card.style.animationDelay = `${index * 0.05}s`; container.appendChild(card); scrollObserver.observe(card);
-                    const mapBtn = document.createElement('div'); mapBtn.className = 'map-item'; mapBtn.setAttribute('data-map-segment', item.num); mapBtn.setAttribute('data-route-key', selectedRouteKey); mapBtn.textContent = `TS-${item.num}`; mapBtn.style.borderLeft = `4px solid ${item.color}`;
-                    attachMapItemListeners(mapBtn, card, item.num, selectedRouteKey); mapContainer.appendChild(mapBtn);
-                    if (!firstNewCardToScroll) firstNewCardToScroll = card;
-                });
-                loadedRoutes.add(selectedRouteKey);
-            });
-
-            routeLoadHistory.push(selectedRouteKeys); document.getElementById('quickAddGroup').style.display = 'flex'; toggleQuickAddModal(false); 
-            updateCommandBar(); document.getElementById('mainCommandBar').classList.add('collapsed'); toggleEmptyState();
-            
-            if(firstNewCardToScroll) { isAutoScrolling = true; scrollToCard(firstNewCardToScroll); firstNewCardToScroll.classList.add('search-highlight'); setTimeout(() => { firstNewCardToScroll.classList.remove('search-highlight'); isAutoScrolling = false; }, 1200); }
-        }
-
-        async function undoLastLoad() {
-            if (routeLoadHistory.length === 0) { showSystemAlert("No actions to undo.", "SYSTEM NOTICE"); return; }
-            const lastTransactionKeys = routeLoadHistory[routeLoadHistory.length - 1]; const keysToUndo = Array.isArray(lastTransactionKeys) ? lastTransactionKeys : [lastTransactionKeys];
-            
-            let hasData = false; let conflictTS = ""; let conflictRoute = ""; let cardsToRemove = [];
-
-            keysToUndo.forEach(key => {
-                const cards = document.querySelectorAll(`.segment-card[data-route-key="${key}"]`);
-                cards.forEach(card => {
-                    cardsToRemove.push(card);
-                    if (hasData) return; 
-                    if (card.querySelector('.segment-notes').value.trim() !== '') hasData = true;
-                    card.querySelectorAll('.defect-row').forEach(row => {
-                        const images = JSON.parse(row.dataset.images || "[]"); const isCustom = row.dataset.isCustom === "true";
-                        const compVal = isCustom ? row.querySelector('.custom-comp').value : row.querySelector('.component-select').value;
-                        const defVal = isCustom ? row.querySelector('.custom-def').value : row.querySelector('.defect-select').value;
-                        if (compVal || defVal || images.length > 0) hasData = true;
-                    });
-                    if (hasData) { conflictTS = card.getAttribute('data-segment'); conflictRoute = card.getAttribute('data-route-name'); }
-                });
-            });
-
-            if (hasData) { const proceed = await showSystemConfirm(`TS-${conflictTS} has data.\n\nUndoing this will erase "${conflictRoute}" and details.\n\nAre you sure you want to cancel?`); if (!proceed) return; }
-            
-            routeLoadHistory.pop();
-            cardsToRemove.forEach(card => {
-                card.querySelectorAll('.defect-row').forEach(row => cleanUpRowImages(row));
-                card.remove();
-            });
-            keysToUndo.forEach(key => { document.querySelectorAll(`.map-item[data-route-key="${key}"]`).forEach(el => el.remove()); loadedRoutes.delete(key); });
-            
-            if (loadedRoutes.size === 0) {
-                document.getElementById('quickAddGroup').style.display = 'none'; currentActiveArea = ""; currentActiveDirection = "";
-                document.getElementById('active-area-display').style.display = 'none'; document.getElementById('stsDropdownBtn').style.display = 'none';
-                document.getElementById('active-route-display').innerHTML = 'AWAITING...'; toggleHelp(true);
-            }
-            toggleQuickAddModal(false); updateCommandBar(); document.getElementById('mainCommandBar').classList.add('collapsed'); toggleEmptyState();
-        }
-
-        function flipOrder() {
-            const container = document.getElementById('segments-container'); const mapContainer = document.getElementById('miniMap');
-            const cards = Array.from(container.children); const mapItems = Array.from(mapContainer.children);
-            if (cards.length === 0) return;
-            cards.reverse(); mapItems.reverse();
-            cards.forEach((card, index) => { container.appendChild(card); card.style.animation = 'none'; void card.offsetWidth; card.style.animation = `cascadingFadeIn 0.3s ease-out ${index * 0.05}s both`; });
-            mapItems.forEach(item => mapContainer.appendChild(item));
-        }
-
-        function createSegmentCard(segmentNum, routeKey, routeText, direction, color = 'var(--primary)', areaName = '') {
-            const card = document.createElement('div');
-            card.className = 'segment-card'; card.setAttribute('data-segment', segmentNum); card.setAttribute('data-route-key', routeKey); card.setAttribute('data-route-name', routeText); card.setAttribute('data-direction', direction); card.setAttribute('data-color', color); card.setAttribute('data-area-name', areaName); card.style.borderLeft = `4px solid ${color}`;
-            const colors = getLineColors(areaName); const areaBadge = areaName ? `<span class="direction-badge" style="background-color: ${colors.bg}; color: ${colors.text}; border-color: ${colors.border};">${areaName}</span>` : '';
-            card.innerHTML = `<div class="segment-header"><h3>TS-${segmentNum}</h3><div class="segment-header-badges">${areaBadge}<span class="direction-badge">${routeText}</span></div></div><textarea class="segment-notes" placeholder="INPUT SECTION LOG..."></textarea><div class="defect-list"></div><button class="add-defect-btn" onclick="addDefectRow(this.previousElementSibling, null, '${areaName}')">+ ADD DEFECT ROW</button>`;
-            addDefectRow(card.querySelector('.defect-list'), null, areaName); return card;
-        }
-
-        function addDefectRow(container, prefill = null, areaName = '') {
-            const row = document.createElement('div'); row.className = 'defect-row'; row.dataset.images = "[]"; row.dataset.isCustom = "false"; 
-
-            const specificDefectMap = window.globalDefectMaps && window.globalDefectMaps[areaName] ? window.globalDefectMaps[areaName] : {};
-            const lineComponents = Object.keys(specificDefectMap);
-
-            const compSelect = document.createElement('select'); compSelect.className = 'component-select';
-            const extendedComponents = ['Select Component', ...lineComponents, 'CUSTOM ENTRY...'];
-            extendedComponents.forEach(c => { let opt = document.createElement('option'); opt.value = c === 'Select Component' ? '' : c; opt.textContent = c.toUpperCase(); compSelect.appendChild(opt); });
-
-            const defSelect = document.createElement('select'); defSelect.className = 'defect-select'; defSelect.disabled = true; 
-            let defaultOpt = document.createElement('option'); defaultOpt.value = ''; defaultOpt.textContent = 'AWAITING COMPONENT'; defSelect.appendChild(defaultOpt);
-
-            const customCompInput = document.createElement('input'); customCompInput.type = 'text'; customCompInput.placeholder = 'COMP NAME...'; customCompInput.className = 'custom-comp'; customCompInput.style.display = 'none';
-            const customDefInput = document.createElement('input'); customDefInput.type = 'text'; customDefInput.placeholder = 'DEFECT TYPE...'; customDefInput.className = 'custom-def'; customDefInput.style.display = 'none';
-
-            const revertBtn = document.createElement('button'); revertBtn.className = 'delete-btn revert-btn'; revertBtn.innerHTML = '↺'; revertBtn.style.display = 'none';
-            revertBtn.onclick = function() { row.dataset.isCustom = "false"; compSelect.style.display = ''; defSelect.style.display = ''; customCompInput.style.display = 'none'; customDefInput.style.display = 'none'; revertBtn.style.display = 'none'; compSelect.value = ''; customCompInput.value = ''; customDefInput.value = ''; updateDefects(''); checkSegmentData(row.closest('.segment-card')); };
-
-            function updateDefects(selectedComp, selectedDefect = '') {
-                defSelect.innerHTML = '';
-                if (selectedComp && specificDefectMap[selectedComp]) {
-                    const defectList = specificDefectMap[selectedComp]; defSelect.disabled = false;
-                    let defDefault = document.createElement('option'); defDefault.value = ''; defDefault.textContent = 'SELECT DEFECT'; defSelect.appendChild(defDefault);
-                    defectList.forEach(d => { let opt = document.createElement('option'); opt.value = d; opt.textContent = d.toUpperCase(); defSelect.appendChild(opt); });
-                    if (selectedDefect) defSelect.value = selectedDefect;
-                } else { defSelect.disabled = true; let resetOpt = document.createElement('option'); resetOpt.value = ''; resetOpt.textContent = 'AWAITING COMPONENT'; defSelect.appendChild(resetOpt); }
-            }
-
-            compSelect.addEventListener('change', function() { 
-                if (this.value === 'CUSTOM ENTRY...') { row.dataset.isCustom = "true"; compSelect.style.display = 'none'; defSelect.style.display = 'none'; customCompInput.style.display = 'block'; customDefInput.style.display = 'block'; revertBtn.style.display = 'flex'; customCompInput.focus(); } 
-                else { updateDefects(this.value); } checkSegmentData(row.closest('.segment-card'));
-            });
-
-            customCompInput.addEventListener('input', () => checkSegmentData(row.closest('.segment-card'))); customDefInput.addEventListener('input', () => checkSegmentData(row.closest('.segment-card')));
-
-            const photoWrapper = document.createElement('div'); photoWrapper.className = 'photo-wrapper';
-            const fileInputId = 'photo-' + Math.random().toString(36).substr(2, 9);
-            const fileInput = document.createElement('input'); fileInput.type = 'file'; fileInput.accept = 'image/*'; fileInput.capture = 'environment'; fileInput.className = 'file-input'; fileInput.id = fileInputId;
-            const cameraLabel = document.createElement('label'); cameraLabel.htmlFor = fileInputId; cameraLabel.className = 'camera-btn'; cameraLabel.innerHTML = '📷 PHOTO';
-            const badgeContainer = document.createElement('div'); badgeContainer.className = 'status-badge-container';
-
-            const cloneBtn = document.createElement('button'); cloneBtn.className = 'clone-btn'; cloneBtn.innerHTML = '⇊'; cloneBtn.title = "Clone Defect"; cloneBtn.onclick = function() { openCloneModal(row); };
-            const delBtn = document.createElement('button'); delBtn.className = 'delete-btn'; delBtn.innerHTML = '✖'; 
-            delBtn.onclick = function() { const card = row.closest('.segment-card'); cleanUpRowImages(row); row.remove(); checkSegmentData(card); };
-
-            fileInput.addEventListener('change', function(e) {
-                if (this.files && this.files.length > 0) {
-                    const file = this.files[0]; cameraLabel.innerHTML = '⏳ LOAD...'; const reader = new FileReader();
-                    reader.onload = function(event) {
-                        const img = new Image();
-                        img.onload = function() {
-                            const canvas = document.createElement('canvas');
-                            // DB Restored Detail: 1200px max, 0.85 jpeg quality
-                            const MAX_WIDTH = 1200, MAX_HEIGHT = 1200;
-                            let width = img.width, height = img.height;
-                            if (width > height) { if (width > MAX_WIDTH) { height = Math.round(height * MAX_WIDTH / width); width = MAX_WIDTH; } } 
-                            else { if (height > MAX_HEIGHT) { width = Math.round(width * MAX_HEIGHT / height); height = MAX_HEIGHT; } }
-                            canvas.width = width; canvas.height = height;
-                            const ctx = canvas.getContext('2d', { alpha: false });
-                            ctx.fillStyle = "#FFFFFF"; ctx.fillRect(0, 0, width, height); ctx.drawImage(img, 0, 0, width, height);
-                            
-                            const base64Data = canvas.toDataURL('image/jpeg', 0.85);
-                            saveImageToDB(base64Data, width, height).then(imgRef => {
-                                const currentImages = JSON.parse(row.dataset.images || "[]");
-                                currentImages.push(imgRef); // ONLY Save ID REF into DOM
-                                row.dataset.images = JSON.stringify(currentImages);
-                                updatePhotoUI(row, cameraLabel, badgeContainer);
-                                checkSegmentData(row.closest('.segment-card'));
-                                // Force Garbage Collection
-                                canvas.width = 0; canvas.height = 0; img.src = ''; fileInput.value = '';
-                            });
-                        };
-                        img.src = event.target.result;
-                    };
-                    reader.readAsDataURL(file);
-                } else { fileInput.value = ''; }
-            });
-
-            photoWrapper.appendChild(cameraLabel); photoWrapper.appendChild(fileInput); photoWrapper.appendChild(badgeContainer); photoWrapper.appendChild(cloneBtn); photoWrapper.appendChild(delBtn); 
-            row.appendChild(compSelect); row.appendChild(defSelect); row.appendChild(customCompInput); row.appendChild(customDefInput); row.appendChild(revertBtn); row.appendChild(photoWrapper); container.appendChild(row);
-
-            if (prefill) {
-                if (prefill.isCustom || (prefill.comp && prefill.comp !== '' && !specificDefectMap[prefill.comp])) {
-                    row.dataset.isCustom = "true"; compSelect.style.display = 'none'; defSelect.style.display = 'none'; customCompInput.style.display = 'block'; customDefInput.style.display = 'block'; revertBtn.style.display = 'flex'; customCompInput.value = prefill.comp || ''; customDefInput.value = prefill.def || '';
-                } else if (prefill.comp) { compSelect.value = prefill.comp; updateDefects(prefill.comp, prefill.def); }
-                if (prefill.images && prefill.images.length > 0) { row.dataset.images = JSON.stringify(prefill.images); updatePhotoUI(row, cameraLabel, badgeContainer); }
-            }
+        function searchTSFromPill() {
+            const val = document.getElementById('pillSearchInput').value;
+            const card = document.querySelector(`.segment-card[data-segment="${val}"]`);
+            if(card) card.scrollIntoView({behavior:'smooth', block:'center'});
+            toggleCommandBar();
         }
 
         async function saveProject() {
             const cards = document.querySelectorAll('.segment-card');
-            if (cards.length === 0) { showSystemAlert('No data available to save.', 'SAVE FAILED', true); return; }
-
-            updateExportProgress(10, "PACKAGING TRACK DATA...", "SAVING DATA");
-            const projectData = [];
-            
-            for (let i = 0; i < cards.length; i++) {
-                const card = cards[i];
-                updateExportProgress(10 + Math.round((i / cards.length) * 50), `PACKAGING TS-${card.getAttribute('data-segment')}...`, "SAVING DATA");
-                
-                const segData = {
-                    segmentNum: card.getAttribute('data-segment'), routeKey: card.getAttribute('data-route-key'), routeName: card.getAttribute('data-route-name'), direction: card.getAttribute('data-direction'), color: card.getAttribute('data-color'), areaName: card.getAttribute('data-area-name'), notes: card.querySelector('.segment-notes').value, defects: []
-                };
-
-                const rows = card.querySelectorAll('.defect-row');
-                for(let row of rows) {
-                    const isCustom = row.dataset.isCustom === "true";
-                    const imgRefs = JSON.parse(row.dataset.images || "[]");
-                    const fullImgs = [];
-                    for(let ref of imgRefs) {
-                        const dbImg = await getImageFromDB(ref.id);
-                        if(dbImg) fullImgs.push({ img: dbImg.data, w: dbImg.w, h: dbImg.h });
-                    }
-                    segData.defects.push({
-                        isCustom: isCustom, comp: isCustom ? row.querySelector('.custom-comp').value : row.querySelector('.component-select').value, def: isCustom ? row.querySelector('.custom-def').value : row.querySelector('.defect-select').value, images: fullImgs 
-                    });
-                }
-                projectData.push(segData);
-            }
-
-            updateExportProgress(75, "WRITING JSON FILE...", "SAVING DATA");
-            const dataStr = JSON.stringify(projectData, null, 2);
-            let exportName = currentFileName || `TRACK_DATA_${new Date().toISOString().split('T')[0]}.json`;
-
-            try {
-                if (window.showSaveFilePicker) {
-                    const handle = await window.showSaveFilePicker({ suggestedName: exportName, types: [{ description: 'JSON File', accept: {'application/json': ['.json']} }], });
-                    const writable = await handle.createWritable();
-                    updateExportProgress(90, "FINALIZING WRITE...", "SAVING DATA");
-                    await writable.write(dataStr); await writable.close();
-                    currentFileName = handle.name;
-                    updateExportProgress(100, "SAVE COMPLETE!", "SAVING DATA");
-                    setTimeout(() => { closeExportProgress(); showSystemAlert('Data saved successfully to selected location.', 'SAVE COMPLETE'); }, 1000);
-                } else {
-                    const blob = new Blob([dataStr], { type: 'application/json' });
-                    const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = exportName; document.body.appendChild(link); link.click(); document.body.removeChild(link);
-                    updateExportProgress(100, "SAVE COMPLETE!", "SAVING DATA");
-                    setTimeout(() => { closeExportProgress(); showSystemAlert('Data downloaded to your device Downloads folder.', 'SAVE COMPLETE'); }, 1000);
-                }
-            } catch (err) {
-                closeExportProgress();
-                if (err.name !== 'AbortError') { console.error(err); showSystemAlert('Failed to save file.', 'SAVE ERROR', true); }
-            }
-            toggleMenu(true); document.getElementById('mainCommandBar').classList.add('collapsed');
-        }
-
-        async function exportData() {
-            if (typeof ExcelJS === 'undefined' || typeof window.jspdf === 'undefined') { showSystemAlert("Libraries offline. Requires network connection for initial boot.", "EXPORT ERROR", true); return; }
-
-            const cards = document.querySelectorAll('.segment-card');
-            if (cards.length === 0) { showSystemAlert('No data available to export.', 'EXPORT FAILED'); return; }
-
-            updateExportProgress(0, "ANALYZING TRACK SECTIONS...", "GENERATING EXPORT");
-            
-            try {
-                const workbook = new ExcelJS.Workbook();
-                const worksheet = workbook.addWorksheet('Defects Report');
-                worksheet.columns = [ { header: 'Line / Area', key: 'line', width: 18 }, { header: 'Route', key: 'route', width: 22 }, { header: 'TS', key: 'segment', width: 15 }, { header: 'Notes', key: 'notes', width: 35 }, { header: 'Component', key: 'component', width: 20 }, { header: 'Defect', key: 'defect', width: 20 } ];
-                worksheet.getRow(1).font = { bold: true };
-
-                let pdfJobs = [];
-                let hasDataRows = false;
-
-                cards.forEach(card => {
-                    const segmentNum = card.getAttribute('data-segment'); const tsId = `TS-${segmentNum}`; const routeName = card.getAttribute('data-route-name'); const areaName = card.getAttribute('data-area-name') || ''; const notes = card.querySelector('.segment-notes').value; const rows = card.querySelectorAll('.defect-row');
-                    let hasDefects = false;
-                    rows.forEach((row, index) => {
-                        const isCustom = row.dataset.isCustom === "true"; const comp = isCustom ? row.querySelector('.custom-comp').value : row.querySelector('.component-select').value; const def = isCustom ? row.querySelector('.custom-def').value : row.querySelector('.defect-select').value;
-                        const imageRefs = JSON.parse(row.dataset.images || "[]");
-                        if (comp || def || imageRefs.length > 0) { hasDefects = true; hasDataRows = true; worksheet.addRow({ line: areaName, route: routeName, segment: tsId, notes: notes, component: comp, defect: def }); }
-                        if (imageRefs.length > 0) { pdfJobs.push({ lineName: areaName, routeName: routeName, tsId: tsId, notes: notes, comp: comp || "N/A", def: def || "N/A", imageRefs: imageRefs, defectID: index + 1 }); }
-                    });
-                    if (!hasDefects && notes.trim() !== '') { hasDataRows = true; worksheet.addRow({ line: areaName, route: routeName, segment: tsId, notes: notes, component: '', defect: '' }); }
-                });
-
-                if (!hasDataRows) {
-                    closeExportProgress();
-                    showSystemAlert("No filled track sections found to export to Excel.", "EXPORT NOTICE");
-                    return;
-                }
-
-                updateExportProgress(5, "BUILDING EXCEL MATRIX...", "GENERATING EXPORT");
-                const buffer = await workbook.xlsx.writeBuffer();
-                const excelBlob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-                const date = new Date().toISOString().split('T')[0];
-                const excelFilename = `DEFECT_REPORT_${date}.xlsx`;
-
-                const totalSteps = pdfJobs.length + 1;
-
-                if (pdfJobs.length > 0 && window.showDirectoryPicker) {
-                    try {
-                        updateExportProgress(10, "AWAITING FOLDER SELECTION...", "GENERATING EXPORT");
-                        const dirHandle = await window.showDirectoryPicker({ mode: 'readwrite' });
-                        
-                        updateExportProgress(15, "SAVING EXCEL REPORT...", "GENERATING EXPORT");
-                        const excelFileHandle = await dirHandle.getFileHandle(excelFilename, { create: true });
-                        const excelWritable = await excelFileHandle.createWritable();
-                        await excelWritable.write(excelBlob); await excelWritable.close();
-
-                        for (let i = 0; i < pdfJobs.length; i++) {
-                            const job = pdfJobs[i];
-                            updateExportProgress(15 + Math.round(((i + 0.3) / totalSteps) * 85), `FETCHING HIGH-RES DB IMAGES [${job.tsId}]...`, "GENERATING EXPORT");
-                            
-                            // JIT DB Fetch
-                            const fullImages = [];
-                            for(let ref of job.imageRefs) {
-                                const dbImg = await getImageFromDB(ref.id);
-                                if(dbImg) fullImages.push(dbImg);
-                            }
-                            job.images = fullImages;
-
-                            updateExportProgress(15 + Math.round(((i + 0.6) / totalSteps) * 85), `BUILDING PDF ${i + 1}/${pdfJobs.length} [${job.tsId}]...`, "GENERATING EXPORT");
-                            const pdfBlob = generatePDF(job);
-                            job.images = null; // GC
-                            
-                            const cleanComp = job.comp ? job.comp.replace(/[^a-z0-9]/gi, '_') : 'UNKNOWN';
-                            const pdfFilename = `${job.tsId}_${cleanComp}_DEFECT.pdf`;
-                            
-                            const pdfFileHandle = await dirHandle.getFileHandle(pdfFilename, { create: true });
-                            const pdfWritable = await pdfFileHandle.createWritable();
-                            await pdfWritable.write(pdfBlob); await pdfWritable.close();
+            await updateProgress(10, "PACKAGING DATA...", "SAVING DATA");
+            const out = [];
+            for(let c of cards) {
+                const obj = { segmentNum: c.dataset.segment, routeName: c.dataset.routeName, areaName: c.dataset.areaName, notes: c.querySelector('.segment-notes').value, defects: [] };
+                const rows = c.querySelectorAll('.defect-row');
+                for(let r of rows) {
+                    const isC = r.dataset.isCustom==="true";
+                    const refs = JSON.parse(r.dataset.images || "[]");
+                    const imgs = [];
+                    for(let ref of refs) { 
+                        if(ref.id) {
+                            const d = await getImageFromDB(ref.id); 
+                            if(d) imgs.push(d); 
+                        } else if(ref.img) {
+                            imgs.push(ref); // Ghost Data
                         }
-                        updateExportProgress(100, "ALL FILES EXPORTED!", "GENERATING EXPORT");
-                        setTimeout(() => { closeExportProgress(); showSystemAlert("All files successfully saved to the selected folder.", "EXPORT COMPLETE"); }, 1500);
-                    } catch (err) {
-                        if (err.name !== 'AbortError') { console.error(err); fallbackDownload(excelBlob, excelFilename, pdfJobs, totalSteps); }
-                        else { closeExportProgress(); }
                     }
-                } else if (pdfJobs.length === 0 && window.showSaveFilePicker) {
-                    try {
-                        const handle = await window.showSaveFilePicker({ suggestedName: excelFilename, types: [{ description: 'Excel File', accept: {'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx']} }], });
-                        const writable = await handle.createWritable(); await writable.write(excelBlob); await writable.close();
-                        updateExportProgress(100, "EXCEL REPORT SAVED!", "GENERATING EXPORT");
-                        setTimeout(() => { closeExportProgress(); showSystemAlert("Excel report saved successfully.", "EXPORT COMPLETE"); }, 1000);
-                    } catch (err) {
-                        if (err.name !== 'AbortError') { console.error(err); fallbackDownload(excelBlob, excelFilename, [], totalSteps); }
-                        else { closeExportProgress(); }
-                    }
-                } else {
-                    fallbackDownload(excelBlob, excelFilename, pdfJobs, totalSteps);
+                    obj.defects.push({ isCustom:isC, comp: isC?r.querySelector('.custom-comp').value:r.querySelector('.component-select').value, def: isC?r.querySelector('.custom-def').value:r.querySelector('.defect-select').value, images: imgs });
                 }
-
-            } catch (error) {
-                closeExportProgress(); console.error(error); showSystemAlert("File compiling failed.", "EXPORT ERROR", true);
+                out.push(obj);
             }
+            triggerDownload(new Blob([JSON.stringify(out, null, 2)], {type:'application/json'}), `BACKUP_${Date.now()}.json`);
+            closeProgress();
         }
 
-        async function fallbackDownload(excelBlob, excelFilename, pdfJobs, totalSteps) {
-            updateExportProgress(15, "TRIGGERING EXCEL DOWNLOAD...", "GENERATING EXPORT");
-            const link = document.createElement("a"); link.href = URL.createObjectURL(excelBlob); link.download = excelFilename; document.body.appendChild(link); link.click(); document.body.removeChild(link);
-
-            if (pdfJobs.length > 0) {
-                await delay(800); 
-                for (let i = 0; i < pdfJobs.length; i++) { 
-                    const job = pdfJobs[i];
-                    updateExportProgress(15 + Math.round(((i + 0.3) / totalSteps) * 85), `FETCHING HIGH-RES DB IMAGES [${job.tsId}]...`, "GENERATING EXPORT");
-                    
-                    const fullImages = [];
-                    for(let ref of job.imageRefs) {
-                        const dbImg = await getImageFromDB(ref.id);
-                        if(dbImg) fullImages.push(dbImg);
-                    }
-                    job.images = fullImages;
-
-                    updateExportProgress(15 + Math.round(((i + 0.6) / totalSteps) * 85), `BUILDING PDF ${i + 1}/${pdfJobs.length} [${job.tsId}]...`, "GENERATING EXPORT");
-                    const pdfBlob = generatePDF(job);
-                    job.images = null; // GC
-                    
-                    const cleanComp = job.comp ? job.comp.replace(/[^a-z0-9]/gi, '_') : 'UNKNOWN';
-                    const pdfFilename = `${job.tsId}_${cleanComp}_DEFECT.pdf`;
-                    
-                    const pdflink = document.createElement("a"); pdflink.href = URL.createObjectURL(pdfBlob); pdflink.download = pdfFilename; document.body.appendChild(pdflink); pdflink.click(); document.body.removeChild(pdflink);
-                    await delay(800); 
-                }
-            }
-            updateExportProgress(100, "ALL FILES EXPORTED!", "GENERATING EXPORT");
-            setTimeout(() => { closeExportProgress(); showSystemAlert("Files downloaded to your device Downloads folder.", "EXPORT COMPLETE"); }, 1500);
-        }
-
-        function generatePDF(data) {
-            const { jsPDF } = window.jspdf;
-            const firstImg = data.images[0];
-            let firstOrientation = (firstImg.w > firstImg.h) ? 'landscape' : 'portrait';
-            const doc = new jsPDF({ orientation: firstOrientation, unit: 'mm', format: 'a4' });
-            
-            const activeTheme = localStorage.getItem('appTheme') || 'tactical';
-            const todayDate = new Date().toLocaleDateString();
-
-            data.images.forEach((imgObj, index) => {
-                let orientation = (imgObj.w > imgObj.h) ? 'landscape' : 'portrait';
-                if (index > 0) doc.addPage('a4', orientation);
-
-                const pageWidth = orientation === 'landscape' ? 297 : 210;
-                const pageHeight = orientation === 'landscape' ? 210 : 297;
-                const margin = 10;
-                const borderW = pageWidth - (margin * 2);
-                const borderH = pageHeight - (margin * 2);
-
-                if (activeTheme === 'windows11') {
-                    doc.setDrawColor(0, 120, 212); doc.setLineWidth(0.5); doc.roundedRect(margin, margin, borderW, borderH, 3, 3, 'S');
-                } else if (activeTheme === 'pokemongo') {
-                    doc.setDrawColor(227, 53, 13); doc.setLineWidth(1.0); doc.roundedRect(margin, margin, borderW, borderH, 5, 5, 'S');
-                    doc.setDrawColor(40, 172, 168); doc.setLineWidth(0.3); doc.roundedRect(margin + 1, margin + 1, borderW - 2, borderH - 2, 4, 4, 'S');
-                } else if (activeTheme === 'macosdark') {
-                    doc.setDrawColor(80, 80, 80); doc.setLineWidth(0.5); doc.roundedRect(margin, margin, borderW, borderH, 4, 4, 'S');
-                } else {
-                    doc.setDrawColor(30, 30, 30); doc.setLineWidth(1.0); doc.rect(margin, margin, borderW, borderH, 'S'); doc.setLineWidth(0.3); doc.rect(margin + 1.5, margin + 1.5, borderW - 3, borderH - 3, 'S');
-                }
-
-                const footerHeight = 22; const safeZoneX = margin + 2; const safeZoneY = margin + 2; const safeZoneW = borderW - 4; const safeZoneH = borderH - footerHeight - 4; 
-                const imgRatio = imgObj.w / imgObj.h; const safeRatio = safeZoneW / safeZoneH;
+        async function loadProject(e) {
+            const file = e.target.files[0]; if(!file) return;
+            const reader = new FileReader();
+            reader.onload = async event => {
+                const data = JSON.parse(event.target.result);
+                await updateProgress(10, "PURGING WORKSPACE...", "LOADING DATA");
+                document.getElementById('segments-container').innerHTML='';
+                document.getElementById('miniMap').innerHTML='';
+                loadedRoutes.clear();
                 
-                let finalW, finalH, finalX, finalY;
-                if (imgRatio > safeRatio) { finalW = safeZoneW; finalH = safeZoneW / imgRatio; } else { finalH = safeZoneH; finalW = safeZoneH * imgRatio; }
-                finalX = safeZoneX + ((safeZoneW - finalW) / 2); finalY = safeZoneY + ((safeZoneH - finalH) / 2);
-
-                doc.addImage(imgObj.img, 'JPEG', finalX, finalY, finalW, finalH);
-
-                doc.setDrawColor(200, 200, 200); doc.setLineWidth(0.3); doc.line(margin, pageHeight - margin - footerHeight, pageWidth - margin, pageHeight - margin - footerHeight);
-
-                const textStartX = margin + 4; let textStartY = pageHeight - margin - 14; 
-                doc.setTextColor(0, 0, 0); doc.setFont("helvetica", "bold"); doc.setFontSize(11); doc.text(`${data.tsId} | ${data.def}  ${data.comp}`, textStartX, textStartY);
-                textStartY += 5; doc.setFont("helvetica", "normal"); doc.setFontSize(10); const cleanLineName = data.lineName ? data.lineName.replace(/ Line/i, '').trim().toUpperCase() : ''; doc.text(`Location: ${data.routeName} - ${cleanLineName}`, textStartX, textStartY);
-                textStartY += 5; doc.text(`Date taken: ${todayDate}`, textStartX, textStartY);
-
-                const rightAlignX = pageWidth - margin - 4; doc.setFont("helvetica", "bold"); doc.setFontSize(9); doc.text(`PAGE ${index + 1} OF ${data.images.length}`, rightAlignX, textStartY, { align: "right" });
-            });
-
-            return doc.output('blob');
+                for(let i=0; i<data.length; i++) {
+                    const seg = data[i];
+                    await updateProgress(10 + Math.round((i/data.length)*80), `RESTORING TS-${seg.segmentNum}...`);
+                    const card = createSegmentCard(seg.segmentNum, "", seg.routeName, "", "var(--primary)", seg.areaName);
+                    card.querySelector('.segment-notes').value = seg.notes || '';
+                    const list = card.querySelector('.defect-list'); list.innerHTML='';
+                    for(let def of seg.defects) {
+                        const newRefs = [];
+                        for(let img of def.images) { 
+                            if(img.data) {
+                                const ref = await saveImageToDB(img.data, img.w || 1200, img.h || 1200); 
+                                newRefs.push(ref); 
+                            } else if (img.img) { // Ghost Data Import
+                                const ref = await saveImageToDB(img.img, img.w || 1200, img.h || 1200); 
+                                newRefs.push(ref); 
+                            }
+                        }
+                        addDefectRow(list, { ...def, images: newRefs }, seg.areaName);
+                    }
+                    document.getElementById('segments-container').appendChild(card);
+                    const mi = document.createElement('div'); mi.className='map-item'; mi.textContent=`TS-${seg.segmentNum}`; mi.dataset.segment=seg.segmentNum;
+                    mi.onclick = () => card.scrollIntoView({behavior:'smooth', block:'center'});
+                    document.getElementById('miniMap').appendChild(mi);
+                    checkSegmentData(card);
+                }
+                document.getElementById('empty-workspace-state').style.display='none';
+                closeProgress();
+            };
+            reader.readAsText(file);
         }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const sel = document.getElementById('general-area');
+            if(window.globalDatabase) Object.keys(window.globalDatabase).forEach(k => { const o=document.createElement('option'); o.value=k; o.textContent=k; sel.appendChild(o); });
+            applySavedSettings();
+        });
     </script>
 </body>
 </html>
