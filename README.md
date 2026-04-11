@@ -1,6 +1,6 @@
 https://clarkx800-rgb.github.io/Defect-Tracer-Beta-Track/
 
-# 🛤️ Defect Tracer Pro
+# 🛤️ Defect Tracer
 
 > **An offline-first Progressive Web App (PWA) engineered for mobile field track inspections.**
 
