@@ -415,12 +415,28 @@ function scrollToCard(card) {
     window.scrollTo({ top: elementPosition - headerHeight - 15, behavior: "smooth" });
 }
 
-function createSegmentCard(segmentNum, routeKey, routeText, direction, color = 'var(--primary)', areaName = '') {
+// Added 'iconStr' to the end of the parameters
+function createSegmentCard(segmentNum, routeKey, routeText, direction, color = 'var(--primary)', areaName = '', iconStr = '') {
     const card = document.createElement('div');
-    card.className = 'segment-card'; card.setAttribute('data-segment', segmentNum); card.setAttribute('data-route-key', routeKey); card.setAttribute('data-route-name', routeText); card.setAttribute('data-direction', direction); card.setAttribute('data-color', color); card.setAttribute('data-area-name', areaName); card.style.borderLeft = `4px solid ${color}`;
-    const colors = getLineColors(areaName); const areaBadge = areaName ? `<span class="direction-badge" style="background-color: ${colors.bg}; color: ${colors.text}; border-color: ${colors.border};">${areaName}</span>` : '';
-    card.innerHTML = `<div class="segment-header"><h3>TS-${segmentNum}</h3><div class="segment-header-badges">${areaBadge}<span class="direction-badge">${routeText}</span></div></div><textarea class="segment-notes" placeholder="INPUT SECTION LOG..."></textarea><div class="defect-list"></div><button class="add-defect-btn" onclick="addDefectRow(this.previousElementSibling, null, '${areaName}')">+ ADD DEFECT ROW</button>`;
-    addDefectRow(card.querySelector('.defect-list'), null, areaName); return card;
+    card.className = 'segment-card'; 
+    card.setAttribute('data-segment', segmentNum); 
+    card.setAttribute('data-route-key', routeKey); 
+    card.setAttribute('data-route-name', routeText); // PDF reads this pure text
+    card.setAttribute('data-direction', direction); 
+    card.setAttribute('data-color', color); 
+    card.setAttribute('data-area-name', areaName); 
+    card.style.borderLeft = `4px solid ${color}`;
+    
+    const colors = getLineColors(areaName); 
+    const areaBadge = areaName ? `<span class="direction-badge" style="background-color: ${colors.bg}; color: ${colors.text}; border-color: ${colors.border};">${areaName}</span>` : '';
+    
+    // Safely inject the SVG icon into the visual badge ONLY
+    const displayIcon = iconStr ? iconStr : '';
+
+    card.innerHTML = `<div class="segment-header"><h3>TS-${segmentNum}</h3><div class="segment-header-badges">${areaBadge}<span class="direction-badge" style="display:flex; align-items:center;">${displayIcon}${routeText}</span></div></div><textarea class="segment-notes" placeholder="INPUT SECTION LOG..."></textarea><div class="defect-list"></div><button class="add-defect-btn" onclick="addDefectRow(this.previousElementSibling, null, '${areaName}')">+ ADD DEFECT ROW</button>`;
+    
+    addDefectRow(card.querySelector('.defect-list'), null, areaName); 
+    return card;
 }
 
 function addDefectRow(container, prefill = null, areaName = '') {
