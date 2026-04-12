@@ -4,7 +4,7 @@ importScripts('template_config.js');
 
 // 2. CACHE VERSION
 // UPDATE THIS NUMBER every time you add a new template or update code to force phones to redownload!
-const CACHE_NAME = 'defect-tracer-v4.0.18';
+const CACHE_NAME = 'defect-tracer-v4.0.19';
 
 // 3. CORE APP FILES (The modular architecture)
 const coreFilesToCache = [
