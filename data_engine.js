@@ -291,7 +291,7 @@ async function fallbackDownload(excelBlob, excelFilename, pdfJobs, totalSteps) {
 }
 
 // ==========================================
-// PDF LAYOUT GENERATOR: Bubble Card Overlay & Clean Masked Corners
+// PDF LAYOUT GENERATOR: Dynamic Bubble Wrapper
 // ==========================================
 async function generatePDFBlob(job, imgs) {
     const { jsPDF } = window.jspdf;
@@ -314,8 +314,7 @@ async function generatePDFBlob(job, imgs) {
         const pageWidth = orientation === 'landscape' ? 279.4 : 215.9; 
         const pageHeight = orientation === 'landscape' ? 215.9 : 279.4; 
         
-        // 0.5 Inch Margin
-        const margin = 12.7; 
+        const margin = 12.7; // 0.5 Inch Margin
         
         const safeZoneX = margin; 
         const safeZoneY = margin; 
@@ -340,53 +339,76 @@ async function generatePDFBlob(job, imgs) {
         // 1. DRAW THE RAW IMAGE
         doc.addImage(imgObj.data, 'JPEG', finalX, finalY, finalW, finalH);
 
-        // 2. CLEAN CORNER MASK HACK
-        // A mathematically perfect thick white border that physically covers the square 
-        // 90-degree corners of the JPEG, creating flawless round corners with NO artifacts.
+        // 2. PERFECT CORNER MASK (6mm thick white border)
         doc.setDrawColor(255, 255, 255);
-        doc.setLineWidth(6); // 6mm thick border
-        // By expanding the radius to 6.5mm, the inner visible curve becomes exactly 3.5mm, 
-        // which completely encompasses the underlying square image corner.
+        doc.setLineWidth(6); 
         doc.roundedRect(finalX, finalY, finalW, finalH, 6.5, 6.5, 'S');
 
-        // 3. THE FLOATING TEXT BUBBLE/CARD
+        // 3. PRE-CALCULATE TEXT TO FIND THE LONGEST LINE
+        const safeComp = job.comp || 'N/A'; 
+        const safeDef = job.def || 'N/A';
+        const cleanLineName = job.lineName ? job.lineName.toString().replace(/ Line/i, '').trim().toUpperCase() : '';
+        const safeRoute = job.routeName || 'UNKNOWN ROUTE';
+
+        const textLine1 = `${job.tsId} | ${safeDef}  ${safeComp}`;
+        const textLine2 = `Location: ${safeRoute} - ${cleanLineName}`;
+        const textLine3 = `Date taken: ${todayDate}`;
+        const textLine4 = `PAGE ${i + 1} OF ${imgs.length}`;
+
+        // Measure widths using precise jsPDF fonts
+        doc.setFont("helvetica", "bold"); doc.setFontSize(11);
+        const width1 = doc.getTextWidth(textLine1);
+        
+        doc.setFont("helvetica", "normal"); doc.setFontSize(10);
+        const width2 = doc.getTextWidth(textLine2);
+        const width3 = doc.getTextWidth(textLine3);
+        
+        doc.setFont("helvetica", "bold"); doc.setFontSize(9);
+        const width4 = doc.getTextWidth(textLine4);
+
+        // Find the absolute longest line of text
+        const maxTextWidth = Math.max(width1, width2, width3, width4);
+
+        // 4. DRAW THE DYNAMIC FLOATING BUBBLE
         const cardMargin = 8;
-        const cardHeight = 24;
-        const cardW = finalW - (cardMargin * 2);
+        const cardPadding = 6; // 6mm padding left/right
+        
+        // Calculate perfect dynamic width
+        let cardW = maxTextWidth + (cardPadding * 2);
+        // Safety bounds to prevent text spilling off the photo
+        if (cardW > finalW - (cardMargin * 2)) cardW = finalW - (cardMargin * 2); 
+
+        const cardHeight = 30; // Accommodates 4 vertical lines now
         const cardX = finalX + cardMargin;
         const cardY = finalY + finalH - cardHeight - cardMargin;
 
-        // Force opacity for the card, then immediately reset to 1.0 to prevent dimming bugs
         try { doc.setGState(new doc.GState({opacity: 0.70})); } catch(e) {}
-        doc.setFillColor(0, 0, 0); // Black card
+        doc.setFillColor(0, 0, 0); 
         doc.roundedRect(cardX, cardY, cardW, cardHeight, 4, 4, 'F');
-        try { doc.setGState(new doc.GState({opacity: 1.0})); } catch(e) {} // ABSOLUTE RESET
+        try { doc.setGState(new doc.GState({opacity: 1.0})); } catch(e) {} 
 
-        // 4. DRAW WHITE TEXT INSIDE THE BUBBLE
+        // 5. DRAW THE TEXT INSIDE THE BUBBLE
         doc.setTextColor(255, 255, 255);
-        const textStartX = cardX + 6; 
+        const textStartX = cardX + cardPadding; 
         let textStartY = cardY + 7; 
         
-        doc.setFont("helvetica", "bold"); 
-        doc.setFontSize(11);
-        const safeComp = job.comp || 'N/A'; 
-        const safeDef = job.def || 'N/A';
-        doc.text(`${job.tsId} | ${safeDef}  ${safeComp}`, textStartX, textStartY);
+        // Line 1: TS & Component
+        doc.setFont("helvetica", "bold"); doc.setFontSize(11);
+        doc.text(textLine1, textStartX, textStartY);
         
+        // Line 2: Location
         textStartY += 6; 
-        doc.setFont("helvetica", "normal"); 
-        doc.setFontSize(10);
-        const cleanLineName = job.lineName ? job.lineName.toString().replace(/ Line/i, '').trim().toUpperCase() : '';
-        const safeRoute = job.routeName || 'UNKNOWN ROUTE';
-        doc.text(`Location: ${safeRoute} - ${cleanLineName}`, textStartX, textStartY);
+        doc.setFont("helvetica", "normal"); doc.setFontSize(10);
+        doc.text(textLine2, textStartX, textStartY);
         
+        // Line 3: Date
         textStartY += 6; 
-        doc.text(`Date taken: ${todayDate}`, textStartX, textStartY);
+        doc.text(textLine3, textStartX, textStartY);
 
-        const rightAlignX = cardX + cardW - 6; 
-        doc.setFont("helvetica", "bold"); 
-        doc.setFontSize(9);
-        doc.text(`PAGE ${i + 1} OF ${imgs.length}`, rightAlignX, cardY + 7, { align: "right" });
+        // Line 4: Page Count (Moved to bottom left!)
+        textStartY += 6; 
+        doc.setFont("helvetica", "bold"); doc.setFontSize(9);
+        doc.text(textLine4, textStartX, textStartY); 
         
         if (i % 2 === 0) await delay(16); 
     }
