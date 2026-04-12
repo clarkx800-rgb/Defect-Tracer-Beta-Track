@@ -291,8 +291,7 @@ async function fallbackDownload(excelBlob, excelFilename, pdfJobs, totalSteps) {
 }
 
 // ==========================================
-// PDF LAYOUT GENERATOR
-// Letter Size, Narrow Margins, Perfect Rounded Crop, Cinematic Text Gradient
+// PDF LAYOUT GENERATOR: Bubble Card Overlay & Clean Masked Corners
 // ==========================================
 async function generatePDFBlob(job, imgs) {
     const { jsPDF } = window.jspdf;
@@ -301,7 +300,6 @@ async function generatePDFBlob(job, imgs) {
     let firstImgH = imgs[0].h || 2400; 
     let firstOrientation = (firstImgW > firstImgH) ? 'landscape' : 'portrait';
     
-    // Configured to 'letter' size (8.5 x 11 inches)
     const doc = new jsPDF({ orientation: firstOrientation, unit: 'mm', format: 'letter' });
     const todayDate = new Date().toLocaleDateString();
 
@@ -316,7 +314,7 @@ async function generatePDFBlob(job, imgs) {
         const pageWidth = orientation === 'landscape' ? 279.4 : 215.9; 
         const pageHeight = orientation === 'landscape' ? 215.9 : 279.4; 
         
-        // NARROW MARGINS (12.7mm = 0.5 inches)
+        // 0.5 Inch Margin
         const margin = 12.7; 
         
         const safeZoneX = margin; 
@@ -329,7 +327,6 @@ async function generatePDFBlob(job, imgs) {
         
         let finalW, finalH, finalX, finalY;
         
-        // FITTED/CENTERED logic
         if (imgRatio > safeRatio) { 
             finalW = safeZoneW; 
             finalH = safeZoneW / imgRatio; 
@@ -340,42 +337,35 @@ async function generatePDFBlob(job, imgs) {
         finalX = safeZoneX + ((safeZoneW - finalW) / 2); 
         finalY = safeZoneY + ((safeZoneH - finalH) / 2);
 
-        // CLIPPING PATH: Crop corners to 6mm radius
-        doc.saveGraphicsState();
-        doc.roundedRect(finalX, finalY, finalW, finalH, 6, 6, null);
-        doc.clip();
-
-        // Draw Image Inside Clip
+        // 1. DRAW THE RAW IMAGE
         doc.addImage(imgObj.data, 'JPEG', finalX, finalY, finalW, finalH);
 
-        // CINEMATIC TEXT GRADIENT (Only behind text)
-        const overlayHeight = 28;
-        const overlayY = finalY + finalH - overlayHeight;
-        
-        // Build the smooth fade from 0% opacity to 75% opacity
-        const steps = 15;
-        for (let s = 0; s < steps; s++) {
-            try { doc.setGState(new doc.GState({opacity: (s / steps) * 0.75})); } catch(e) {}
-            doc.setFillColor(0, 0, 0);
-            doc.rect(finalX, overlayY + (s * (overlayHeight/steps)), finalW, (overlayHeight/steps) + 0.5, 'F');
-        }
-        
-        // Remove clip
-        doc.restoreGraphicsState();
-        
-        // BUG FIX 1: Explicitly reset opacity to 1.0 to prevent the ENTIRE image from darkening
-        try { doc.setGState(new doc.GState({opacity: 1.0})); } catch(e) {}
-
-        // BUG FIX 2: Explicit White Border to forcefully round all 4 corners perfectly
-        // This hides any sharp pixel bleed that jsPDF's clipping engine missed.
+        // 2. CLEAN CORNER MASK HACK
+        // A mathematically perfect thick white border that physically covers the square 
+        // 90-degree corners of the JPEG, creating flawless round corners with NO artifacts.
         doc.setDrawColor(255, 255, 255);
-        doc.setLineWidth(2.5); 
-        doc.roundedRect(finalX, finalY, finalW, finalH, 6, 6, 'S');
+        doc.setLineWidth(6); // 6mm thick border
+        // By expanding the radius to 6.5mm, the inner visible curve becomes exactly 3.5mm, 
+        // which completely encompasses the underlying square image corner.
+        doc.roundedRect(finalX, finalY, finalW, finalH, 6.5, 6.5, 'S');
 
-        // DRAW WHITE TEXT OVER THE GRADIENT
+        // 3. THE FLOATING TEXT BUBBLE/CARD
+        const cardMargin = 8;
+        const cardHeight = 24;
+        const cardW = finalW - (cardMargin * 2);
+        const cardX = finalX + cardMargin;
+        const cardY = finalY + finalH - cardHeight - cardMargin;
+
+        // Force opacity for the card, then immediately reset to 1.0 to prevent dimming bugs
+        try { doc.setGState(new doc.GState({opacity: 0.70})); } catch(e) {}
+        doc.setFillColor(0, 0, 0); // Black card
+        doc.roundedRect(cardX, cardY, cardW, cardHeight, 4, 4, 'F');
+        try { doc.setGState(new doc.GState({opacity: 1.0})); } catch(e) {} // ABSOLUTE RESET
+
+        // 4. DRAW WHITE TEXT INSIDE THE BUBBLE
         doc.setTextColor(255, 255, 255);
-        const textStartX = finalX + 6; 
-        let textStartY = overlayY + 12; 
+        const textStartX = cardX + 6; 
+        let textStartY = cardY + 7; 
         
         doc.setFont("helvetica", "bold"); 
         doc.setFontSize(11);
@@ -393,12 +383,12 @@ async function generatePDFBlob(job, imgs) {
         textStartY += 6; 
         doc.text(`Date taken: ${todayDate}`, textStartX, textStartY);
 
-        const rightAlignX = finalX + finalW - 6; 
+        const rightAlignX = cardX + cardW - 6; 
         doc.setFont("helvetica", "bold"); 
         doc.setFontSize(9);
-        doc.text(`PAGE ${i + 1} OF ${imgs.length}`, rightAlignX, overlayY + 12, { align: "right" });
+        doc.text(`PAGE ${i + 1} OF ${imgs.length}`, rightAlignX, cardY + 7, { align: "right" });
         
-        if (i % 2 === 0) await window.delay(16); 
+        if (i % 2 === 0) await delay(16); 
     }
     return doc.output('blob');
 }
