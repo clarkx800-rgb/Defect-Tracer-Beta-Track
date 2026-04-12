@@ -1,7 +1,7 @@
 window.globalDatabase = window.globalDatabase || {};
 window.globalDefectMaps = window.globalDefectMaps || {};
 
-window.globalDatabase["Millenium Line"] = {
+window.globalDatabase["Millennium Line"] = {
     "Inbound Track": {
         "SAZ-BDZ-IB": {
             name: "SAZ-BDZ-IB",
@@ -25,7 +25,7 @@ window.globalDatabase["Millenium Line"] = {
     }
 };
 
-window.globalDefectMaps["Millenium Line"] = {
+window.globalDefectMaps["Millennium Line"] = {
     'Millennium Fastener': ['Loose', 'Missing', 'Rusted'],
     'Millennium Power Rail': ['Arc Burns', 'Steel Cap Wear']
     // Add all MILLENNIUM specific parts here...
