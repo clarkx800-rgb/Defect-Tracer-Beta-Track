@@ -107,7 +107,6 @@ function doSmoothScroll(targetY, duration) {
     requestAnimationFrame(step);
 }
 
-// BUG FIXED: Restored Scroll Listener for the Toggle Button
 ['touchstart', 'mousedown', 'wheel'].forEach(evt => { window.addEventListener(evt, () => { if (window.isPageScrolling) window.isPageScrolling = false; }, { passive: true }); });
 
 window.addEventListener('scroll', () => {
@@ -458,16 +457,28 @@ function addDefectRow(container, prefill = null, areaName = '') {
     const cloneBtn = document.createElement('button'); cloneBtn.className = 'clone-btn'; cloneBtn.innerHTML = '⇊'; cloneBtn.title = "Clone Defect to other Track Sections"; cloneBtn.onclick = function() { openCloneModal(row); };
     const delBtn = document.createElement('button'); delBtn.className = 'delete-btn'; delBtn.innerHTML = '✖'; delBtn.onclick = function() { const card = row.closest('.segment-card'); cleanUpRowImages(row); row.remove(); checkSegmentData(card); };
 
+    // HIGH QUALITY IMAGE CAPTURE MODIFICATION
     fileInput.addEventListener('change', function(e) {
         if (this.files && this.files.length > 0) {
             const file = this.files[0]; cameraLabel.innerHTML = '⏳ LOAD...'; const reader = new FileReader();
             reader.onload = function(event) {
                 const img = new Image();
                 img.onload = function() {
-                    const canvas = document.createElement('canvas'); const MAX_WIDTH = 1200, MAX_HEIGHT = 1200; let width = img.width, height = img.height;
-                    if (width > height) { if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; } } else { if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; } }
-                    canvas.width = width; canvas.height = height; const ctx = canvas.getContext('2d', { alpha: false }); ctx.fillStyle = "#FFFFFF"; ctx.fillRect(0, 0, width, height); ctx.drawImage(img, 0, 0, width, height);
-                    saveImageToDB(canvas.toDataURL('image/jpeg', 0.85), width, height).then(imgRef => {
+                    const canvas = document.createElement('canvas'); 
+                    // HDR / Native quality limits 
+                    const MAX_WIDTH = 2400, MAX_HEIGHT = 2400; 
+                    let width = img.width, height = img.height;
+                    
+                    if (width > height) { if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; } } 
+                    else { if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; } }
+                    
+                    canvas.width = width; canvas.height = height; 
+                    const ctx = canvas.getContext('2d', { alpha: false }); 
+                    ctx.fillStyle = "#FFFFFF"; ctx.fillRect(0, 0, width, height); 
+                    ctx.drawImage(img, 0, 0, width, height);
+                    
+                    // Increased JPEG quality to 95%
+                    saveImageToDB(canvas.toDataURL('image/jpeg', 0.95), width, height).then(imgRef => {
                         const currentImages = JSON.parse(row.dataset.images || "[]"); currentImages.push(imgRef); row.dataset.images = JSON.stringify(currentImages); updatePhotoUI(row, cameraLabel, badgeContainer); checkSegmentData(row.closest('.segment-card'));
                         canvas.width = 0; canvas.height = 0; img.src = ''; fileInput.value = ''; 
                     }).catch(err => {
