@@ -3,10 +3,14 @@ window.globalDefectMaps = window.globalDefectMaps || {};
 
 window.globalDatabase["Millenium Line"] = {
     "Inbound Track": {
-        "Work-In-Progress-IB": {
-            name: "Demo Area 2 - Inbound",
-            segments: [ { start: 0, end: 5, color: "#9c27b0" } ]
-        }
+        "SAZ-BDZ-IB": {
+            name: "SAZ-BDZ-IB",
+            segments: [ { start: 4639, end: 4712, color: "#DB532D" } ]
+        },
+        "BDZ-PWZ-IB": {
+            name: "BDZ-PWZ-IB",
+            segments: [ { start: 4713, end: 4712, color: "#DB532D" } ]
+        },
     },
     "Outbound Track": {
         "Work-In-Progress-OB": {
