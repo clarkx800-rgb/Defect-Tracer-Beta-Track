@@ -140,6 +140,7 @@ async function executeClone() {
     }
 }
 
+// BUG FIXED: Upgraded Switch Splicer to read Text-based 'points'
 async function executeInsert() {
     const targetTS = window.currentInsertTargetTS;
     if (!targetTS) return;
@@ -155,7 +156,16 @@ async function executeInsert() {
 
     await updateProgress(10, "SPLICING NEW SWITCH...", "LOADING SECTIONS");
     const newCards = []; 
-    selectedRouteData.segments.forEach(range => { const blockColor = range.color || 'var(--primary)'; if (range.start <= range.end) { for (let i = range.start; i <= range.end; i++) newCards.push({ num: i, color: blockColor }); } else { for (let i = range.start; i >= range.end; i--) newCards.push({ num: i, color: blockColor }); } });
+    
+    selectedRouteData.segments.forEach(range => { 
+        const blockColor = range.color || 'var(--primary)'; 
+        if (range.points) {
+            range.points.forEach(pt => newCards.push({ num: pt, color: blockColor }));
+        } else if (range.start !== undefined && range.end !== undefined) {
+            if (range.start <= range.end) { for (let i = range.start; i <= range.end; i++) newCards.push({ num: i, color: blockColor }); } 
+            else { for (let i = range.start; i >= range.end; i--) newCards.push({ num: i, color: blockColor }); } 
+        }
+    });
 
     const targetCard = document.querySelector(`.segment-card[data-segment="${targetTS}"]`); const targetMap = document.querySelector(`.map-item[data-map-segment="${targetTS}"]`);
     const refCard = targetCard ? targetCard.nextSibling : null; const refMap = targetMap ? targetMap.nextSibling : null;
@@ -175,7 +185,6 @@ async function executeInsert() {
     await updateProgress(100, "SPLICE COMPLETE!"); setTimeout(closeProgress, 800);
 }
 
-// BUG FIXED: Restored Missing Template Loader
 async function loadSelectedTemplate() {
     const select = document.getElementById('template-select');
     const url = select.value;
@@ -299,6 +308,7 @@ async function injectProjectData(projectData, fileName) {
     }
 }
 
+// BUG FIXED: Upgraded Section Generator to read Text-based 'points'
 async function generateSegments() {
     const area = window.currentActiveArea; const direction = window.currentActiveDirection;
     const checkboxes = Array.from(document.querySelectorAll('#quick-add-checklist input[type="checkbox"]:checked'));
@@ -315,7 +325,16 @@ async function generateSegments() {
         const selectedRouteData = window.globalDatabase[area][direction][selectedRouteKey];
         const container = document.getElementById('segments-container'); const mapContainer = document.getElementById('miniMap');
         const newCards = []; 
-        selectedRouteData.segments.forEach(range => { const blockColor = range.color || 'var(--primary)'; if (range.start <= range.end) { for (let i = range.start; i <= range.end; i++) newCards.push({ num: i, color: blockColor }); } else { for (let i = range.start; i >= range.end; i--) newCards.push({ num: i, color: blockColor }); } });
+        
+        selectedRouteData.segments.forEach(range => { 
+            const blockColor = range.color || 'var(--primary)'; 
+            if (range.points) {
+                range.points.forEach(pt => newCards.push({ num: pt, color: blockColor }));
+            } else if (range.start !== undefined && range.end !== undefined) {
+                if (range.start <= range.end) { for (let i = range.start; i <= range.end; i++) newCards.push({ num: i, color: blockColor }); } 
+                else { for (let i = range.start; i >= range.end; i--) newCards.push({ num: i, color: blockColor }); } 
+            }
+        });
         
         for (let i=0; i<newCards.length; i++) {
             const item = newCards[i];
