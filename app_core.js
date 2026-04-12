@@ -140,7 +140,6 @@ async function executeClone() {
     }
 }
 
-// BUG FIXED: Upgraded Switch Splicer to read Text-based 'points'
 async function executeInsert() {
     const targetTS = window.currentInsertTargetTS;
     if (!targetTS) return;
@@ -173,7 +172,9 @@ async function executeInsert() {
     for (let i=0; i<newCards.length; i++) {
         const item = newCards[i];
         await updateProgress(10 + Math.round((i/newCards.length)*80), `INSERTING TS-${item.num}...`, "LOADING SECTIONS");
-        const card = createSegmentCard(item.num, routeKey, selectedRouteData.name, direction, item.color, area);
+        
+        // ICON INJECTED HERE
+        const card = createSegmentCard(item.num, routeKey, selectedRouteData.name, direction, item.color, area, selectedRouteData.icon);
         card.style.animationDelay = `${i * 0.05}s`; container.insertBefore(card, refCard); scrollObserver.observe(card);
         const mapBtn = document.createElement('div'); mapBtn.className = 'map-item'; mapBtn.setAttribute('data-map-segment', item.num); mapBtn.setAttribute('data-route-key', routeKey); mapBtn.textContent = `TS-${item.num}`; mapBtn.style.borderLeft = `4px solid ${item.color}`;
         attachMapItemListeners(mapBtn, card, item.num, routeKey); mapContainer.insertBefore(mapBtn, refMap);
@@ -232,7 +233,8 @@ async function injectProjectData(projectData, fileName) {
             const safeAreaName = segData.areaName || '';
             const activeKey = segData.routeKey || segData.routeName; 
             
-            const card = createSegmentCard(segData.segmentNum, activeKey, segData.routeName, segData.direction, segData.color, safeAreaName);
+            // ICON INJECTED HERE
+            const card = createSegmentCard(segData.segmentNum, activeKey, segData.routeName, segData.direction, segData.color, safeAreaName, segData.icon);
             card.style.animationDelay = `${index * 0.05}s`;
             
             card.querySelector('.segment-notes').value = segData.notes || '';
@@ -308,7 +310,6 @@ async function injectProjectData(projectData, fileName) {
     }
 }
 
-// BUG FIXED: Upgraded Section Generator to read Text-based 'points'
 async function generateSegments() {
     const area = window.currentActiveArea; const direction = window.currentActiveDirection;
     const checkboxes = Array.from(document.querySelectorAll('#quick-add-checklist input[type="checkbox"]:checked'));
@@ -339,7 +340,11 @@ async function generateSegments() {
         for (let i=0; i<newCards.length; i++) {
             const item = newCards[i];
             await updateProgress(10 + Math.round(((j+0.5)/selectedRouteKeys.length)*80), `BUILDING TS-${item.num}...`, "LOADING ROUTES");
-            const card = createSegmentCard(item.num, selectedRouteKey, selectedRouteData.name, direction, item.color, area); card.style.animationDelay = `${i * 0.05}s`; container.appendChild(card); scrollObserver.observe(card);
+            
+            // ICON INJECTED HERE
+            const card = createSegmentCard(item.num, selectedRouteKey, selectedRouteData.name, direction, item.color, area, selectedRouteData.icon); 
+            
+            card.style.animationDelay = `${i * 0.05}s`; container.appendChild(card); scrollObserver.observe(card);
             const mapBtn = document.createElement('div'); mapBtn.className = 'map-item'; mapBtn.setAttribute('data-map-segment', item.num); mapBtn.setAttribute('data-route-key', selectedRouteKey); mapBtn.textContent = `TS-${item.num}`; mapBtn.style.borderLeft = `4px solid ${item.color}`;
             attachMapItemListeners(mapBtn, card, item.num, selectedRouteKey); mapContainer.appendChild(mapBtn);
             if (!firstNewCardToScroll) firstNewCardToScroll = card;
