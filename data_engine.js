@@ -78,11 +78,11 @@ async function saveProject() {
 
     await updateProgress(10, "PACKAGING TRACK DATA...", "SAVING DATA");
     const projectData = [];
-    
+
     for (let i = 0; i < cards.length; i++) {
         const card = cards[i];
         await updateProgress(10 + Math.round((i / cards.length) * 50), `PACKAGING TS-${card.getAttribute('data-segment')}...`, "SAVING DATA");
-        
+
         const segData = {
             segmentNum: card.getAttribute('data-segment'), routeKey: card.getAttribute('data-route-key'), routeName: card.getAttribute('data-route-name'),
             direction: card.getAttribute('data-direction'), color: card.getAttribute('data-color'), areaName: card.getAttribute('data-area-name'), 
@@ -192,7 +192,7 @@ async function exportData() {
         for(let i=0; i<total; i++) {
             const card = cards[i];
             const segmentNum = card.getAttribute('data-segment'); const tsId = `TS-${segmentNum}`; const routeName = card.getAttribute('data-route-name'); const areaName = card.getAttribute('data-area-name') || ''; const notes = card.querySelector('.segment-notes').value; const rows = card.querySelectorAll('.defect-row');
-            
+
             await updateProgress(5 + Math.round((i/total)*25), `SCRAPING TS-${segmentNum}...`, "EXPORTING DATA");
             let hasDefects = false;
 
@@ -201,7 +201,7 @@ async function exportData() {
                 const comp = isCustom ? row.querySelector('.custom-comp').value : row.querySelector('.component-select').value;
                 const def = isCustom ? row.querySelector('.custom-def').value : row.querySelector('.defect-select').value;
                 const refs = JSON.parse(row.dataset.images || "[]");
-                
+
                 if (comp || def || refs.length > 0) {
                     hasDefects = true; hasDataRows = true;
                     worksheet.addRow({ line: areaName, route: routeName, segment: tsId, notes: notes, component: comp, defect: def });
@@ -229,7 +229,7 @@ async function exportData() {
             for (let j = 0; j < pdfJobs.length; j++) {
                 const job = pdfJobs[j];
                 await updateProgress(42 + Math.round(((j+0.5) / totalSteps) * 58), `BUILDING PDF ${j+1}/${pdfJobs.length} [${job.tsId}]...`, "GENERATING EXPORT");
-                
+
                 const imgs = [];
                 for(let r of job.refs) { 
                     if (r.id) { const d = await getImageFromDB(r.id); if(d && d.data) imgs.push(d); } 
@@ -240,7 +240,7 @@ async function exportData() {
                 const pdfBlob = await generatePDFBlob(job, imgs);
                 const cleanComp = job.comp ? job.comp.toString().replace(/[^a-z0-9]/gi, '_') : 'UNKNOWN';
                 const pdfFilename = `${job.tsId}_${cleanComp}_DEFECT.pdf`;
-                
+
                 const pdfFileHandle = await dirHandle.getFileHandle(pdfFilename, { create: true });
                 const pdfWritable = await pdfFileHandle.createWritable();
                 await pdfWritable.write(pdfBlob); await pdfWritable.close();
@@ -270,7 +270,7 @@ async function fallbackDownload(excelBlob, excelFilename, pdfJobs, totalSteps) {
         for (let j = 0; j < pdfJobs.length; j++) { 
             const job = pdfJobs[j];
             await updateProgress(45 + Math.round(((j+0.5) / totalSteps) * 55), `BUILDING PDF ${j+1}/${pdfJobs.length} [${job.tsId}]...`, "GENERATING EXPORT");
-            
+
             const imgs = [];
             for(let r of job.refs) { 
                 if (r.id) { const d = await getImageFromDB(r.id); if(d && d.data) imgs.push(d); }
@@ -281,7 +281,7 @@ async function fallbackDownload(excelBlob, excelFilename, pdfJobs, totalSteps) {
             const pdfBlob = await generatePDFBlob(job, imgs);
             const cleanComp = job.comp ? job.comp.toString().replace(/[^a-z0-9]/gi, '_') : 'UNKNOWN';
             const pdfFilename = `${job.tsId}_${cleanComp}_DEFECT.pdf`;
-            
+
             const pdflink = document.createElement("a"); pdflink.href = URL.createObjectURL(pdfBlob); pdflink.download = pdfFilename; document.body.appendChild(pdflink); pdflink.click(); document.body.removeChild(pdflink);
             await delay(800); 
         }
@@ -292,100 +292,26 @@ async function fallbackDownload(excelBlob, excelFilename, pdfJobs, totalSteps) {
 
 async function generatePDFBlob(job, imgs) {
     const { jsPDF } = window.jspdf;
-    
-    // Auto-orient the very first page based on the first image's actual dimensions
-    let firstImgW = imgs[0].w || 1200; 
-    let firstImgH = imgs[0].h || 1200; 
-    let firstOrientation = (firstImgW > firstImgH) ? 'landscape' : 'portrait';
-    
+    let firstImgW = imgs[0].w || 1200; let firstImgH = imgs[0].h || 1200; let firstOrientation = (firstImgW > firstImgH) ? 'landscape' : 'portrait';
+
+
+
+
+
     const doc = new jsPDF({ orientation: firstOrientation, unit: 'mm', format: 'a4' });
-    const todayDate = new Date().toLocaleDateString();
+    const activeTheme = localStorage.getItem('appTheme') || 'tactical'; const todayDate = new Date().toLocaleDateString();
 
     for(let i=0; i<imgs.length; i++) {
-        const imgObj = imgs[i]; 
-        let imgW = imgObj.w || 1200; 
-        let imgH = imgObj.h || 1200; 
-        
-        let orientation = (imgW > imgH) ? 'landscape' : 'portrait';
+        const imgObj = imgs[i]; let imgW = imgObj.w || 1200; let imgH = imgObj.h || 1200; let orientation = (imgW > imgH) ? 'landscape' : 'portrait';
+
+
+
+
         if (i > 0) doc.addPage('a4', orientation);
 
-        // 1. PAGE & MARGIN MATH
-        const pageWidth = doc.internal.pageSize.getWidth();
-        const pageHeight = doc.internal.pageSize.getHeight();
-        const margin = 5; 
-        const boxWidth = pageWidth - (margin * 2);
-        const boxHeight = pageHeight - (margin * 2);
-        const cornerRadius = 4; 
+        const pageWidth = orientation === 'landscape' ? 297 : 210; const pageHeight = orientation === 'landscape' ? 210 : 297; const margin = 10; const borderW = pageWidth - (margin * 2); const borderH = pageHeight - (margin * 2);
 
-        // 2. "OBJECT-FIT: COVER" MATH (Ensures no stretching)
-        const imgRatio = imgW / imgH;
-        const boxRatio = boxWidth / boxHeight;
-
-        let renderWidth = boxWidth;
-        let renderHeight = boxHeight;
-        let xOffset = margin;
-        let yOffset = margin;
-
-        if (imgRatio > boxRatio) {
-            renderHeight = boxHeight;
-            renderWidth = renderHeight * imgRatio;
-            xOffset = margin - ((renderWidth - boxWidth) / 2);
-        } else {
-            renderWidth = boxWidth;
-            renderHeight = renderWidth / imgRatio;
-            yOffset = margin - ((renderHeight - boxHeight) / 2);
-        }
-
-        // 3. DRAW CLIPPED, ROUNDED IMAGE (No visible border)
-        doc.saveGraphicsState(); 
-        
-        // Define the clipping path (the rounded rectangle boundary)
-        doc.roundedRect(margin, margin, boxWidth, boxHeight, cornerRadius, cornerRadius, null);
-        doc.clip(); // Activate clipping
-        
-        doc.addImage(imgObj.data, 'JPEG', xOffset, yOffset, renderWidth, renderHeight);
-        
-        doc.restoreGraphicsState(); // Reset state
-
-        // 4. THE "MODERN WATERMARK" SHIELD
-        const overlayHeight = 28; 
-        const overlayX = margin + 5; 
-        const overlayY = pageHeight - margin - overlayHeight - 5; 
-        const overlayWidth = boxWidth - 10; 
-
-        doc.setFillColor(20, 20, 20); 
-        doc.setDrawColor(20, 20, 20); 
-        doc.setGState(new doc.GState({opacity: 0.70})); 
-        
-        doc.roundedRect(overlayX, overlayY, overlayWidth, overlayHeight, 2, 2, 'F'); 
-
-        // 5. DRAW CRISP, READABLE DETAILS
-        doc.setGState(new doc.GState({opacity: 1.0})); 
-        doc.setTextColor(255, 255, 255); 
-
-        const safeComp = job.comp || 'N/A'; 
-        const safeDef = job.def || 'N/A';
-        const cleanLineName = job.lineName ? job.lineName.toString().replace(/ Line/i, '').trim().toUpperCase() : '';
-        const safeRoute = job.routeName || 'UNKNOWN ROUTE';
-
-        // Title Row: Defect & Component (Bold)
-        doc.setFont("helvetica", "bold");
-        doc.setFontSize(12);
-        doc.text(`${job.tsId} | ${safeDef} - ${safeComp}`, overlayX + 5, overlayY + 8);
-
-        // Location Row (Normal weight)
-        doc.setFont("helvetica", "normal");
-        doc.setFontSize(10);
-        doc.text(`Location: ${safeRoute} ${cleanLineName ? '- ' + cleanLineName : ''}`, overlayX + 5, overlayY + 16);
-        
-        // Data & Page Number Row (Right-aligned page)
-        doc.text(`Date taken: ${todayDate}`, overlayX + 5, overlayY + 24);
-        
-        const rightAlignX = overlayX + overlayWidth - 5; 
-        doc.setFont("helvetica", "bold"); doc.setFontSize(9);
-        doc.text(`PAGE ${i + 1} OF ${imgs.length}`, rightAlignX, overlayY + 24, { align: "right" });
-        
-        if (i % 2 === 0) await delay(16); 
-    }
-    return doc.output('blob');
-}
+        if (activeTheme === 'windows11') { doc.setDrawColor(0, 120, 212); doc.setLineWidth(0.5); doc.roundedRect(margin, margin, borderW, borderH, 3, 3, 'S'); } 
+        else if (activeTheme === 'pokemongo') { doc.setDrawColor(227, 53, 13); doc.setLineWidth(1.0); doc.roundedRect(margin, margin, borderW, borderH, 5, 5, 'S'); doc.setDrawColor(40, 172, 168); doc.setLineWidth(0.3); doc.roundedRect(margin + 1, margin + 1, borderW - 2, borderH - 2, 4, 4, 'S'); } 
+        else if (activeTheme === 'macosdark') { doc.setDrawColor(80, 80, 80); doc.setLineWidth(0.5); doc.roundedRect(margin, margin, borderW, borderH, 4, 4, 'S'); } 
+        else { doc.setDrawColor(30, 30, 30); doc.setLineWidth(1.0); doc.rect(margin, margin, borderW, borderH, 'S'); doc.setLineWidth(0.3); doc.rect(margin + 1.5, margin + 1.5, borderW - 3, borderH - 3, 'S'); }
