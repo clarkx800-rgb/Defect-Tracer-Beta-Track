@@ -1,299 +1,11 @@
 // ==========================================
-// DATA ENGINE: IndexedDB, Exports, Save/Load
+// --- REPLACE YOUR CURRENT PDF EXPORT FUNCTION AT THE END OF data_engine.js ---
 // ==========================================
-
-const dbName = "TracerImageDB";
-let imageDB;
-
-const initDB = () => {
-    return new Promise((resolve, reject) => {
-        const request = indexedDB.open(dbName, 1);
-        request.onupgradeneeded = (e) => {
-            const db = e.target.result;
-            if (!db.objectStoreNames.contains('images')) db.createObjectStore('images', { keyPath: 'id' });
-        };
-        request.onsuccess = (e) => { imageDB = e.target.result; resolve(imageDB); };
-        request.onerror = (e) => reject(e.target.error);
-    });
-};
-initDB().catch(err => console.error("IndexedDB Init Failed:", err));
-
-const saveImageToDB = (base64Data, w, h) => {
-    return new Promise((resolve, reject) => {
-        if(!imageDB) return reject("DB offline");
-        const id = 'img_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
-        const transaction = imageDB.transaction(['images'], 'readwrite');
-        const store = transaction.objectStore('images');
-        const record = { id: id, data: base64Data, w: w, h: h };
-        store.add(record);
-        transaction.oncomplete = () => resolve({ id: id, w: w, h: h });
-        transaction.onerror = (e) => reject(e.target.error);
-    });
-};
-
-const getImageFromDB = (id) => {
-    return new Promise((resolve, reject) => {
-        if(!imageDB) return resolve(null);
-        const transaction = imageDB.transaction(['images'], 'readonly');
-        const store = transaction.objectStore('images');
-        const request = store.get(id);
-        request.onsuccess = (e) => resolve(e.target.result);
-        request.onerror = (e) => reject(e.target.error);
-    });
-};
-
-const deleteImageFromDB = (id) => {
-    if(!imageDB) return;
-    const transaction = imageDB.transaction(['images'], 'readwrite');
-    transaction.objectStore('images').delete(id);
-};
-
-function cleanUpRowImages(row) {
-    if(!row) return;
-    const images = JSON.parse(row.dataset.images || "[]");
-    images.forEach(img => { if (img.id) deleteImageFromDB(img.id); });
-}
-
-// ==========================================
-// SAVE PROJECT
-// ==========================================
-async function saveProject() {
-    const cards = document.querySelectorAll('.segment-card');
-    if (cards.length === 0) { showSystemAlert('No data available to save.', 'SAVE FAILED', true); return; }
-
-    let exportName = window.currentFileName || `TRACK_DATA_${new Date().toISOString().split('T')[0]}.json`;
-    let fileHandle = null;
-
-    if (window.showSaveFilePicker) {
-        try {
-            fileHandle = await window.showSaveFilePicker({
-                suggestedName: exportName,
-                types: [{ description: 'JSON File', accept: {'application/json': ['.json']} }],
-            });
-        } catch (err) {
-            if (err.name !== 'AbortError') { console.error(err); showSystemAlert('File selection failed.', 'SAVE ERROR', true); }
-            return; 
-        }
-    }
-
-    await updateProgress(10, "PACKAGING TRACK DATA...", "SAVING DATA");
-    const projectData = [];
-    
-    for (let i = 0; i < cards.length; i++) {
-        const card = cards[i];
-        await updateProgress(10 + Math.round((i / cards.length) * 50), `PACKAGING TS-${card.getAttribute('data-segment')}...`, "SAVING DATA");
-        
-        const segData = {
-            segmentNum: card.getAttribute('data-segment'), routeKey: card.getAttribute('data-route-key'), routeName: card.getAttribute('data-route-name'),
-            direction: card.getAttribute('data-direction'), color: card.getAttribute('data-color'), areaName: card.getAttribute('data-area-name'), 
-            notes: card.querySelector('.segment-notes').value, defects: []
-        };
-
-        const rows = card.querySelectorAll('.defect-row');
-        for(let row of rows) {
-            const isCustom = row.dataset.isCustom === "true";
-            const imgRefs = JSON.parse(row.dataset.images || "[]");
-            const fullImgs = [];
-            for(let ref of imgRefs) {
-                if(ref.id) { const dbImg = await getImageFromDB(ref.id); if(dbImg) fullImgs.push({ data: dbImg.data, w: dbImg.w, h: dbImg.h }); } 
-                else if(ref.img) { fullImgs.push({ data: ref.img, w: ref.w, h: ref.h }); }
-            }
-            segData.defects.push({
-                isCustom: isCustom, comp: isCustom ? row.querySelector('.custom-comp').value : row.querySelector('.component-select').value,
-                def: isCustom ? row.querySelector('.custom-def').value : row.querySelector('.defect-select').value, images: fullImgs 
-            });
-        }
-        projectData.push(segData);
-    }
-
-    await updateProgress(75, "WRITING JSON FILE...", "SAVING DATA");
-    const dataStr = JSON.stringify(projectData, null, 2);
-
-    try {
-        if (fileHandle) {
-            await updateProgress(90, "FINALIZING WRITE...", "SAVING DATA");
-            const writable = await fileHandle.createWritable();
-            await writable.write(dataStr);
-            await writable.close();
-            window.currentFileName = fileHandle.name;
-            await updateProgress(100, "SAVE COMPLETE!", "SAVING DATA");
-            setTimeout(() => { closeProgress(); showSystemAlert('Data saved successfully to selected location.', 'SAVE COMPLETE'); }, 1000);
-        } else {
-            const blob = new Blob([dataStr], { type: 'application/json' });
-            const link = document.createElement("a");
-            link.href = URL.createObjectURL(blob);
-            link.download = exportName;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            await updateProgress(100, "SAVE COMPLETE!", "SAVING DATA");
-            setTimeout(() => { closeProgress(); showSystemAlert('Data downloaded to your device Downloads folder.', 'SAVE COMPLETE'); }, 1000);
-        }
-    } catch (err) {
-        closeProgress(); console.error(err); showSystemAlert('Failed to write file.', 'SAVE ERROR', true);
-    }
-    toggleMenu(true); document.getElementById('mainCommandBar').classList.add('collapsed');
-}
-
-function loadProject(event) {
-    const fileInput = event.target;
-    const file = fileInput.files[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = async function(e) {
-        try {
-            const projectData = JSON.parse(e.target.result);
-            await injectProjectData(projectData, file.name);
-        } catch (err) {
-            closeProgress(); showSystemAlert('Corrupt or invalid JSON file.', 'SYSTEM ERROR', true); console.error(err);
-        }
-        fileInput.value = ''; 
-    };
-    reader.onerror = function() { showSystemAlert('Could not read file from device.', 'FILE ERROR', true); fileInput.value = ''; };
-    reader.readAsText(file);
-}
-
-// ==========================================
-// EXPORT ENGINE
-// ==========================================
-async function exportData() {
-    if (typeof ExcelJS === 'undefined' || typeof window.jspdf === 'undefined') {
-        showSystemAlert("Libraries offline. Requires network connection for initial boot.", "EXPORT ERROR", true);
-        return;
-    }
-
-    const cards = document.querySelectorAll('.segment-card');
-    if (cards.length === 0) { showSystemAlert('No data available to export.', 'EXPORT FAILED'); return; }
-
-    let requiresFolder = false;
-    document.querySelectorAll('.defect-row').forEach(row => { if (JSON.parse(row.dataset.images || "[]").length > 0) requiresFolder = true; });
-
-    const date = new Date().toISOString().split('T')[0];
-    const excelFilename = `DEFECT_REPORT_${date}.xlsx`;
-    let dirHandle = null; let singleFileHandle = null;
-
-    try {
-        if (requiresFolder && window.showDirectoryPicker) { dirHandle = await window.showDirectoryPicker({ mode: 'readwrite' }); } 
-        else if (!requiresFolder && window.showSaveFilePicker) { singleFileHandle = await window.showSaveFilePicker({ suggestedName: excelFilename, types: [{ description: 'Excel File', accept: {'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx']} }] }); }
-    } catch (err) {
-        if (err.name !== 'AbortError') { console.error(err); showSystemAlert('Folder/File selection failed.', 'EXPORT ERROR', true); }
-        return; 
-    }
-
-    try {
-        await updateProgress(5, "INITIALIZING EXCEL...", "EXPORTING DATA");
-        const workbook = new ExcelJS.Workbook(); const worksheet = workbook.addWorksheet('Defects Report');
-        worksheet.columns = [ { header: 'Line / Area', key: 'line', width: 18 }, { header: 'Route', key: 'route', width: 22 }, { header: 'TS', key: 'segment', width: 15 }, { header: 'Notes', key: 'notes', width: 35 }, { header: 'Component', key: 'component', width: 20 }, { header: 'Defect', key: 'defect', width: 20 } ];
-        worksheet.getRow(1).font = { bold: true };
-
-        let pdfJobs = []; let hasDataRows = false; let total = cards.length;
-
-        for(let i=0; i<total; i++) {
-            const card = cards[i];
-            const segmentNum = card.getAttribute('data-segment'); const tsId = `TS-${segmentNum}`; const routeName = card.getAttribute('data-route-name'); const areaName = card.getAttribute('data-area-name') || ''; const notes = card.querySelector('.segment-notes').value; const rows = card.querySelectorAll('.defect-row');
-            
-            await updateProgress(5 + Math.round((i/total)*25), `SCRAPING TS-${segmentNum}...`, "EXPORTING DATA");
-            let hasDefects = false;
-
-            rows.forEach((row, index) => {
-                const isCustom = row.dataset.isCustom === "true";
-                const comp = isCustom ? row.querySelector('.custom-comp').value : row.querySelector('.component-select').value;
-                const def = isCustom ? row.querySelector('.custom-def').value : row.querySelector('.defect-select').value;
-                const refs = JSON.parse(row.dataset.images || "[]");
-                
-                if (comp || def || refs.length > 0) {
-                    hasDefects = true; hasDataRows = true;
-                    worksheet.addRow({ line: areaName, route: routeName, segment: tsId, notes: notes, component: comp, defect: def });
-                }
-                if (refs.length > 0) { pdfJobs.push({ lineName: areaName, routeName: routeName, tsId: tsId, notes: notes, comp: comp || "N/A", def: def || "N/A", refs: refs, defectID: index + 1 }); }
-            });
-
-            if (!hasDefects && notes.trim() !== '') { hasDataRows = true; worksheet.addRow({ line: areaName, route: routeName, segment: tsId, notes: notes, component: '', defect: '' }); }
-            if (i % 5 === 0) await delay(16); 
-        }
-
-        if (!hasDataRows) { closeProgress(); showSystemAlert("No filled track sections found to export to Excel.", "EXPORT NOTICE"); return; }
-
-        await updateProgress(35, "GENERATING EXCEL BLOB...", "EXPORTING DATA");
-        const buffer = await workbook.xlsx.writeBuffer();
-        const excelBlob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-        const totalSteps = pdfJobs.length + 1;
-
-        if (dirHandle) {
-            await updateProgress(42, "SAVING EXCEL REPORT...", "GENERATING EXPORT");
-            const excelFileHandle = await dirHandle.getFileHandle(excelFilename, { create: true });
-            const excelWritable = await excelFileHandle.createWritable();
-            await excelWritable.write(excelBlob); await excelWritable.close();
-
-            for (let j = 0; j < pdfJobs.length; j++) {
-                const job = pdfJobs[j];
-                await updateProgress(42 + Math.round(((j+0.5) / totalSteps) * 58), `BUILDING PDF ${j+1}/${pdfJobs.length} [${job.tsId}]...`, "GENERATING EXPORT");
-                
-                const imgs = [];
-                for(let r of job.refs) { 
-                    if (r.id) { const d = await getImageFromDB(r.id); if(d && d.data) imgs.push(d); } 
-                    else if (r.img) { imgs.push({ data: r.img, w: r.w || 1200, h: r.h || 1200 }); }
-                }
-                if (imgs.length === 0) { console.warn(`Skipping PDF for ${job.tsId}: No valid images found.`); continue; }
-
-                const pdfBlob = await generatePDFBlob(job, imgs);
-                const cleanComp = job.comp ? job.comp.toString().replace(/[^a-z0-9]/gi, '_') : 'UNKNOWN';
-                const pdfFilename = `${job.tsId}_${cleanComp}_DEFECT.pdf`;
-                
-                const pdfFileHandle = await dirHandle.getFileHandle(pdfFilename, { create: true });
-                const pdfWritable = await pdfFileHandle.createWritable();
-                await pdfWritable.write(pdfBlob); await pdfWritable.close();
-                await delay(16);
-            }
-            await updateProgress(100, "ALL FILES EXPORTED!", "GENERATING EXPORT");
-            setTimeout(() => { closeProgress(); showSystemAlert("All files successfully saved to the selected folder.", "EXPORT COMPLETE"); }, 1000);
-        } else if (singleFileHandle) {
-            const writable = await singleFileHandle.createWritable();
-            await writable.write(excelBlob); await writable.close();
-            await updateProgress(100, "EXCEL REPORT SAVED!", "GENERATING EXPORT");
-            setTimeout(() => { closeProgress(); showSystemAlert("Excel report saved successfully.", "EXPORT COMPLETE"); }, 1000);
-        } else {
-            await fallbackDownload(excelBlob, excelFilename, pdfJobs, totalSteps);
-        }
-    } catch (error) {
-        console.error("Export Crash:", error); closeProgress(); showSystemAlert("Export failed: " + error.message, "CRITICAL ERROR", true);
-    }
-}
-
-async function fallbackDownload(excelBlob, excelFilename, pdfJobs, totalSteps) {
-    await updateProgress(45, "TRIGGERING EXCEL DOWNLOAD...", "GENERATING EXPORT");
-    const link = document.createElement("a"); link.href = URL.createObjectURL(excelBlob); link.download = excelFilename; document.body.appendChild(link); link.click(); document.body.removeChild(link);
-
-    if (pdfJobs.length > 0) {
-        await delay(800); 
-        for (let j = 0; j < pdfJobs.length; j++) { 
-            const job = pdfJobs[j];
-            await updateProgress(45 + Math.round(((j+0.5) / totalSteps) * 55), `BUILDING PDF ${j+1}/${pdfJobs.length} [${job.tsId}]...`, "GENERATING EXPORT");
-            
-            const imgs = [];
-            for(let r of job.refs) { 
-                if (r.id) { const d = await getImageFromDB(r.id); if(d && d.data) imgs.push(d); }
-                else if (r.img) { imgs.push({ data: r.img, w: r.w || 1200, h: r.h || 1200 }); }
-            }
-            if (imgs.length === 0) continue;
-
-            const pdfBlob = await generatePDFBlob(job, imgs);
-            const cleanComp = job.comp ? job.comp.toString().replace(/[^a-z0-9]/gi, '_') : 'UNKNOWN';
-            const pdfFilename = `${job.tsId}_${cleanComp}_DEFECT.pdf`;
-            
-            const pdflink = document.createElement("a"); pdflink.href = URL.createObjectURL(pdfBlob); pdflink.download = pdfFilename; document.body.appendChild(pdflink); pdflink.click(); document.body.removeChild(pdflink);
-            await delay(800); 
-        }
-    }
-    await updateProgress(100, "ALL FILES EXPORTED!", "GENERATING EXPORT");
-    setTimeout(() => { closeProgress(); showSystemAlert("Files downloaded to your device Downloads folder.", "EXPORT COMPLETE"); }, 1000);
-}
 
 async function generatePDFBlob(job, imgs) {
     const { jsPDF } = window.jspdf;
     
-    // Auto-orient the very first page
+    // Auto-orient the very first page based on the first image's actual dimensions
     let firstImgW = imgs[0].w || 1200; 
     let firstImgH = imgs[0].h || 1200; 
     let firstOrientation = (firstImgW > firstImgH) ? 'landscape' : 'portrait';
@@ -312,12 +24,12 @@ async function generatePDFBlob(job, imgs) {
         // 1. PAGE & MARGIN MATH
         const pageWidth = doc.internal.pageSize.getWidth();
         const pageHeight = doc.internal.pageSize.getHeight();
-        const margin = 5; 
+        const margin = 5; // Narrow 5mm margin from the edge
         const boxWidth = pageWidth - (margin * 2);
         const boxHeight = pageHeight - (margin * 2);
-        const cornerRadius = 4; 
+        const cornerRadius = 4; // Modern, smooth rounded corners
 
-        // 2. "OBJECT-FIT: COVER" MATH
+        // 2. "OBJECT-FIT: COVER" MATH (Ensures no stretching)
         const imgRatio = imgW / imgH;
         const boxRatio = boxWidth / boxHeight;
 
@@ -327,60 +39,71 @@ async function generatePDFBlob(job, imgs) {
         let yOffset = margin;
 
         if (imgRatio > boxRatio) {
+            // Photo is wider than the container. Scale to height, center horizontally.
             renderHeight = boxHeight;
             renderWidth = renderHeight * imgRatio;
             xOffset = margin - ((renderWidth - boxWidth) / 2);
         } else {
+            // Photo is taller than the container. Scale to width, center vertically.
             renderWidth = boxWidth;
             renderHeight = renderWidth / imgRatio;
             yOffset = margin - ((renderHeight - boxHeight) / 2);
         }
 
-        // 3. DRAW CLIPPED, ROUNDED IMAGE (Invisible border)
+        // 3. DRAW CLIPPED, ROUNDED IMAGE (No visible border)
         doc.saveGraphicsState(); 
+        
+        // Define the clipping path (the rounded rectangle boundary)
         doc.roundedRect(margin, margin, boxWidth, boxHeight, cornerRadius, cornerRadius, null);
-        doc.clip(); 
+        doc.clip(); // Activate clipping: everything drawn now is contained inside this path
+        
+        // Draw the full canvas picture (it dynamically scales, centers, and fills the box)
         doc.addImage(imgObj.data, 'JPEG', xOffset, yOffset, renderWidth, renderHeight);
-        doc.restoreGraphicsState(); 
+        
+        doc.restoreGraphicsState(); // Reset state: removes clipping so text can be drawn on top
 
         // 4. THE "MODERN WATERMARK" SHIELD
-        const overlayHeight = 28; 
+        const overlayHeight = 28; // The contrasting pill height
         const overlayX = margin + 5; 
-        const overlayY = pageHeight - margin - overlayHeight - 5; 
+        const overlayY = pageHeight - margin - overlayHeight - 5; // Anchored to the bottom
         const overlayWidth = boxWidth - 10; 
 
-        doc.setFillColor(20, 20, 20); 
-        doc.setDrawColor(20, 20, 20); 
-        doc.setGState(new doc.GState({opacity: 0.70})); 
+        // Set up the semi-transparent black background ("watermark magic")
+        doc.setFillColor(20, 20, 20); // Dark grey/black
+        doc.setDrawColor(20, 20, 20); // Match invisible border
+        doc.setGState(new doc.GState({opacity: 0.70})); // 70% opacity shield
+        
+        // Draw the shield with lightly rounded inner corners
         doc.roundedRect(overlayX, overlayY, overlayWidth, overlayHeight, 2, 2, 'F'); 
 
-        // 5. DRAW CRISP DETAILS
-        doc.setGState(new doc.GState({opacity: 1.0})); 
-        doc.setTextColor(255, 255, 255); 
+        // 5. DRAW CRISP, READABLE DETAILS
+        doc.setGState(new doc.GState({opacity: 1.0})); // Reset to 100% opacity for sharp text
+        doc.setTextColor(255, 255, 255); // Pure white text
 
+        // Fallbacks (|| 'N/A') used from your original context
         const safeComp = job.comp || 'N/A'; 
         const safeDef = job.def || 'N/A';
         const cleanLineName = job.lineName ? job.lineName.toString().replace(/ Line/i, '').trim().toUpperCase() : '';
         const safeRoute = job.routeName || 'UNKNOWN ROUTE';
 
-        // Title Row
+        // Title Row: Defect & Component (Bold)
         doc.setFont("helvetica", "bold");
         doc.setFontSize(12);
         doc.text(`${job.tsId} | ${safeDef} - ${safeComp}`, overlayX + 5, overlayY + 8);
 
-        // Location Row
+        // Location Row (Normal weight)
         doc.setFont("helvetica", "normal");
         doc.setFontSize(10);
         doc.text(`Location: ${safeRoute} ${cleanLineName ? '- ' + cleanLineName : ''}`, overlayX + 5, overlayY + 16);
         
-        // Data & Page Number Row
+        // Data & Page Number Row (Right-aligned page)
         doc.text(`Date taken: ${todayDate}`, overlayX + 5, overlayY + 24);
         
         const rightAlignX = overlayX + overlayWidth - 5; 
         doc.setFont("helvetica", "bold"); doc.setFontSize(9);
         doc.text(`PAGE ${i + 1} OF ${imgs.length}`, rightAlignX, overlayY + 24, { align: "right" });
         
-        if (i % 2 === 0) await delay(16); 
+        if (i % 2 === 0) await delay(16); // Small delay for system breathing room
     }
     return doc.output('blob');
 }
