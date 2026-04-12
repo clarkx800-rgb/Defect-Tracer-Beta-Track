@@ -290,7 +290,10 @@ async function fallbackDownload(excelBlob, excelFilename, pdfJobs, totalSteps) {
     setTimeout(() => { closeProgress(); showSystemAlert("Files downloaded to your device Downloads folder.", "EXPORT COMPLETE"); }, 1000);
 }
 
-// NEW PDF LAYOUT GENERATOR: Letter Size, Narrow Margins, Rounded Crop, Watermark Overlay
+// ==========================================
+// PDF LAYOUT GENERATOR
+// Letter Size, Narrow Margins, Perfect Rounded Crop, Cinematic Text Gradient
+// ==========================================
 async function generatePDFBlob(job, imgs) {
     const { jsPDF } = window.jspdf;
     
@@ -345,24 +348,34 @@ async function generatePDFBlob(job, imgs) {
         // Draw Image Inside Clip
         doc.addImage(imgObj.data, 'JPEG', finalX, finalY, finalW, finalH);
 
-        // WATERMARK OVERLAY BOX (Positioned at bottom of image)
-        const overlayHeight = 24;
+        // CINEMATIC TEXT GRADIENT (Only behind text)
+        const overlayHeight = 28;
         const overlayY = finalY + finalH - overlayHeight;
         
-        try {
-            doc.setGState(new doc.GState({opacity: 0.65}));
-        } catch(e) { } // Safety fallback for older jsPDF versions
+        // Build the smooth fade from 0% opacity to 75% opacity
+        const steps = 15;
+        for (let s = 0; s < steps; s++) {
+            try { doc.setGState(new doc.GState({opacity: (s / steps) * 0.75})); } catch(e) {}
+            doc.setFillColor(0, 0, 0);
+            doc.rect(finalX, overlayY + (s * (overlayHeight/steps)), finalW, (overlayHeight/steps) + 0.5, 'F');
+        }
         
-        doc.setFillColor(0, 0, 0); // Black box
-        doc.rect(finalX, overlayY, finalW, overlayHeight, 'F');
-        
-        // End Clipping and Opacity
+        // Remove clip
         doc.restoreGraphicsState();
+        
+        // BUG FIX 1: Explicitly reset opacity to 1.0 to prevent the ENTIRE image from darkening
+        try { doc.setGState(new doc.GState({opacity: 1.0})); } catch(e) {}
 
-        // DRAW WHITE TEXT OVER THE WATERMARK
+        // BUG FIX 2: Explicit White Border to forcefully round all 4 corners perfectly
+        // This hides any sharp pixel bleed that jsPDF's clipping engine missed.
+        doc.setDrawColor(255, 255, 255);
+        doc.setLineWidth(2.5); 
+        doc.roundedRect(finalX, finalY, finalW, finalH, 6, 6, 'S');
+
+        // DRAW WHITE TEXT OVER THE GRADIENT
         doc.setTextColor(255, 255, 255);
         const textStartX = finalX + 6; 
-        let textStartY = overlayY + 7; 
+        let textStartY = overlayY + 12; 
         
         doc.setFont("helvetica", "bold"); 
         doc.setFontSize(11);
@@ -383,9 +396,9 @@ async function generatePDFBlob(job, imgs) {
         const rightAlignX = finalX + finalW - 6; 
         doc.setFont("helvetica", "bold"); 
         doc.setFontSize(9);
-        doc.text(`PAGE ${i + 1} OF ${imgs.length}`, rightAlignX, overlayY + 7, { align: "right" });
+        doc.text(`PAGE ${i + 1} OF ${imgs.length}`, rightAlignX, overlayY + 12, { align: "right" });
         
-        if (i % 2 === 0) await delay(16); 
+        if (i % 2 === 0) await window.delay(16); 
     }
     return doc.output('blob');
 }
