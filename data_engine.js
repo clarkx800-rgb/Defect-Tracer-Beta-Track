@@ -292,43 +292,93 @@ async function fallbackDownload(excelBlob, excelFilename, pdfJobs, totalSteps) {
 
 async function generatePDFBlob(job, imgs) {
     const { jsPDF } = window.jspdf;
-    let firstImgW = imgs[0].w || 1200; let firstImgH = imgs[0].h || 1200; let firstOrientation = (firstImgW > firstImgH) ? 'landscape' : 'portrait';
+    
+    // Auto-orient the very first page
+    let firstImgW = imgs[0].w || 1200; 
+    let firstImgH = imgs[0].h || 1200; 
+    let firstOrientation = (firstImgW > firstImgH) ? 'landscape' : 'portrait';
+    
     const doc = new jsPDF({ orientation: firstOrientation, unit: 'mm', format: 'a4' });
-    const activeTheme = localStorage.getItem('appTheme') || 'tactical'; const todayDate = new Date().toLocaleDateString();
+    const todayDate = new Date().toLocaleDateString();
 
     for(let i=0; i<imgs.length; i++) {
-        const imgObj = imgs[i]; let imgW = imgObj.w || 1200; let imgH = imgObj.h || 1200; let orientation = (imgW > imgH) ? 'landscape' : 'portrait';
+        const imgObj = imgs[i]; 
+        let imgW = imgObj.w || 1200; 
+        let imgH = imgObj.h || 1200; 
+        
+        let orientation = (imgW > imgH) ? 'landscape' : 'portrait';
         if (i > 0) doc.addPage('a4', orientation);
 
-        const pageWidth = orientation === 'landscape' ? 297 : 210; const pageHeight = orientation === 'landscape' ? 210 : 297; const margin = 10; const borderW = pageWidth - (margin * 2); const borderH = pageHeight - (margin * 2);
+        // 1. PAGE & MARGIN MATH
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const pageHeight = doc.internal.pageSize.getHeight();
+        const margin = 5; 
+        const boxWidth = pageWidth - (margin * 2);
+        const boxHeight = pageHeight - (margin * 2);
+        const cornerRadius = 4; 
 
-        if (activeTheme === 'windows11') { doc.setDrawColor(0, 120, 212); doc.setLineWidth(0.5); doc.roundedRect(margin, margin, borderW, borderH, 3, 3, 'S'); } 
-        else if (activeTheme === 'pokemongo') { doc.setDrawColor(227, 53, 13); doc.setLineWidth(1.0); doc.roundedRect(margin, margin, borderW, borderH, 5, 5, 'S'); doc.setDrawColor(40, 172, 168); doc.setLineWidth(0.3); doc.roundedRect(margin + 1, margin + 1, borderW - 2, borderH - 2, 4, 4, 'S'); } 
-        else if (activeTheme === 'macosdark') { doc.setDrawColor(80, 80, 80); doc.setLineWidth(0.5); doc.roundedRect(margin, margin, borderW, borderH, 4, 4, 'S'); } 
-        else { doc.setDrawColor(30, 30, 30); doc.setLineWidth(1.0); doc.rect(margin, margin, borderW, borderH, 'S'); doc.setLineWidth(0.3); doc.rect(margin + 1.5, margin + 1.5, borderW - 3, borderH - 3, 'S'); }
+        // 2. "OBJECT-FIT: COVER" MATH
+        const imgRatio = imgW / imgH;
+        const boxRatio = boxWidth / boxHeight;
 
-        const footerHeight = 22; const safeZoneX = margin + 2; const safeZoneY = margin + 2; const safeZoneW = borderW - 4; const safeZoneH = borderH - footerHeight - 4; 
-        const imgRatio = imgW / imgH; const safeRatio = safeZoneW / safeZoneH;
-        let finalW, finalH, finalX, finalY;
-        if (imgRatio > safeRatio) { finalW = safeZoneW; finalH = safeZoneW / imgRatio; } else { finalH = safeZoneH; finalW = safeZoneH * imgRatio; }
-        finalX = safeZoneX + ((safeZoneW - finalW) / 2); finalY = safeZoneY + ((safeZoneH - finalH) / 2);
+        let renderWidth = boxWidth;
+        let renderHeight = boxHeight;
+        let xOffset = margin;
+        let yOffset = margin;
 
-        doc.addImage(imgObj.data, 'JPEG', finalX, finalY, finalW, finalH);
-        doc.setDrawColor(200, 200, 200); doc.setLineWidth(0.3); doc.line(margin, pageHeight - margin - footerHeight, pageWidth - margin, pageHeight - margin - footerHeight);
+        if (imgRatio > boxRatio) {
+            renderHeight = boxHeight;
+            renderWidth = renderHeight * imgRatio;
+            xOffset = margin - ((renderWidth - boxWidth) / 2);
+        } else {
+            renderWidth = boxWidth;
+            renderHeight = renderWidth / imgRatio;
+            yOffset = margin - ((renderHeight - boxHeight) / 2);
+        }
 
-        const textStartX = margin + 4; let textStartY = pageHeight - margin - 14; 
-        doc.setTextColor(0, 0, 0); doc.setFont("helvetica", "bold"); doc.setFontSize(11);
-        const safeComp = job.comp || 'N/A'; const safeDef = job.def || 'N/A';
-        doc.text(`${job.tsId} | ${safeDef}  ${safeComp}`, textStartX, textStartY);
-        
-        textStartY += 5; doc.setFont("helvetica", "normal"); doc.setFontSize(10);
+        // 3. DRAW CLIPPED, ROUNDED IMAGE (Invisible border)
+        doc.saveGraphicsState(); 
+        doc.roundedRect(margin, margin, boxWidth, boxHeight, cornerRadius, cornerRadius, null);
+        doc.clip(); 
+        doc.addImage(imgObj.data, 'JPEG', xOffset, yOffset, renderWidth, renderHeight);
+        doc.restoreGraphicsState(); 
+
+        // 4. THE "MODERN WATERMARK" SHIELD
+        const overlayHeight = 28; 
+        const overlayX = margin + 5; 
+        const overlayY = pageHeight - margin - overlayHeight - 5; 
+        const overlayWidth = boxWidth - 10; 
+
+        doc.setFillColor(20, 20, 20); 
+        doc.setDrawColor(20, 20, 20); 
+        doc.setGState(new doc.GState({opacity: 0.70})); 
+        doc.roundedRect(overlayX, overlayY, overlayWidth, overlayHeight, 2, 2, 'F'); 
+
+        // 5. DRAW CRISP DETAILS
+        doc.setGState(new doc.GState({opacity: 1.0})); 
+        doc.setTextColor(255, 255, 255); 
+
+        const safeComp = job.comp || 'N/A'; 
+        const safeDef = job.def || 'N/A';
         const cleanLineName = job.lineName ? job.lineName.toString().replace(/ Line/i, '').trim().toUpperCase() : '';
         const safeRoute = job.routeName || 'UNKNOWN ROUTE';
-        doc.text(`Location: ${safeRoute} - ${cleanLineName}`, textStartX, textStartY);
+
+        // Title Row
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(12);
+        doc.text(`${job.tsId} | ${safeDef} - ${safeComp}`, overlayX + 5, overlayY + 8);
+
+        // Location Row
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(10);
+        doc.text(`Location: ${safeRoute} ${cleanLineName ? '- ' + cleanLineName : ''}`, overlayX + 5, overlayY + 16);
         
-        textStartY += 5; doc.text(`Date taken: ${todayDate}`, textStartX, textStartY);
-        const rightAlignX = pageWidth - margin - 4; doc.setFont("helvetica", "bold"); doc.setFontSize(9);
-        doc.text(`PAGE ${i + 1} OF ${imgs.length}`, rightAlignX, textStartY, { align: "right" });
+        // Data & Page Number Row
+        doc.text(`Date taken: ${todayDate}`, overlayX + 5, overlayY + 24);
+        
+        const rightAlignX = overlayX + overlayWidth - 5; 
+        doc.setFont("helvetica", "bold"); doc.setFontSize(9);
+        doc.text(`PAGE ${i + 1} OF ${imgs.length}`, rightAlignX, overlayY + 24, { align: "right" });
         
         if (i % 2 === 0) await delay(16); 
     }
